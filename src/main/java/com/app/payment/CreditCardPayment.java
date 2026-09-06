@@ -1,30 +1,56 @@
+
 package com.app.payment;
 
+// فئة تمثل طريقة الدفع بالبطاقة الائتمانية، وتلتزم بتطبيق دوال واجهة PaymentMethod
 public class CreditCardPayment implements PaymentMethod {
+    
+    // رقم البطاقة الائتمانية (مُعرف كـ final لضمان عدم تعديله بعد إنشاء الكائن)
     private final String cardNumber;
+    // مؤشر لتتبع حالة الدفع (تم بنجاح أم لا)
     private boolean paid;
+    // متغير لتخزين الرصيد المتاح في البطاقة
     private double balance;
-    public CreditCardPayment(String cardNumber ,double balance) {
+
+    // المُنشئ (Constructor): لتهيئة الكائن برقم البطاقة والرصيد المبدئي
+    public CreditCardPayment(String cardNumber, double balance) {
         this.cardNumber = cardNumber;
-        this.balance=balance;
+        this.balance = balance;
     }
 
+    // تطبيق دالة الدفع لمعالجة المعاملة وخصم الرصيد
     @Override
     public void pay(double amount) {
-        if(balance>= amount){
-        paid = true;
-        balance-=amount;
-        String maskedCard = cardNumber.length() >= 4
+        // التحقق مما إذا كان رصيد البطاقة يغطي المبلغ المطلوب
+        if(balance >= amount) {
+            // تحديث حالة الدفع إلى "تم بنجاح"
+            paid = true;
+            // خصم المبلغ المطلوب من رصيد البطاقة
+            balance -= amount;
+            
+            // إخفاء رقم البطاقة (Masking) وعرض آخر 4 أرقام فقط لأسباب أمنية
+            String maskedCard = cardNumber.length() >= 4
                 ? "**** " + cardNumber.substring(cardNumber.length() - 4)
                 : "****";
-        System.out.println(">>> Paid " + amount + " EGP via Credit Card (" + maskedCard + ")");
-         }else{paid = false;
-         System.out.println("\n Payment Failed: Insufficient Credit Card Limit/Budget!");
-        }}
+                
+            // طباعة رسالة تأكيد الدفع مع عرض المبلغ ورقم البطاقة المخفي
+            System.out.println(">>> Paid " + amount + " EGP via Credit Card (" + maskedCard + ")");
+        } else {
+            // تحديث حالة الدفع إلى "فشل"
+            paid = false;
+            // طباعة رسالة تنبيه لعدم كفاية رصيد البطاقة
+            System.out.println("\n Payment Failed: Insufficient Credit Card Limit/Budget!");
+        }
+    }
 
+    // دالة تُرجع نوع طريقة الدفع المُستخدمة
     @Override
-    public String getPaymentType() { return "Credit Card"; }
+    public String getPaymentType() { 
+        return "Credit Card"; 
+    }
 
+    // دالة تُرجع حالة الدفع الحالية
     @Override
-    public boolean getPaymentStatus() { return paid; }
+    public boolean getPaymentStatus() { 
+        return paid; 
+    }
 }
