@@ -3,7 +3,9 @@ package com.app.service;
 import com.app.enums.OrderStatus;
 import com.app.model.order.Order;
 
+// كلاس محاكاة التتبع اللحظي لحالة الطلب
 public class DeliverySimulator {
+    // تشغيل المحاكاة وتحديث الحالة زمنياً
     public void startLiveTracking(Order order) {
         System.out.println("\n=========================================");
         System.out.println("        VELOX LIVE TRACKING SYSTEM");
@@ -23,6 +25,7 @@ public class DeliverySimulator {
         }
     }
 
+    // تحديث حالة الطلب وطباعة رسالة التتبع
     private void update(Order order, OrderStatus status, String message) {
         order.setStatus(status);
         System.out.println("[VELOX Status]: " + message);
