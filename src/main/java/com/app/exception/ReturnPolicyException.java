@@ -8,7 +8,13 @@ package com.app.exception;
  *
  * @author 3bdelr7man
  */
-public class ReturnPolicyException extends Exception {
-    public ReturnPolicyException(String message){}
+
+  
     
+
+
+    // كونسرتكر بياخد نص الرسالة ويسلمها للكلاس الأب (Exception)
+    public ReturnPolicyException(String message) {
+    }
+
 }

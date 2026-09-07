@@ -9,18 +9,20 @@ package com.app.enums;
  * @author 3bdelr7man
  */
 
-
-// enum يحدد الحالات المختلفة للشكوى
 public enum ComplaintStatus {
+    // الحالات المتاحه وكل حاله معاها الوصف بتاعها
     PENDING("Pending"),
     IN_REVIEW("In Review"),
     RESOLVED("Resolved");
 
+    // متغير بيحفظ نص الوصف الخاص بكل حالة
     private final String description;
 
+    // كونسركتر بيحط الوصف للحالة أول ما تتعرف
     ComplaintStatus(String description) {
         this.description = description;
     }
+    // دالة بترجعلك نص الوصف عشان تعوض بيه أو تعرضه للمستخدم
 
     public String getDescription() {
         return description;
