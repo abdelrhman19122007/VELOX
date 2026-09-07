@@ -8,6 +8,8 @@ package com.app.enums;
  *
  * @author 3bdelr7man
  */
+
+// بيحدد المقاسات المتاحة للمنتجات في التطبيق Enum نوع
 public enum Size {
      SMALL, MEDIUM, LARGE
 }

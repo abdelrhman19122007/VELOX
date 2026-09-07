@@ -8,6 +8,13 @@ package com.app.enums;
  *
  * @author 3bdelr7man
  */
+
+    /**
+     * 
+     * بيحدد المناطق أو المحافظات المتاحة للشحن أو الخدمات في السيستم Enum نوع
+     */
+     
+
 public enum Zone {
     CAIRO, GIZA, ALEXANDRIA,DAMIETTA
     
