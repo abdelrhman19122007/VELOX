@@ -8,6 +8,8 @@ package com.app.enums;
  *
  * @author 3bdelr7man
  */
+
+// يحدد الفئات المتاحة للمنتجات في التطبيق Enum نوع
 public enum ProductType {
     FOOD, CLOTHES, TECH
 }
