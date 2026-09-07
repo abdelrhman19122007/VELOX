@@ -7,11 +7,13 @@ package com.app.service;
 import com.app.model.order.Order;
 import com.app.model.product.Product;
 import java.util.Map;
+
 /**
  * @author 3bdelr7man
  */
+// كلاس إدارة عملية تغليف الطلبات
 public class PackagingService {
-
+    // طباعة وتأكيد تغليف كافة المنتجات داخل الطلب
     public static void packageOrder(Order order) {
         System.out.println("\n==========================================");
         System.out.println("[Packaging] Starting packaging process for Order...");
