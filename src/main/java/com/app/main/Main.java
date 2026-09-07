@@ -36,8 +36,10 @@ import com.app.enums.Size;
 import com.app.model.product.*;
 import com.app.enums.Zone;
 import com.app.model.order.Cart;
+// نقطة بداية التشغيل الأساسية للبرنامج وتحميل البيانات المخزنة
 public class Main {
     public static Set<String> activePromoCodes = new HashSet<>();
+
     public static void printLogo() {
         System.out.println("=========================================");
         System.out.println("              V E L O X");
@@ -50,35 +52,35 @@ public class Main {
             System.out.println();
         }
     }
-
+    // تهيئة القوائم والمنتجات للمطاعم ومحلات الملابس والإلكترونيات
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         List<Order> orderHistory = OrderRepository.loadOrders();
         ReturnService returnService = new ReturnService();
         boolean keepRunning = true;
-
+        // تجهيز بيانات مطاعم الأكل الشرقي
         Restaurant orientalRest = new Restaurant("R1", "Abou Tarek & Shabrawy", "Oriental Cuisine");
         ArrayList<Product> orientalItems = new ArrayList<>();
-        orientalItems.add(new FoodItem("F1", "Koshary Family Box", 120.0, "Large",Size.LARGE));
-        orientalItems.add(new FoodItem("F2", "Mixed Grill Platter (1 kg)", 450.0, "Family",Size.LARGE));
-        orientalItems.add(new FoodItem("F3", "Beef Shawarma Wrap", 95.0, "Medium",Size.MEDIUM));
-        orientalItems.add(new FoodItem("F4", "Chicken Crepe Crunchy", 110.0, "Large",Size.LARGE));
-        orientalItems.add(new FoodItem("F5", "Molokhia with Half Chicken", 160.0, "Standard",Size.MEDIUM));
-
+        orientalItems.add(new FoodItem("F1", "Koshary Family Box", 120.0, "Large", Size.LARGE));
+        orientalItems.add(new FoodItem("F2", "Mixed Grill Platter (1 kg)", 450.0, "Family", Size.LARGE));
+        orientalItems.add(new FoodItem("F3", "Beef Shawarma Wrap", 95.0, "Medium", Size.MEDIUM));
+        orientalItems.add(new FoodItem("F4", "Chicken Crepe Crunchy", 110.0, "Large", Size.LARGE));
+        orientalItems.add(new FoodItem("F5", "Molokhia with Half Chicken", 160.0, "Standard", Size.MEDIUM));
+        // تجهيز بيانات مطاعم الأكل الغربي
         Restaurant westernRest = new Restaurant("R2", "Buffalo & Pizza Hut", "Western Cuisine");
         ArrayList<Product> westernItems = new ArrayList<>();
-        westernItems.add(new FoodItem("F6", "Pizza Super Supreme", 260.0, "Large",Size.LARGE));
+        westernItems.add(new FoodItem("F6", "Pizza Super Supreme", 260.0, "Large", Size.LARGE));
         westernItems.add(new FoodItem("F7", "Double Mushroom Beef Burger", 180.0, "Medium", Size.MEDIUM));
-        westernItems.add(new FoodItem("F8", "Crispy Chicken Strips Meal", 165.0, "Large",Size.LARGE));
-        westernItems.add(new FoodItem("F9", "Italian Pasta Alfredo", 140.0, "Standard",Size.LARGE));
+        westernItems.add(new FoodItem("F8", "Crispy Chicken Strips Meal", 165.0, "Large", Size.LARGE));
+        westernItems.add(new FoodItem("F9", "Italian Pasta Alfredo", 140.0, "Standard", Size.LARGE));
         westernItems.add(new FoodItem("F10", "Cheesy Garlic Bread", 75.0, "Small", Size.SMALL));
-
+        // تجهيز متاجر الملابس الفاخرة
         FashionStore luxuryStore = new FashionStore("S1", "Lacoste Luxury", "Luxury Perfumes & Accessories");
         ArrayList<Product> luxuryItems = new ArrayList<>();
-        luxuryItems.add(new ClothingItem("C1", "Lacoste French Perfume (100ml)", 4500.0, "Fragrance",Size.MEDIUM));
+        luxuryItems.add(new ClothingItem("C1", "Lacoste French Perfume (100ml)", 4500.0, "Fragrance", Size.MEDIUM));
         luxuryItems.add(new ClothingItem("C2", "Classic Croco Polo Shirt", 3800.0, "White", Size.MEDIUM));
         luxuryItems.add(new ClothingItem("C3", "Genuine Leather Belt Set", 2200.0, "Black", Size.MEDIUM));
-
+        // تجهيز متاجر الملابس الرياضية
         FashionStore midSportStore = new FashionStore("S2", "Adidas Sport", "Sportswear & Footwear");
         ArrayList<Product> sportItems = new ArrayList<>();
         sportItems.add(new ClothingItem("C4", "Ultraboost Running Sneakers", 2400.0, "Black/Red", Size.MEDIUM));
@@ -90,11 +92,11 @@ public class Main {
         budgetItems.add(new ClothingItem("C7", "Casual Denim Jacket", 1200.0, "Blue Denim", Size.MEDIUM));
         budgetItems.add(new ClothingItem("C8", "Basic Cotton T-Shirt Pack", 450.0, "Grey", Size.MEDIUM));
         budgetItems.add(new ClothingItem("C9", "Summer Bucket Hat", 300.0, "Beige", Size.SMALL));
-
+        // تجهيز متاجر الإلكترونيات والضمان
         TechStore luxuryTech = new TechStore("T1", "Apple Flagship Store", "2 Years Warranty");
         ArrayList<Product> appleItems = new ArrayList<>();
         appleItems.add(new ElectronicsItem("E1", "iPhone 15 Pro Max 256GB", 65000.0, "Apple", Size.MEDIUM));
-        appleItems.add(new ElectronicsItem("E2", "MacBook Air M2 13-inch", 52000.0, "Apple",Size.LARGE));
+        appleItems.add(new ElectronicsItem("E2", "MacBook Air M2 13-inch", 52000.0, "Apple", Size.LARGE));
         appleItems.add(new ElectronicsItem("E3", "AirPods Pro 2nd Gen", 11500.0, "Apple", Size.SMALL));
 
         TechStore midTech = new TechStore("T2", "Samsung Smart Hub", "1 Year Warranty");
@@ -102,7 +104,7 @@ public class Main {
         samsungItems.add(new ElectronicsItem("E4", "Samsung Galaxy S24 Ultra", 48000.0, "Samsung", Size.MEDIUM));
         samsungItems.add(new ElectronicsItem("E5", "Smart Watch Galaxy Watch 6", 8500.0, "Samsung", Size.SMALL));
         samsungItems.add(new ElectronicsItem("E6", "Wireless Fast Charging Pad", 950.0, "Samsung", Size.SMALL));
-
+        // الحلقة التكرارية الرئيسية لتنقل المستخدم بين خدمات التطبيق
         while (keepRunning) {
             clearConsole();
             printLogo();
@@ -115,20 +117,22 @@ public class Main {
 
             switch (mainMenuChoice) {
                 case 1 -> {
+                    // إدخال بيانات العميل (المدينة، الهاتف، الميزانية)
                     System.out.print("\nEnter Delivery City: ");
                     String inputCity = scanner.nextLine();
                     Zone selectedZone = parseZone(inputCity);
                     System.out.print("Enter Phone Number: ");
                     String phone = scanner.nextLine().trim();
-                    //  إدخال الميزانية المتاحة مع العميل
+                    // إدخال الميزانية المتاحة مع العميل
                     System.out.print("Enter your available Budget (EGP): ");
                     double userBudget = scanner.nextDouble();
-                    scanner.nextLine(); 
-                    
-                   String generatedOrderId = "ORD-" + getNextOrderId(orderHistory);
-                   Order order = new Order(generatedOrderId, selectedZone.name(), phone);
-                    boolean shopping = true;
+                    scanner.nextLine();
 
+                    String generatedOrderId = "ORD-" + getNextOrderId(orderHistory);
+                    // إنشاء كائن طلب جديد
+                    Order order = new Order(generatedOrderId, selectedZone.name(), phone);
+                    boolean shopping = true;
+                    // عرض أقسام المتاجر المتاحة واختيار المنتجات وإضافتها للسلة
                     while (shopping) {
                         System.out.println("\nCart Items: " + order.getProducts().size());
                         System.out.println("Cart Total: " + order.calculateRawTotal() + " EGP");
@@ -139,24 +143,26 @@ public class Main {
                         int mainChoice = readInt(scanner, "Choose Option: ");
 
                         switch (mainChoice) {
-                            case 1 -> {boolean foodMenu = true;
-                              while (foodMenu) {
-                                  
-                                System.out.println("\n--- FOOD & RESTAURANTS ---");
-                                System.out.println("\n1. " + orientalRest.getName());
-                                System.out.println("2. " + westernRest.getName());
-                                System.out.println("0. Back to Shopping Menu");
-                                int restPick = readInt(scanner, "Select Restaurant: ");
-                               if (restPick == 0) {
-                                    foodMenu = false;
-                                } else if (restPick == 1 || restPick == 2) {
-                                    ArrayList<Product> list = (restPick == 1) ? orientalItems : westernItems;
-                                    addSelectedProduct(scanner, order, list);
-                                } else {
-                                    System.out.println("Invalid restaurant selection.");
+                            case 1 -> {
+                                boolean foodMenu = true;
+                                while (foodMenu) {
+
+                                    System.out.println("\n--- FOOD & RESTAURANTS ---");
+                                    System.out.println("\n1. " + orientalRest.getName());
+                                    System.out.println("2. " + westernRest.getName());
+                                    System.out.println("0. Back to Shopping Menu");
+                                    int restPick = readInt(scanner, "Select Restaurant: ");
+                                    if (restPick == 0) {
+                                        foodMenu = false;
+                                    } else if (restPick == 1 || restPick == 2) {
+                                        ArrayList<Product> list = (restPick == 1) ? orientalItems : westernItems;
+                                        addSelectedProduct(scanner, order, list);
+                                    } else {
+                                        System.out.println("Invalid restaurant selection.");
+                                    }
                                 }
-                            }}
-                                case 2 -> {
+                            }
+                            case 2 -> {
                                 boolean fashionMenu = true;
                                 while (fashionMenu) {
                                     System.out.println("\n--- FASHION & CLOTHES ---");
@@ -169,7 +175,8 @@ public class Main {
                                     if (brandPick == 0) {
                                         fashionMenu = false;
                                     } else if (brandPick >= 1 && brandPick <= 3) {
-                                        ArrayList<Product> list = (brandPick == 1) ? luxuryItems : (brandPick == 2) ? sportItems : budgetItems;
+                                        ArrayList<Product> list = (brandPick == 1) ? luxuryItems
+                                                : (brandPick == 2) ? sportItems : budgetItems;
                                         addSelectedProduct(scanner, order, list);
                                     } else {
                                         System.out.println("Invalid fashion store selection.");
@@ -177,24 +184,24 @@ public class Main {
                                 }
                             }
                             case 3 -> {
-                                    boolean techMenu = true;
-                                    while (techMenu) {
-                                        System.out.println("\n--- TECH & ELECTRONICS ---");
-                                        System.out.println("1. " + luxuryTech.getName());
-                                        System.out.println("2. " + midTech.getName());
-                                        System.out.println("0. Back to Shopping Menu");
-                                        int techPick = readInt(scanner, "Select Store: ");
+                                boolean techMenu = true;
+                                while (techMenu) {
+                                    System.out.println("\n--- TECH & ELECTRONICS ---");
+                                    System.out.println("1. " + luxuryTech.getName());
+                                    System.out.println("2. " + midTech.getName());
+                                    System.out.println("0. Back to Shopping Menu");
+                                    int techPick = readInt(scanner, "Select Store: ");
 
-                                        if (techPick == 0) {
-                                            techMenu = false;
-                                        } else if (techPick == 1 || techPick == 2) {
-                                            ArrayList<Product> list = (techPick == 1) ? appleItems : samsungItems;
-                                            addSelectedProduct(scanner, order, list);
-                                        } else {
-                                            System.out.println("Invalid tech store selection.");
-                                        }
+                                    if (techPick == 0) {
+                                        techMenu = false;
+                                    } else if (techPick == 1 || techPick == 2) {
+                                        ArrayList<Product> list = (techPick == 1) ? appleItems : samsungItems;
+                                        addSelectedProduct(scanner, order, list);
+                                    } else {
+                                        System.out.println("Invalid tech store selection.");
                                     }
                                 }
+                            }
                             case 4 -> {
                                 if (order.getProducts().isEmpty()) {
                                     System.out.println("Cart is empty! Add items first.");
@@ -207,17 +214,18 @@ public class Main {
                     }
 
                     try {
+                        // التأكد من صحة بيانات الطلب
                         validateOrder(order);
 
                         Cart tempCart = new Cart();
                         for (Product p : order.getProducts()) {
                             tempCart.addProduct(p); // أو اسم دالة إضافة المنتج للسلة لديك
                         }
-                      Zone zone = parseZone(order.getCity());
-                       double deliveryFee = tempCart.createDelivery(order.getPhone(), zone).calculatePrice();
+                        Zone zone = parseZone(order.getCity());
+                        double deliveryFee = tempCart.createDelivery(order.getPhone(), zone).calculatePrice();
                         System.out.print("\nEnter Promo Code (or press Enter to skip): ");
                         String promoInput = scanner.nextLine().trim();
-
+                        // تطبيق أكواد الخصم والتوصيل المجاني
                         if (!promoInput.isEmpty()) {
                             String code = promoInput.toUpperCase();
 
@@ -226,7 +234,7 @@ public class Main {
                                 order.setDiscountStrategy(new SeasonalDiscount()); // خصم الشكاوى
                                 activePromoCodes.remove(code); // إلغاء الكود بعد الاستخدام
                                 System.out.println("--> Compensation promo code applied successfully!");
-                            } 
+                            }
                             // 2. فحص الأكواد الأساسية للسيستم
                             else if (PromoCodeManager.isValidCode(promoInput)) {
                                 if (code.equals("FIRSTORDER")) {
@@ -239,47 +247,45 @@ public class Main {
                                     deliveryFee = 0;
                                     System.out.println("FREESHIP applied: delivery is free.");
                                 }
-                            } 
+                            }
                             // 3. في حالة إدخال كود غير صحيح
                             else {
                                 System.out.println("Invalid or expired promo code.");
                             }
                         }
 
-                        // 1. خطوة اختيار نوع التغليف
-                          double unitPackagingFee = 0.0;
-                         String packagingType = "None";
+                       // تحديد نوع التغليف وحساب التكلفة
+                        double unitPackagingFee = 0.0;
+                        String packagingType = "None";
 
-                         System.out.println("\nSelect Packaging Type:");
-                         System.out.println("1. Standard Packaging (10 EGP / item)");
-                         System.out.println("2. Gift Packaging (25 EGP / item)");
-                         System.out.println("3. No Packaging");
-                         System.out.print("Choice: ");
+                        System.out.println("\nSelect Packaging Type:");
+                        System.out.println("1. Standard Packaging (10 EGP / item)");
+                        System.out.println("2. Gift Packaging (25 EGP / item)");
+                        System.out.println("3. No Packaging");
+                        System.out.print("Choice: ");
 
-                         int packChoice = scanner.nextInt();
-                         scanner.nextLine();
+                        int packChoice = scanner.nextInt();
+                        scanner.nextLine();
 
-                         if (packChoice == 1) {
-                             unitPackagingFee = 10.0; // سعر تغليف القطعة الواحدة
-                             packagingType = "Standard Packaging";
-                         } else if (packChoice == 2) {
-                             unitPackagingFee = 25.0; // سعر تغليف القطعة الواحدة للهدايا
-                             packagingType = "Gift Packaging";
-                         }
-                         // 2. حساب إجمالي عدد القطع مضروباً في سعر التغليف
-                        int totalItemsCount = order.getProducts().size(); 
+                        if (packChoice == 1) {
+                            unitPackagingFee = 10.0; // سعر تغليف القطعة الواحدة
+                            packagingType = "Standard Packaging";
+                        } else if (packChoice == 2) {
+                            unitPackagingFee = 25.0; // سعر تغليف القطعة الواحدة للهدايا
+                            packagingType = "Gift Packaging";
+                        }
+                        // 2. حساب إجمالي عدد القطع مضروباً في سعر التغليف
+                        int totalItemsCount = order.getProducts().size();
                         double totalPackagingFee = unitPackagingFee * totalItemsCount;
-                         double amountToPay = order.calculateFinalTotal() + deliveryFee + totalPackagingFee;
+                        double amountToPay = order.calculateFinalTotal() + deliveryFee + totalPackagingFee;
                         boolean isPaymentSuccessful = false;
-
-                        
+                        // تحديد طريقة الدفع (محفظة، كارت، كاش)
                         System.out.println("1. Wallet");
                         System.out.println("2. Credit Card");
                         System.out.println("3. Cash on Delivery");
                         int payChoice = readInt(scanner, "Select Payment Method: ");
 
-                      
-                       // 1. إنشاء كائن وسيلة الدفع بناءً على اختيار المستخدم
+                        // 1. إنشاء كائن وسيلة الدفع بناءً على اختيار المستخدم
                         PaymentMethod payment;
 
                         if (payChoice == 1) {
@@ -296,45 +302,44 @@ public class Main {
                             String cardNumber = scanner.nextLine();
 
                             // إنشاء كائن الكريدت كارد برقم الكارت الذي أدخله المستخدم
-                           payment = new CreditCardPayment(cardNumber, userBudget);;
+                            payment = new CreditCardPayment(cardNumber, userBudget);
+                            ;
 
                         } else {
                             // الدفع عند الاستلام لا يتطلب إدخال أرقام
-                           payment = new CashOnDelivery(userBudget);
-                        }
+                            payment = new CashOnDelivery(userBudget);
+                        }// خصم المبلغ والتأكد من الميزانية
                         payment.pay(order.calculateFinalTotal());
                         // 2. تنفيذ الدفع والتحقق من الحالة
-                       if (!payment.getPaymentStatus()) {
-                        System.out.println("\n>>> Would you like to remove items from your cart to reduce the total? (1: Yes / 2: No)");
-                        int choice = scanner.nextInt();
-                        scanner.nextLine();
+                        if (!payment.getPaymentStatus()) {
+                            System.out.println(
+                                    "\n>>> Would you like to remove items from your cart to reduce the total? (1: Yes / 2: No)");
+                            int choice = scanner.nextInt();
+                            scanner.nextLine();
 
-                        if (choice == 1) {
-                            manageCart(scanner, order); // تحويله لواجهة حذف المنتجات من السلة
-                        } else {
-                            System.out.println("Order cancelled.");
-                            break;
+                            if (choice == 1) {
+                                manageCart(scanner, order); // تحويله لواجهة حذف المنتجات من السلة
+                            } else {
+                                System.out.println("Order cancelled.");
+                                break;
+                            }
                         }
-}
-                      
-                       
 
                         // 2. خطوة إنشاء وطباعة الفاتورة
-                        String receipt = ReceiptGenerator.generateReceipt(order, deliveryFee, totalPackagingFee, packagingType);
+                        String receipt = ReceiptGenerator.generateReceipt(order, deliveryFee, totalPackagingFee,
+                                packagingType);
                         System.out.println(receipt);
                         OrderRepository.saveReceiptText(receipt);
-                         
-                       
-                        
-                         //-----------------------------------
-                       DeliverySimulator simulator = new DeliverySimulator();
+
+                        // -----------------------------------
+                        DeliverySimulator simulator = new DeliverySimulator();
                         simulator.startLiveTracking(order);
-                          // ==========================================
-                        // خدمة العملاء والشكاوى بعد الاستلام
                         // ==========================================
+                        // خدمة العملاء والشكاوى بعد الاستلام
+                        //==========================================
                         System.out.println("\nDo you have any issues or complaints about your order?");
-                         System.out.println("1. No, everything is fine");
-                        System.out.println("2. Yes, I want to submit a complaint");                       
+                        System.out.println("1. No, everything is fine");
+                        System.out.println("2. Yes, I want to submit a complaint");
                         int complaintCheck = readInt(scanner, "Select choice (1-2): ");
 
                         if (complaintCheck == 2) {
@@ -342,15 +347,13 @@ public class Main {
                         } else {
                             System.out.println("\nThank you for shopping with us! Have a great day.");
                         }
-                        //===========================================
+                        // ===========================================
                         // 1. قراءة التقييم من 1 إلى 5
                         int userRating = readInt(scanner, "Please rate your experience from 1 to 5: ");
                         while (userRating < 1 || userRating > 5) {
                             System.out.println("Invalid rating. Please enter a number between 1 and 5.");
                             userRating = readInt(scanner, "Please rate your experience from 1 to 5: ");
                         }
-
-                       
 
                         // 3. قراءة التعليق النصي
                         System.out.print("Write any comments (optional): ");
@@ -359,10 +362,9 @@ public class Main {
                         // 4. إنشاء كائن من كلاس Review الأصلي واستدعاء دالة العرض
                         Review myReview = new Review(userRating, userComment);
                         myReview.displayReview();
-                       
+
                         // ==========================================
-                
-                        
+
                         // مسح الشاشة بعد انتهاء التوصيل
                         clearConsole();
                         printLogo();
@@ -374,7 +376,7 @@ public class Main {
                         // عرض الفاتورة الأخيرة
                         System.out.println(receipt);
 
-                        // حفظ الفاتورة في الملفات
+                       // حفظ الطلب في قاعدة البيانات
                         orderHistory.add(order);
                         OrderRepository.saveOrders(orderHistory);
                         System.out.println("[DATABASE]: Order saved successfully!");
@@ -383,12 +385,12 @@ public class Main {
                         System.out.print("\nPress Enter to return to Main Menu...");
                         scanner.nextLine();
 
-                    }
-                    catch (InvalidOrderException e) {
+                    } catch (InvalidOrderException e) {
                         System.out.println("\n[ORDER ERROR]: " + e.getMessage());
-                    }}
+                    }
+                }
 
-                case 2 -> {
+                case 2 -> {// معالجة طلبات الإرجاع برقم الطلب
                     System.out.println("\n=== RETURN REQUEST ===");
                     System.out.print("Enter Order ID to return: ");
                     String searchId = scanner.nextLine().trim();
@@ -414,7 +416,7 @@ public class Main {
                     }
                 }
 
-                case 3 -> {
+                case 3 -> {// إنهاء البرنامج    
                     keepRunning = false;
                     System.out.println("\nThank you for using VELOX!");
                 }
@@ -425,7 +427,7 @@ public class Main {
 
         scanner.close();
     }
-
+    // عرض المنتجات وإضافتها للسلة
     private static void addSelectedProduct(Scanner scanner, Order order, ArrayList<Product> products) {
         System.out.println("\n=============================================================================");
         System.out.printf(Locale.US, "%-4s | %-6s | %-35s | %-12s%n", "#", "ID", "Product Name", "Price");
@@ -433,8 +435,8 @@ public class Main {
 
         for (int i = 0; i < products.size(); i++) {
             Product p = products.get(i);
-            System.out.printf(Locale.US, "%-4d | %-6s | %-35s | %-10.2f EGP%n", 
-                              (i + 1), p.getId(), p.getName(), p.getPrice());
+            System.out.printf(Locale.US, "%-4d | %-6s | %-35s | %-10.2f EGP%n",
+                    (i + 1), p.getId(), p.getName(), p.getPrice());
         }
         System.out.println("=============================================================================");
 
@@ -453,7 +455,7 @@ public class Main {
             System.out.println("\n[ERROR] Invalid item selection.");
         }
     }
-
+    // دالة مساعدة لقراءة الأرقام الصحيحة والتحقق من صحة المدخلات
     private static int readInt(Scanner scanner, String message) {
         while (true) {
             System.out.print(message);
@@ -464,11 +466,9 @@ public class Main {
                 System.out.println("Please enter a valid number.");
             }
         }
-       
 
-   
     }
-
+    // إدارة الشكاوى وتوليد كود التعويض
     public static void handleComplaintSection(Scanner scanner) {
         System.out.println("\n--- COMPLAINT & SUPPORT SYSTEM ---");
         System.out.print("Enter Order ID related to your complaint: ");
@@ -478,7 +478,7 @@ public class Main {
         System.out.print("Please describe your problem: ");
         String details = scanner.nextLine();
 
-        String complaintId = "CMP-" + (int)(Math.random() * 9000 + 1000);
+        String complaintId = "CMP-" + (int) (Math.random() * 9000 + 1000);
         com.app.model.order.Complaint complaint = new com.app.model.order.Complaint(complaintId, orderId, details);
 
         com.app.util.ComplaintRepository.saveComplaintToFile(complaint);
@@ -500,7 +500,7 @@ public class Main {
             complaint.setStatus(com.app.enums.ComplaintStatus.RESOLVED);
             System.out.println("--> Final Status: " + complaint.getStatus().getDescription());
             System.out.println("--> Resolution: Our support team has reviewed your issue and processed a solution.");
-            String generatedPromo = "SORRY" + (int)(Math.random() * 9000 + 1000);
+            String generatedPromo = "SORRY" + (int) (Math.random() * 9000 + 1000);
             activePromoCodes.add(generatedPromo);
 
             System.out.println("==========================================");
@@ -511,7 +511,7 @@ public class Main {
             System.out.println("Tracking interrupted.");
         }
     }
-
+    // فحص بيانات الطلب والسلة قبل الإتمام
     private static void validateOrder(Order order) throws InvalidOrderException {
         if (order.getProducts().isEmpty()) {
             throw new InvalidOrderException("Cannot process checkout: Order cart is empty.");
@@ -523,94 +523,93 @@ public class Main {
             throw new InvalidOrderException("Cannot process checkout: Phone number is missing.");
         }
     }
-   
+    // التعديل على محتويات السلة والحذف منها
     public static void manageCart(Scanner scanner, Order order) {
-    while (true) {
-        if (order.getProducts().isEmpty()) {
-            System.out.println("\n Your cart is empty!");
-            break;
-        }
-
-        System.out.println("\n---  YOUR CART ---");
-      for (int i = 0; i < order.getProducts().size(); i++) {
-    Product p = order.getProducts().get(i);
-    System.out.printf(Locale.US, "%d. %s - %.2f EGP%n", (i + 1), p.getName(), p.getPrice());
-}
-        System.out.println("--------------------");
-        System.out.println("1. Remove an item");
-        System.out.println("2. Proceed to Checkout");
-
-        int choice = readInt(scanner, "Choice: ");
-
-        if (choice == 1) {
-            int itemNum = readInt(scanner, "Enter item number to remove: ");
-
-            if (itemNum > 0 && itemNum <= order.getProducts().size()) {
-                Product removed = order.getProducts().get(itemNum - 1);
-                order.removeProduct(itemNum - 1);
-                System.out.println("--> Removed: " + removed.getName());
-            } else {
-                System.out.println("--> Invalid item number.");
+        while (true) {
+            if (order.getProducts().isEmpty()) {
+                System.out.println("\n Your cart is empty!");
+                break;
             }
-        } else if (choice == 2) {
-            break;
-        }
-    }
-    } 
-    
-    public static Zone parseZone(String input) {
-    if (input == null || input.trim().isEmpty()) {
-        return Zone.CAIRO;
-    }
 
-    String clean = input.trim().toUpperCase();
+            System.out.println("\n---  YOUR CART ---");
+            for (int i = 0; i < order.getProducts().size(); i++) {
+                Product p = order.getProducts().get(i);
+                System.out.printf(Locale.US, "%d. %s - %.2f EGP%n", (i + 1), p.getName(), p.getPrice());
+            }
+            System.out.println("--------------------");
+            System.out.println("1. Remove an item");
+            System.out.println("2. Proceed to Checkout");
 
-    for (Zone z : Zone.values()) {
-        if (z.name().equalsIgnoreCase(clean)) {
-            return z;
-        }
-    }
+            int choice = readInt(scanner, "Choice: ");
 
-    if (clean.startsWith("ALEX") || clean.startsWith("AL") || clean.startsWith("A")) {
-        return Zone.ALEXANDRIA;
-    }
-    if (clean.startsWith("GIZ") || clean.startsWith("G")) {
-        return Zone.GIZA;
-    }
-    if (clean.startsWith("CAI") || clean.startsWith("KAI") || clean.startsWith("C")) {
-        return Zone.CAIRO;
-    }
-    if (clean.startsWith("DAM") || clean.startsWith("DOM") || clean.startsWith("D")) {
-        return Zone.DAMIETTA;
-    }
+            if (choice == 1) {
+                int itemNum = readInt(scanner, "Enter item number to remove: ");
 
-    for (Zone z : Zone.values()) {
-        if (z.name().contains(clean) || clean.contains(z.name())) {
-            return z;
-        }
-    }
-
-    return Zone.CAIRO; // في حالة إدخال رمز خاطئ تماماً كـ L يتحول تلقائياً للقاهرة
-}
-    
-    public static int getNextOrderId(List<Order> orderHistory) {
-    int maxId = 100; // البداية لتكون أول فاتورة 101
-    
-    if (orderHistory != null) {
-        for (Order order : orderHistory) {
-            try {
-                // استخراج الرقم من النص "ORD-105" ليصبح 105
-                String numStr = order.getOrderId().replace("ORD-", "").trim();
-                int num = Integer.parseInt(numStr);
-                if (num > maxId) {
-                    maxId = num;
+                if (itemNum > 0 && itemNum <= order.getProducts().size()) {
+                    Product removed = order.getProducts().get(itemNum - 1);
+                    order.removeProduct(itemNum - 1);
+                    System.out.println("--> Removed: " + removed.getName());
+                } else {
+                    System.out.println("--> Invalid item number.");
                 }
-            } catch (Exception e) {
-                // لتجاهل أي ID مكتوب بشكل غير قياسي
+            } else if (choice == 2) {
+                break;
             }
         }
     }
-    return maxId + 1;
+    // تحديد المنطقة الجغرافية بناءً على المدخلات
+    public static Zone parseZone(String input) {
+        if (input == null || input.trim().isEmpty()) {
+            return Zone.CAIRO;
+        }
+
+        String clean = input.trim().toUpperCase();
+
+        for (Zone z : Zone.values()) {
+            if (z.name().equalsIgnoreCase(clean)) {
+                return z;
+            }
+        }
+
+        if (clean.startsWith("ALEX") || clean.startsWith("AL") || clean.startsWith("A")) {
+            return Zone.ALEXANDRIA;
+        }
+        if (clean.startsWith("GIZ") || clean.startsWith("G")) {
+            return Zone.GIZA;
+        }
+        if (clean.startsWith("CAI") || clean.startsWith("KAI") || clean.startsWith("C")) {
+            return Zone.CAIRO;
+        }
+        if (clean.startsWith("DAM") || clean.startsWith("DOM") || clean.startsWith("D")) {
+            return Zone.DAMIETTA;
+        }
+
+        for (Zone z : Zone.values()) {
+            if (z.name().contains(clean) || clean.contains(z.name())) {
+                return z;
+            }
+        }
+
+        return Zone.CAIRO; // في حالة إدخال رمز خاطئ تماماً كـ L يتحول تلقائياً للقاهرة
+    }
+    // دالة توليد رقم تسلسلي فريد لكل طلب جديد
+    public static int getNextOrderId(List<Order> orderHistory) {
+        int maxId = 100; // البداية لتكون أول فاتورة 101
+
+        if (orderHistory != null) {
+            for (Order order : orderHistory) {
+                try {
+                    // استخراج الرقم من النص "ORD-105" ليصبح 105
+                    String numStr = order.getOrderId().replace("ORD-", "").trim();
+                    int num = Integer.parseInt(numStr);
+                    if (num > maxId) {
+                        maxId = num;
+                    }
+                } catch (Exception e) {
+                    // لتجاهل أي ID مكتوب بشكل غير قياسي
+                }
+            }
+        }
+        return maxId + 1;
+    }
 }
-}    
-    
