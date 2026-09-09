@@ -14,7 +14,10 @@ package com.app.exception;
 
 
     // كونسرتكر بياخد نص الرسالة ويسلمها للكلاس الأب (Exception)
-    public ReturnPolicyException(String message) {
+public class ReturnPolicyException extends Exception{    
+public ReturnPolicyException(String message) {
+       
+        super(message);
     }
 
 }

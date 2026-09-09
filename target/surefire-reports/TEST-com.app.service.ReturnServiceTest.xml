@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" version="3.0.2" name="com.app.service.ReturnServiceTest" time="0.15" tests="1" errors="0" skipped="0" failures="0">
+  <properties>
+    <property name="java.specification.version" value="25"/>
+    <property name="sun.cpu.isalist" value="amd64"/>
+    <property name="sun.jnu.encoding" value="Cp1256"/>
+    <property name="java.class.path" value="C:\Users\NV\Documents\NetBeansProjects\VELOX\target\test-classes;C:\Users\NV\Documents\NetBeansProjects\VELOX\target\classes;C:\Users\NV\.m2\repository\junit\junit\4.13.2\junit-4.13.2.jar;C:\Users\NV\.m2\repository\org\hamcrest\hamcrest-core\1.3\hamcrest-core-1.3.jar;"/>
+    <property name="java.vm.vendor" value="Eclipse Adoptium"/>
+    <property name="sun.arch.data.model" value="64"/>
+    <property name="user.variant" value=""/>
+    <property name="java.vendor.url" value="https://adoptium.net/"/>
+    <property name="user.timezone" value="Africa/Cairo"/>
+    <property name="user.country.format" value="EG"/>
+    <property name="os.name" value="Windows 11"/>
+    <property name="java.vm.specification.version" value="25"/>
+    <property name="user.country" value="US"/>
+    <property name="sun.java.launcher" value="SUN_STANDARD"/>
+    <property name="sun.boot.library.path" value="C:\Program Files\Eclipse Adoptium\jdk-25.0.4.7-hotspot\bin"/>
+    <property name="sun.java.command" value="C:\Users\NV\AppData\Local\Temp\surefire14374956488113333020\surefirebooter-20260909155351270_3.jar C:\Users\NV\AppData\Local\Temp\surefire14374956488113333020 ????-??-??T??-??-??_???-jvmRun1 surefire-20260909155351270_1tmp surefire_0-20260909155351270_2tmp"/>
+    <property name="jdk.debug" value="release"/>
+    <property name="test" value="com.app.service.ReturnServiceTest"/>
+    <property name="surefire.test.class.path" value="C:\Users\NV\Documents\NetBeansProjects\VELOX\target\test-classes;C:\Users\NV\Documents\NetBeansProjects\VELOX\target\classes;C:\Users\NV\.m2\repository\junit\junit\4.13.2\junit-4.13.2.jar;C:\Users\NV\.m2\repository\org\hamcrest\hamcrest-core\1.3\hamcrest-core-1.3.jar;"/>
+    <property name="sun.cpu.endian" value="little"/>
+    <property name="user.home" value="C:\Users\NV"/>
+    <property name="user.language" value="en"/>
+    <property name="java.specification.vendor" value="Oracle Corporation"/>
+    <property name="java.version.date" value="2026-07-21"/>
+    <property name="java.home" value="C:\Program Files\Eclipse Adoptium\jdk-25.0.4.7-hotspot"/>
+    <property name="file.separator" value="\"/>
+    <property name="basedir" value="C:\Users\NV\Documents\NetBeansProjects\VELOX"/>
+    <property name="java.vm.compressedOopsMode" value="Zero based"/>
+    <property name="line.separator" value="&#10;"/>
+    <property name="java.vm.specification.vendor" value="Oracle Corporation"/>
+    <property name="java.specification.name" value="Java Platform API Specification"/>
+    <property name="surefire.real.class.path" value="C:\Users\NV\AppData\Local\Temp\surefire14374956488113333020\surefirebooter-20260909155351270_3.jar"/>
+    <property name="user.script" value=""/>
+    <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
+    <property name="java.runtime.version" value="25.0.4+7-LTS"/>
+    <property name="user.name" value="3bdelr7man"/>
+    <property name="stdout.encoding" value="Cp1256"/>
+    <property name="path.separator" value=";"/>
+    <property name="os.version" value="10.0"/>
+    <property name="java.runtime.name" value="OpenJDK Runtime Environment"/>
+    <property name="file.encoding" value="UTF-8"/>
+    <property name="java.vm.name" value="OpenJDK 64-Bit Server VM"/>
+    <property name="java.vendor.version" value="Temurin-25.0.4+7"/>
+    <property name="maven.ext.class.path" value="C:\Users\NV\Downloads\3bdo_DEPI_Global-Knowledge\Lecture_Technical\Programs\netbeans\java\maven-nblib\netbeans-eventspy.jar"/>
+    <property name="localRepository" value="C:\Users\NV\.m2\repository"/>
+    <property name="java.vendor.url.bug" value="https://github.com/adoptium/adoptium-support/issues"/>
+    <property name="java.io.tmpdir" value="C:\Users\NV\AppData\Local\Temp\"/>
+    <property name="java.version" value="25.0.4"/>
+    <property name="user.dir" value="C:\Users\NV\Documents\NetBeansProjects\VELOX"/>
+    <property name="os.arch" value="amd64"/>
+    <property name="java.vm.specification.name" value="Java Virtual Machine Specification"/>
+    <property name="user.language.format" value="ar"/>
+    <property name="sun.os.patch.level" value=""/>
+    <property name="native.encoding" value="Cp1256"/>
+    <property name="java.library.path" value="C:\Program Files\Eclipse Adoptium\jdk-25.0.4.7-hotspot\bin;C:\Windows\Sun\Java\bin;C:\Windows\system32;C:\Windows;C:\Program Files\Eclipse Adoptium\jdk-25.0.4.7-hotspot\bin;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Windows\System32\OpenSSH\;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\NVIDIA Corporation\NVIDIA App\NvDLISR;C:\Program Files\dotnet\;C:\Program Files\Git\cmd;C:\Program Files\nodejs\;C:\Users\NV\AppData\Local\Programs\Python\Python312\Scripts\;C:\Users\NV\AppData\Local\Programs\Python\Python312\;C:\Users\NV\AppData\Local\Programs\Python\Python313\Scripts\;C:\Users\NV\AppData\Local\Programs\Python\Python313\;C:\Users\NV\AppData\Local\Microsoft\WindowsApps;C:\Users\NV\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\NV\AppData\Local\Python\bin;C:\msys64\ucrt64\bin;C:\Users\3bdelr7man\AppData\Local\Programs\Python\Python312\;C:\Users\NV\Downloads\3bdo_DEPI_Global-Knowledge\Lecture_Technical\IntelliJ IDEA 2026.2.0.1\bin;C:\Users\NV\AppData\Local\spicetify;C:\Users\NV\AppData\Roaming\npm;C:\Users\NV\Downloads\3bdo_DEPI_Global-Knowledge\Lecture_Technical\Programs\netbeans\bin\;."/>
+    <property name="java.vm.info" value="mixed mode, sharing"/>
+    <property name="stderr.encoding" value="Cp1256"/>
+    <property name="java.vendor" value="Eclipse Adoptium"/>
+    <property name="java.vm.version" value="25.0.4+7-LTS"/>
+    <property name="stdin.encoding" value="Cp1256"/>
+    <property name="sun.io.unicode.encoding" value="UnicodeLittle"/>
+    <property name="java.class.version" value="69.0"/>
+  </properties>
+  <testcase name="testProcessReturn_Success" classname="com.app.service.ReturnServiceTest" time="0.039"/>
+</testsuite>
