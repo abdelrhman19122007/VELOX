@@ -34,7 +34,13 @@
             <version>4.13.2</version>
             <scope>test</scope>
         </dependency>
-    </dependencies>
+    
+    <dependency>
+    <groupId>com.mysql</groupId>
+    <artifactId>mysql-connector-j</artifactId>
+    <version>8.3.0</version>
+   </dependency>
+   </dependencies>
 
     <name>Velox</name>
 </project>
