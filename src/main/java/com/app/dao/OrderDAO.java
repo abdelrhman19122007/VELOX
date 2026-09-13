@@ -21,18 +21,27 @@ public class OrderDAO {
 
 // ميثود لإنشاء طلب جديد وإرجاع الـ Order ID
     public int createOrder(int userId, double totalAmount, String status) {
-        // إضافة shipping_address والحقول الإضافية لتفادي أخطاء SQL NOT NULL
+        return createOrder(userId, 1, totalAmount, totalAmount, status, "");
+    }
+
+    public int createOrder(int userId, int addressId, double totalAmount, double finalAmount, String status, String shippingAddress) {
+        if (userId <= 0 || totalAmount < 0 || finalAmount < 0) {
+            return -1;
+        }
+        String safeStatus = (status == null || status.trim().isEmpty()) ? "PENDING" : status.trim().toUpperCase();
+        String safeAddress = (shippingAddress == null || shippingAddress.trim().isEmpty()) ? "NOT_PROVIDED" : shippingAddress.trim();
+        int safeAddressId = addressId <= 0 ? 1 : addressId;
         String sql = "INSERT INTO orders (user_id, address_id, total_amount, final_amount, status, shipping_address) VALUES (?, ?, ?, ?, ?, ?)";
         
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             
             stmt.setInt(1, userId);
-            stmt.setInt(2, 1);                   // address_id
-            stmt.setDouble(3, totalAmount);        // total_amount
-            stmt.setDouble(4, totalAmount);        // final_amount
-            stmt.setString(5, status);              // status
-            stmt.setString(6, "Damietta, Egypt");  // shipping_address (عنوان تجريبي)
+            stmt.setInt(2, safeAddressId);
+            stmt.setDouble(3, totalAmount);
+            stmt.setDouble(4, finalAmount);
+            stmt.setString(5, safeStatus);
+            stmt.setString(6, safeAddress);
             
             int affectedRows = stmt.executeUpdate();
             if (affectedRows > 0) {
@@ -43,12 +52,15 @@ public class OrderDAO {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.err.println("[OrderDAO] create order failed: " + e.getMessage());
         }
         return -1; // في حالة الفشل
     }
     // ميثود لإضافة عناصر الطلب (Junction Table)
     public boolean addOrderItem(int orderId, int productId, int quantity, double price) {
+        if (orderId <= 0 || productId <= 0 || quantity <= 0 || price < 0) {
+            return false;
+        }
         String sql = "INSERT INTO order_items (order_id, product_id, quantity, price) VALUES (?, ?, ?, ?)";
         
         try (Connection conn = DatabaseConnection.getConnection();
@@ -61,26 +73,8 @@ public class OrderDAO {
             
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.err.println("[OrderDAO] add item failed: " + e.getMessage());
             return false;
-        }
-    }
-
-    // اختبار سريع
-    public static void main(String[] args) {
-        OrderDAO orderDAO = new OrderDAO();
-        
-        // تجربة إنشاء طلب جديد لليوزر رقم 1
-        int orderId = orderDAO.createOrder(1, 420.0, "PENDING");
-        
-        if (orderId != -1) {
-            System.out.println("✅ Order Created Successfully! Order ID: " + orderId);
-            // إضافة منتج للطلب (مثلاً الكشري بـ 120 والقميص بـ 300)
-            orderDAO.addOrderItem(orderId, 3, 1, 120.0);
-            orderDAO.addOrderItem(orderId, 4, 1, 300.0);
-            System.out.println("✅ Order Items Added Successfully!");
-        } else {
-            System.out.println("❌ Failed to create order.");
         }
     }
 

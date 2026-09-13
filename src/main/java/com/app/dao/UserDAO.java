@@ -10,6 +10,9 @@
 package com.app.dao;
 
 import com.app.util.DatabaseConnection;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -17,27 +20,48 @@ import java.sql.SQLException;
 
 public class UserDAO {
 
-    // 1. ميثود للتحقق من تسجيل الدخول (Login)
+    // 1. ميثود للتحقق من تسجيل الدخول (Login) - تقارن hash وليس كلمة سر صريحة
     public boolean authenticateUser(String email, String passwordHash) {
+        if (email == null || passwordHash == null || email.trim().isEmpty()) {
+            return false;
+        }
         String sql = "SELECT * FROM users WHERE email = ? AND password_hash = ?";
         
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             
-            stmt.setString(1, email);
-            stmt.setString(2, passwordHash);
+            stmt.setString(1, email.trim());
+            stmt.setString(2, toSha256(passwordHash));
             
             try (ResultSet rs = stmt.executeQuery()) {
                 return rs.next(); // لو لقى يوزر بالبيانات دي بيرجع true
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.err.println("[UserDAO] auth failed: " + e.getMessage());
             return false;
+        }
+    }
+
+    /** SHA-256 helper حتى لا تُقارن كلمات السر كنص صريح. للإنتاج يُفضل BCrypt. */
+    public static String toSha256(String raw) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            byte[] digest = md.digest(raw.getBytes(StandardCharsets.UTF_8));
+            StringBuilder sb = new StringBuilder(digest.length * 2);
+            for (byte b : digest) {
+                sb.append(String.format("%02x", b));
+            }
+            return sb.toString();
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalStateException("SHA-256 not available", e);
         }
     }
 
     // 2. ميثود لتحديث رصيد اليوزر (Budget) بعد أي عملية شراء
     public boolean updateUserBudget(int userId, double newBudget) {
+        if (userId <= 0 || newBudget < 0) {
+            return false;
+        }
         String sql = "UPDATE users SET current_budget = ? WHERE id = ?";
         
         try (Connection conn = DatabaseConnection.getConnection();
@@ -49,23 +73,8 @@ public class UserDAO {
             int rowsUpdated = stmt.executeUpdate();
             return rowsUpdated > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.err.println("[UserDAO] update budget failed: " + e.getMessage());
             return false;
-        }
-    }
-public static void main(String[] args) {
-        UserDAO userDAO = new UserDAO();
-
-        // تجربة تسجيل الدخول باستخدام بيانات اليوزر التجريبية الموجودة في الداتابيز
-        String testEmail = "hoda@example.com";
-        String testPassword = "test_hash_123";
-
-        boolean isAuthenticated = userDAO.authenticateUser(testEmail, testPassword);
-
-        if (isAuthenticated) {
-            System.out.println("✅ User Authentication Successful for: " + testEmail);
-        } else {
-            System.out.println("❌ Authentication Failed! User not found or invalid credentials.");
         }
     }
 }

@@ -30,7 +30,8 @@ import com.app.util.ReceiptGenerator;
 import com.app.util.Response;
 import com.app.service.PackagingService;
 import java.util.Set;
-import java.util.HashSet;
+import java.util.concurrent.ConcurrentHashMap;
+import java.security.SecureRandom;
 import com.app.model.order.Review;
 import com.app.enums.Size;
 import com.app.model.product.*;
@@ -39,7 +40,8 @@ import com.app.model.order.Cart;
 import com.app.util.StoreRepository;
 // نقطة بداية التشغيل الأساسية للبرنامج وتحميل البيانات المخزنة
 public class Main {
-    public static Set<String> activePromoCodes = new HashSet<>();
+    public static Set<String> activePromoCodes = ConcurrentHashMap.newKeySet();
+    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
     public static void printLogo() {
         System.out.println("=========================================");
@@ -88,19 +90,26 @@ public class Main {
             switch (mainMenuChoice) {
                 case 1 -> {
                     // إدخال بيانات العميل (المدينة، الهاتف، الميزانية)
-                    System.out.print("\nEnter Delivery City: ");
+                    System.out.print("\nEnter Delivery City (CAIRO/GIZA/ALEXANDRIA/DAMIETTA): ");
                     String inputCity = scanner.nextLine();
                     Zone selectedZone = parseZone(inputCity);
-                    System.out.print("Enter Phone Number: ");
+                    System.out.print("Enter Customer Name: ");
+                    String customerName = scanner.nextLine().trim();
+                    if (customerName.isEmpty()) {
+                        customerName = "VELOX-Customer";
+                    }
+                    System.out.print("Enter Phone Number (11 digits, e.g. 01xxxxxxxxx): ");
                     String phone = scanner.nextLine().trim();
+                    if (!isValidPhone(phone)) {
+                        System.out.println("[WARNING] Invalid phone format. Order will still be created but please verify.");
+                    }
                     // إدخال الميزانية المتاحة مع العميل
-                    System.out.print("Enter your available Budget (EGP): ");
-                    double userBudget = scanner.nextDouble();
-                    scanner.nextLine();
+                    double userBudget = readDouble(scanner, "Enter your available Budget (EGP): ");
 
                     String generatedOrderId = "ORD-" + getNextOrderId(orderHistory);
                     // إنشاء كائن طلب جديد
                     Order order = new Order(generatedOrderId, selectedZone.name(), phone);
+                    order.setCustomerNameForDelivery(customerName);
                     boolean shopping = true;
                     // عرض أقسام المتاجر المتاحة واختيار المنتجات وإضافتها للسلة
                     while (shopping) {
@@ -210,7 +219,7 @@ public class Main {
                             tempCart.addProduct(p); // أو اسم دالة إضافة المنتج للسلة لديك
                         }
                         Zone zone = parseZone(order.getCity());
-                        double deliveryFee = tempCart.createDelivery(order.getPhone(), zone).calculatePrice();
+                        double deliveryFee = tempCart.createDelivery(order.getCustomerName(), zone).calculatePrice();
                         System.out.print("\nEnter Promo Code (or press Enter to skip): ");
                         String promoInput = scanner.nextLine().trim();
                         // تطبيق أكواد الخصم والتوصيل المجاني
@@ -250,10 +259,8 @@ public class Main {
                         System.out.println("1. Standard Packaging (10 EGP / item)");
                         System.out.println("2. Gift Packaging (25 EGP / item)");
                         System.out.println("3. No Packaging");
-                        System.out.print("Choice: ");
 
-                        int packChoice = scanner.nextInt();
-                        scanner.nextLine();
+                        int packChoice = readInt(scanner, "Choice: ");
 
                         if (packChoice == 1) {
                             unitPackagingFee = 10.0; // سعر تغليف القطعة الواحدة
@@ -266,7 +273,6 @@ public class Main {
                         int totalItemsCount = order.getProducts().size();
                         double totalPackagingFee = unitPackagingFee * totalItemsCount;
                         double amountToPay = order.calculateFinalTotal() + deliveryFee + totalPackagingFee;
-                        boolean isPaymentSuccessful = false;
                         // تحديد طريقة الدفع (محفظة، كارت، كاش)
                         System.out.println("1. Wallet");
                         System.out.println("2. Credit Card");
@@ -274,44 +280,64 @@ public class Main {
                         int payChoice = readInt(scanner, "Select Payment Method: ");
 
                         // 1. إنشاء كائن وسيلة الدفع بناءً على اختيار المستخدم
-                        PaymentMethod payment;
+                        PaymentMethod payment = null;
+                        String paymentError = null;
 
                         if (payChoice == 1) {
                             // طلب رقم المحفظة من المستخدم
                             System.out.print("Enter your Wallet Phone Number: ");
-                            String walletNumber = scanner.nextLine();
-
-                            // إنشاء كائن المحفظة برقم المحفظة والرصيد المتاح
-                            payment = new WalletPayment(walletNumber, userBudget);
+                            String walletNumber = scanner.nextLine().trim();
+                            try {
+                                // إنشاء كائن المحفظة برقم المحفظة والرصيد المتاح
+                                payment = new WalletPayment(walletNumber, userBudget);
+                            } catch (IllegalArgumentException ex) {
+                                paymentError = ex.getMessage();
+                            }
 
                         } else if (payChoice == 2) {
                             // طلب رقم كارت الائتمان من المستخدم
                             System.out.print("Enter your 16-digit Credit Card Number: ");
-                            String cardNumber = scanner.nextLine();
+                            String cardNumber = scanner.nextLine().trim();
 
-                            // إنشاء كائن الكريدت كارد برقم الكارت الذي أدخله المستخدم
-                            payment = new CreditCardPayment(cardNumber, userBudget);
-                            ;
+                            try {
+                                // إنشاء كائن الكريدت كارد برقم الكارت الذي أدخله المستخدم
+                                payment = new CreditCardPayment(cardNumber, userBudget);
+                            } catch (IllegalArgumentException ex) {
+                                paymentError = ex.getMessage();
+                            }
 
-                        } else {
+                        } else if (payChoice == 3) {
                             // الدفع عند الاستلام لا يتطلب إدخال أرقام
                             payment = new CashOnDelivery(userBudget);
-                        }// خصم المبلغ والتأكد من الميزانية
-                        payment.pay(order.calculateFinalTotal());
+                        } else {
+                            System.out.println("Invalid payment choice. Order cancelled.");
+                            break;
+                        }
+                        if (paymentError != null) {
+                            System.out.println("\n[PAYMENT ERROR]: " + paymentError);
+                            System.out.println("Order cancelled.");
+                            break;
+                        }
+                        // FIX: must pay FULL amount (products after discount + delivery + packaging)
+                        // Old bug: payment.pay(order.calculateFinalTotal()) ignored fees
+                        payment.pay(amountToPay);
+                        boolean isPaymentSuccessful = payment.getPaymentStatus();
                         // 2. تنفيذ الدفع والتحقق من الحالة
-                        if (!payment.getPaymentStatus()) {
+                        if (!isPaymentSuccessful) {
                             System.out.println(
                                     "\n>>> Would you like to remove items from your cart to reduce the total? (1: Yes / 2: No)");
-                            int choice = scanner.nextInt();
-                            scanner.nextLine();
+                            int choice = readInt(scanner, "Choice (1-2): ");
 
                             if (choice == 1) {
                                 manageCart(scanner, order); // تحويله لواجهة حذف المنتجات من السلة
+                                System.out.println("Please restart checkout to re-pay with updated cart. Order NOT completed.");
                             } else {
-                                System.out.println("Order cancelled.");
-                                break;
+                                System.out.println("Order cancelled due to payment failure.");
                             }
+                            break;
                         }
+                        PackagingService.packageOrder(order);
+                        order.setStatus(OrderStatus.PAID);
 
                         // 2. خطوة إنشاء وطباعة الفاتورة
                         String receipt = ReceiptGenerator.generateReceipt(order, deliveryFee, totalPackagingFee,
@@ -431,13 +457,13 @@ public class Main {
         int choice = readInt(scanner, "\nSelect item to add: ");
 
         if (choice >= 1 && choice <= products.size()) {
-            int quantity = readInt(scanner, "Enter quantity: ");
+            int quantity = readInt(scanner, "Enter quantity (1-50): ");
 
-            if (quantity > 0) {
+            if (quantity >= 1 && quantity <= 50) {
                 order.addProduct(products.get(choice - 1), quantity);
                 System.out.println("\n[SUCCESS] Item added to cart successfully!");
             } else {
-                System.out.println("\n[ERROR] Quantity must be greater than 0.");
+                System.out.println("\n[ERROR] Quantity must be between 1 and 50.");
             }
         } else {
             System.out.println("\n[ERROR] Invalid item selection.");
@@ -456,17 +482,48 @@ public class Main {
         }
 
     }
+
+    private static double readDouble(Scanner scanner, String message) {
+        while (true) {
+            System.out.print(message);
+            String input = scanner.nextLine().trim();
+            try {
+                double v = Double.parseDouble(input);
+                if (v < 0) {
+                    System.out.println("Value cannot be negative.");
+                    continue;
+                }
+                return v;
+            } catch (NumberFormatException e) {
+                System.out.println("Please enter a valid amount.");
+            }
+        }
+    }
+
+    public static boolean isValidPhone(String phone) {
+        if (phone == null) {
+            return false;
+        }
+        return phone.trim().matches("01\\d{9}");
+    }
     // إدارة الشكاوى وتوليد كود التعويض
     public static void handleComplaintSection(Scanner scanner) {
         System.out.println("\n--- COMPLAINT & SUPPORT SYSTEM ---");
         System.out.print("Enter Order ID related to your complaint: ");
-        String orderId = scanner.next();
-        scanner.nextLine();
+        String orderId = scanner.nextLine().trim();
+        if (orderId.isEmpty()) {
+            System.out.println("[ERROR] Order ID is required.");
+            return;
+        }
 
         System.out.print("Please describe your problem: ");
-        String details = scanner.nextLine();
+        String details = scanner.nextLine().trim();
+        if (details.isEmpty()) {
+            System.out.println("[ERROR] Description is required.");
+            return;
+        }
 
-        String complaintId = "CMP-" + (int) (Math.random() * 9000 + 1000);
+        String complaintId = "CMP-" + (1000 + SECURE_RANDOM.nextInt(9000));
         com.app.model.order.Complaint complaint = new com.app.model.order.Complaint(complaintId, orderId, details);
 
         com.app.util.ComplaintRepository.saveComplaintToFile(complaint);
@@ -488,27 +545,36 @@ public class Main {
             complaint.setStatus(com.app.enums.ComplaintStatus.RESOLVED);
             System.out.println("--> Final Status: " + complaint.getStatus().getDescription());
             System.out.println("--> Resolution: Our support team has reviewed your issue and processed a solution.");
-            String generatedPromo = "SORRY" + (int) (Math.random() * 9000 + 1000);
+            String generatedPromo = "SORRY" + (1000 + SECURE_RANDOM.nextInt(9000));
             activePromoCodes.add(generatedPromo);
 
             System.out.println("==========================================");
-            System.out.println("? Compensation Discount Generated!");
-            System.out.println("Use Code: " + generatedPromo + " on your next order for 10% OFF.");
+            System.out.println("Compensation Discount Generated!");
+            System.out.println("Use Code: " + generatedPromo + " on your next order for 15% OFF (Seasonal).");
             System.out.println("==========================================");
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             System.out.println("Tracking interrupted.");
         }
     }
     // فحص بيانات الطلب والسلة قبل الإتمام
     private static void validateOrder(Order order) throws InvalidOrderException {
-        if (order.getProducts().isEmpty()) {
+        if (order == null || order.getProducts().isEmpty()) {
             throw new InvalidOrderException("Cannot process checkout: Order cart is empty.");
         }
-        if (order.getCity().isEmpty()) {
+        if (order.getCity() == null || order.getCity().trim().isEmpty()) {
             throw new InvalidOrderException("Cannot process checkout: Delivery city is missing.");
         }
-        if (order.getAddress().getPhone().isEmpty()) {
+        try {
+            parseZoneStrict(order.getCity());
+        } catch (IllegalArgumentException ex) {
+            throw new InvalidOrderException("Cannot process checkout: " + ex.getMessage());
+        }
+        if (order.getAddress().getPhone() == null || order.getAddress().getPhone().trim().isEmpty()) {
             throw new InvalidOrderException("Cannot process checkout: Phone number is missing.");
+        }
+        if (!isValidPhone(order.getAddress().getPhone())) {
+            throw new InvalidOrderException("Cannot process checkout: Invalid phone number (expected 01xxxxxxxxx).");
         }
     }
     // التعديل على محتويات السلة والحذف منها
@@ -546,39 +612,27 @@ public class Main {
         }
     }
     // تحديد المنطقة الجغرافية بناءً على المدخلات
+    // FIX: exact match only. Old prefix logic mapped "A"/"London"/"L" to wrong zones.
     public static Zone parseZone(String input) {
-        if (input == null || input.trim().isEmpty()) {
+        try {
+            return parseZoneStrict(input);
+        } catch (IllegalArgumentException ex) {
+            System.out.println("[WARNING] Unknown city '" + input + "'. Defaulting to CAIRO.");
             return Zone.CAIRO;
         }
+    }
 
+    public static Zone parseZoneStrict(String input) {
+        if (input == null || input.trim().isEmpty()) {
+            throw new IllegalArgumentException("Delivery city is missing.");
+        }
         String clean = input.trim().toUpperCase();
-
         for (Zone z : Zone.values()) {
             if (z.name().equalsIgnoreCase(clean)) {
                 return z;
             }
         }
-
-        if (clean.startsWith("ALEX") || clean.startsWith("AL") || clean.startsWith("A")) {
-            return Zone.ALEXANDRIA;
-        }
-        if (clean.startsWith("GIZ") || clean.startsWith("G")) {
-            return Zone.GIZA;
-        }
-        if (clean.startsWith("CAI") || clean.startsWith("KAI") || clean.startsWith("C")) {
-            return Zone.CAIRO;
-        }
-        if (clean.startsWith("DAM") || clean.startsWith("DOM") || clean.startsWith("D")) {
-            return Zone.DAMIETTA;
-        }
-
-        for (Zone z : Zone.values()) {
-            if (z.name().contains(clean) || clean.contains(z.name())) {
-                return z;
-            }
-        }
-
-        return Zone.CAIRO; // في حالة إدخال رمز خاطئ تماماً كـ L يتحول تلقائياً للقاهرة
+        throw new IllegalArgumentException("Unsupported city '" + input + "'. Use CAIRO/GIZA/ALEXANDRIA/DAMIETTA.");
     }
     // دالة توليد رقم تسلسلي فريد لكل طلب جديد
     public static int getNextOrderId(List<Order> orderHistory) {

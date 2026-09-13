@@ -41,3 +41,20 @@ bin/
 # OS specific files
 .DS_Store
 Thumbs.db
+
+# VELOX runtime / local data - never commit
+orders.dat
+complaints.txt
+invoices_history.txt
+*.dat
+application-local.properties
+.env
+
+# VELOX DB dumps with secrets / local dumps
+DB/
+*.SQL
+VELOX_D2.SQL
+
+# Local build artifacts (already covered by *.jar + target/, kept explicit)
+Velox.jar
+target/

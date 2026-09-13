@@ -17,11 +17,14 @@ import java.time.temporal.ChronoUnit;
  */
 // طباعة وتأكيد تغليف كافة المنتجات داخل الطلب
 public class ReturnService {
-    private static final int ALLOWED_RETURN_DAYS = 1;
+    // Matches receipt text: "Products can be returned within 14 days."
+    private static final int ALLOWED_RETURN_DAYS = 14;
 
     // التحقق من سياسة الإرجاع وحساب المبلغ المسترد
     public Response<Double> processReturn(Order order) throws ReturnPolicyException {
-
+        if (order == null) {
+            throw new ReturnPolicyException("Order not found!");
+        }
         if (order.isReturned() || order.getStatus() == OrderStatus.RETURNED) {
             throw new ReturnPolicyException("This order has already been returned!");
         }

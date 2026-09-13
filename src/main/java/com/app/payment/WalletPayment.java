@@ -14,8 +14,22 @@ public class WalletPayment implements PaymentMethod {
 
     // المُنشئ (Constructor): لتهيئة كائن المحفظة برقمها والرصيد المبدئي
     public WalletPayment(String walletNumber, double balance) {
+        if (!isValidWalletNumber(walletNumber)) {
+            throw new IllegalArgumentException("Invalid wallet number: must be 11 digits starting with 01");
+        }
+        if (balance < 0) {
+            throw new IllegalArgumentException("Balance cannot be negative");
+        }
         this.balance = balance;
-        this.walletNumber = walletNumber;
+        this.walletNumber = walletNumber.trim();
+    }
+
+    public static boolean isValidWalletNumber(String walletNumber) {
+        if (walletNumber == null) {
+            return false;
+        }
+        String digits = walletNumber.trim().replaceAll("\\s|-", "");
+        return digits.matches("01\\d{9}");
     }
 
     // دالة إضافية للحصول على الرصيد الحالي للمحفظة

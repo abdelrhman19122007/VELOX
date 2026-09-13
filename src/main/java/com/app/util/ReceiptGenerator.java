@@ -16,13 +16,13 @@ public class ReceiptGenerator {
             double grandTotal = finalTotal + deliveryFee + packagingFee;
 
         StringBuilder builder = new StringBuilder();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("hh:mm / dd:MM:YYYY");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("hh:mm a dd/MM/yyyy");
         
    
         builder.append("\n==========================================\n");
         builder.append("             OFFICIAL RECEIPT             \n");
         builder.append("==========================================\n");
-        builder.append("Order ID  : ").append(order.getOrderId()).append(" ||  Date  : ").append(java.time.LocalDateTime.now().format(formatter)).append("\n");
+        builder.append("Order ID  : ").append(order.getOrderId()).append(" ||  Date  : ").append(order.getOrderDate().format(formatter)).append("\n");
         builder.append("Delivery  : City: ").append(order.getCity()).append(" | Phone: ").append(order.getPhone()).append("\n");
         builder.append("------------------------------------------\n");
         for (Product product : order.getProducts()) {
