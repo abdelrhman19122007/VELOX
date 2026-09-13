@@ -8,6 +8,7 @@ package com.app.service;
  *
  * @author 3bdelr7man
  */
+import com.app.enums.Governorate;
 import com.app.enums.Zone;
 
 // كلاس حساب تكلفة توصيل الوجبات والمطاعم
@@ -16,6 +17,10 @@ public class FoodDelivery extends Delivery {
 
     public FoodDelivery(String customerName, Zone zone, double weight) {
         super(customerName, zone, weight);
+    }
+
+    public FoodDelivery(String customerName, Governorate governorate, double weight) {
+        super(customerName, governorate, weight);
     }
 
     // حساب السعر النهائي بإضافة رسوم معالجة الأطعمة

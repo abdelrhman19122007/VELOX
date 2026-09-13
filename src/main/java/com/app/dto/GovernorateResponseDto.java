@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class GovernorateResponseDto {
 
+    private int code;
     private String name;
     private String arabicName;
     private double shippingPrice;
@@ -20,6 +21,7 @@ public class GovernorateResponseDto {
 
     public static GovernorateResponseDto from(Governorate governorate) {
         return new GovernorateResponseDto(
+                governorate.getCode(),
                 governorate.name(),
                 governorate.getArabicName(),
                 governorate.getShippingPrice(),

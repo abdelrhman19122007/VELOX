@@ -47,6 +47,7 @@ orders.dat
 complaints.txt
 invoices_history.txt
 *.dat
+data/
 application-local.properties
 .env
 

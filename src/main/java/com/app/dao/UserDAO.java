@@ -10,9 +10,7 @@
 package com.app.dao;
 
 import com.app.util.DatabaseConnection;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+import com.app.util.PasswordUtil;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -44,17 +42,7 @@ public class UserDAO {
 
     /** SHA-256 helper حتى لا تُقارن كلمات السر كنص صريح. للإنتاج يُفضل BCrypt. */
     public static String toSha256(String raw) {
-        try {
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            byte[] digest = md.digest(raw.getBytes(StandardCharsets.UTF_8));
-            StringBuilder sb = new StringBuilder(digest.length * 2);
-            for (byte b : digest) {
-                sb.append(String.format("%02x", b));
-            }
-            return sb.toString();
-        } catch (NoSuchAlgorithmException e) {
-            throw new IllegalStateException("SHA-256 not available", e);
-        }
+        return PasswordUtil.sha256(raw);
     }
 
     // 2. ميثود لتحديث رصيد اليوزر (Budget) بعد أي عملية شراء

@@ -19,6 +19,9 @@
     <properties>
         <java.version>17</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <!-- Spring Boot 3.3.0 manages Lombok 1.18.32 which crashes on JDK 21+ (TypeTag UNKNOWN).
+             Pin a newer Lombok that supports the installed JDK 25. -->
+        <lombok.version>1.18.48</lombok.version>
     </properties>
 
     <build>
@@ -81,6 +84,13 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.13.2</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Lets the existing JUnit4 tests run on the JUnit platform (Boot 3 ships Jupiter only) -->
+        <dependency>
+            <groupId>org.junit.vintage</groupId>
+            <artifactId>junit-vintage-engine</artifactId>
             <scope>test</scope>
         </dependency>
     
