@@ -36,6 +36,7 @@ import com.app.enums.Size;
 import com.app.model.product.*;
 import com.app.enums.Zone;
 import com.app.model.order.Cart;
+import com.app.util.StoreRepository;
 // نقطة بداية التشغيل الأساسية للبرنامج وتحميل البيانات المخزنة
 public class Main {
     public static Set<String> activePromoCodes = new HashSet<>();
@@ -58,52 +59,21 @@ public class Main {
         List<Order> orderHistory = OrderRepository.loadOrders();
         ReturnService returnService = new ReturnService();
         boolean keepRunning = true;
-        // تجهيز بيانات مطاعم الأكل الشرقي
-        Restaurant orientalRest = new Restaurant("R1", "Abou Tarek & Shabrawy", "Oriental Cuisine");
-        ArrayList<Product> orientalItems = new ArrayList<>();
-        orientalItems.add(new FoodItem("F1", "Koshary Family Box", 120.0, "Large", Size.LARGE));
-        orientalItems.add(new FoodItem("F2", "Mixed Grill Platter (1 kg)", 450.0, "Family", Size.LARGE));
-        orientalItems.add(new FoodItem("F3", "Beef Shawarma Wrap", 95.0, "Medium", Size.MEDIUM));
-        orientalItems.add(new FoodItem("F4", "Chicken Crepe Crunchy", 110.0, "Large", Size.LARGE));
-        orientalItems.add(new FoodItem("F5", "Molokhia with Half Chicken", 160.0, "Standard", Size.MEDIUM));
-        // تجهيز بيانات مطاعم الأكل الغربي
-        Restaurant westernRest = new Restaurant("R2", "Buffalo & Pizza Hut", "Western Cuisine");
-        ArrayList<Product> westernItems = new ArrayList<>();
-        westernItems.add(new FoodItem("F6", "Pizza Super Supreme", 260.0, "Large", Size.LARGE));
-        westernItems.add(new FoodItem("F7", "Double Mushroom Beef Burger", 180.0, "Medium", Size.MEDIUM));
-        westernItems.add(new FoodItem("F8", "Crispy Chicken Strips Meal", 165.0, "Large", Size.LARGE));
-        westernItems.add(new FoodItem("F9", "Italian Pasta Alfredo", 140.0, "Standard", Size.LARGE));
-        westernItems.add(new FoodItem("F10", "Cheesy Garlic Bread", 75.0, "Small", Size.SMALL));
-        // تجهيز متاجر الملابس الفاخرة
-        FashionStore luxuryStore = new FashionStore("S1", "Lacoste Luxury", "Luxury Perfumes & Accessories");
-        ArrayList<Product> luxuryItems = new ArrayList<>();
-        luxuryItems.add(new ClothingItem("C1", "Lacoste French Perfume (100ml)", 4500.0, "Fragrance", Size.MEDIUM));
-        luxuryItems.add(new ClothingItem("C2", "Classic Croco Polo Shirt", 3800.0, "White", Size.MEDIUM));
-        luxuryItems.add(new ClothingItem("C3", "Genuine Leather Belt Set", 2200.0, "Black", Size.MEDIUM));
-        // تجهيز متاجر الملابس الرياضية
-        FashionStore midSportStore = new FashionStore("S2", "Adidas Sport", "Sportswear & Footwear");
-        ArrayList<Product> sportItems = new ArrayList<>();
-        sportItems.add(new ClothingItem("C4", "Ultraboost Running Sneakers", 2400.0, "Black/Red", Size.MEDIUM));
-        sportItems.add(new ClothingItem("C5", "Athletic Tracksuit Set", 1750.0, "Navy Blue", Size.MEDIUM));
-        sportItems.add(new ClothingItem("C6", "Sport Cap & Wristbands", 450.0, "White", Size.SMALL));
+        StoreRepository storeRepo = new StoreRepository();
+        
+                   
+        // المطاعم
+        Restaurant orientalRest = new Restaurant("R1", "Oriental", "Egyptian Cuisine");
+        Restaurant westernRest  = new Restaurant("R2", "Western", "International Cuisine");
 
-        FashionStore budgetStore = new FashionStore("S3", "Zara Casual", "Everyday Wear & Caps");
-        ArrayList<Product> budgetItems = new ArrayList<>();
-        budgetItems.add(new ClothingItem("C7", "Casual Denim Jacket", 1200.0, "Blue Denim", Size.MEDIUM));
-        budgetItems.add(new ClothingItem("C8", "Basic Cotton T-Shirt Pack", 450.0, "Grey", Size.MEDIUM));
-        budgetItems.add(new ClothingItem("C9", "Summer Bucket Hat", 300.0, "Beige", Size.SMALL));
-        // تجهيز متاجر الإلكترونيات والضمان
-        TechStore luxuryTech = new TechStore("T1", "Apple Flagship Store", "2 Years Warranty");
-        ArrayList<Product> appleItems = new ArrayList<>();
-        appleItems.add(new ElectronicsItem("E1", "iPhone 15 Pro Max 256GB", 65000.0, "Apple", Size.MEDIUM));
-        appleItems.add(new ElectronicsItem("E2", "MacBook Air M2 13-inch", 52000.0, "Apple", Size.LARGE));
-        appleItems.add(new ElectronicsItem("E3", "AirPods Pro 2nd Gen", 11500.0, "Apple", Size.SMALL));
+        // متاجر الملابس
+        FashionStore luxuryStore   = new FashionStore("S1", "Luxury Store", "Luxury");
+        FashionStore midSportStore = new FashionStore("S2", "Sport Store", "Sportswear");
+        FashionStore budgetStore   = new FashionStore("S3", "Budget Store", "Budget");
 
-        TechStore midTech = new TechStore("T2", "Samsung Smart Hub", "1 Year Warranty");
-        ArrayList<Product> samsungItems = new ArrayList<>();
-        samsungItems.add(new ElectronicsItem("E4", "Samsung Galaxy S24 Ultra", 48000.0, "Samsung", Size.MEDIUM));
-        samsungItems.add(new ElectronicsItem("E5", "Smart Watch Galaxy Watch 6", 8500.0, "Samsung", Size.SMALL));
-        samsungItems.add(new ElectronicsItem("E6", "Wireless Fast Charging Pad", 950.0, "Samsung", Size.SMALL));
+        // متاجر الإلكترونيات
+        TechStore luxuryTech = new TechStore("T1", "Apple Store", "1 Year Warranty");
+        TechStore midTech    = new TechStore("T2", "Samsung Store", "2 Years Warranty");
         // الحلقة التكرارية الرئيسية لتنقل المستخدم بين خدمات التطبيق
         while (keepRunning) {
             clearConsole();
@@ -154,10 +124,15 @@ public class Main {
                                     int restPick = readInt(scanner, "Select Restaurant: ");
                                     if (restPick == 0) {
                                         foodMenu = false;
-                                    } else if (restPick == 1 || restPick == 2) {
-                                        ArrayList<Product> list = (restPick == 1) ? orientalItems : westernItems;
-                                        addSelectedProduct(scanner, order, list);
-                                    } else {
+                                    } else if (restPick == 1) { 
+                                        // 1 is the ID for Abou Tarek (Oriental)
+                                         ArrayList<Product> items = storeRepo.getProductsByStoreId(1);
+                                         addSelectedProduct(scanner, order, items);
+                                     } else if (restPick == 2) { 
+                                         // 4 is the ID for Buffalo (Western)
+                                         ArrayList<Product> items = storeRepo.getProductsByStoreId(4);
+                                         addSelectedProduct(scanner, order, items);
+                                     } else {
                                         System.out.println("Invalid restaurant selection.");
                                     }
                                 }
@@ -174,10 +149,18 @@ public class Main {
 
                                     if (brandPick == 0) {
                                         fashionMenu = false;
-                                    } else if (brandPick >= 1 && brandPick <= 3) {
-                                        ArrayList<Product> list = (brandPick == 1) ? luxuryItems
-                                                : (brandPick == 2) ? sportItems : budgetItems;
-                                        addSelectedProduct(scanner, order, list);
+                                   } else if (brandPick == 1) { 
+                                        // 5 is the ID for Lacoste
+                                        ArrayList<Product> items = storeRepo.getProductsByStoreId(5);
+                                        addSelectedProduct(scanner, order, items);
+                                    } else if (brandPick == 2) { 
+                                        // 6 is the ID for Adidas
+                                        ArrayList<Product> items = storeRepo.getProductsByStoreId(6);
+                                        addSelectedProduct(scanner, order, items);
+                                    } else if (brandPick == 3) { 
+                                        // 2 is the ID for Zara
+                                        ArrayList<Product> items = storeRepo.getProductsByStoreId(2);
+                                        addSelectedProduct(scanner, order, items);
                                     } else {
                                         System.out.println("Invalid fashion store selection.");
                                     }
@@ -194,10 +177,15 @@ public class Main {
 
                                     if (techPick == 0) {
                                         techMenu = false;
-                                    } else if (techPick == 1 || techPick == 2) {
-                                        ArrayList<Product> list = (techPick == 1) ? appleItems : samsungItems;
-                                        addSelectedProduct(scanner, order, list);
-                                    } else {
+                                    } else if (techPick == 1) { 
+                                        // 3 is the ID for Apple
+                                        ArrayList<Product> items = storeRepo.getProductsByStoreId(3);
+                                        addSelectedProduct(scanner, order, items);
+                                    } else if (techPick == 2) { 
+                                        // 7 is the ID for Samsung
+                                        ArrayList<Product> items = storeRepo.getProductsByStoreId(7);
+                                        addSelectedProduct(scanner, order, items);
+                                    }else {
                                         System.out.println("Invalid tech store selection.");
                                     }
                                 }
@@ -613,3 +601,4 @@ public class Main {
         return maxId + 1;
     }
 }
+

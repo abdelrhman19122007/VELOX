@@ -830,3 +830,83 @@ RETURN POLICY:
 
 -----------------------------------------
 
+
+==========================================
+             OFFICIAL RECEIPT             
+==========================================
+Order ID  : ORD-107 ||  Date  : 06:23 / 09:09:2026
+Delivery  : City: CAIRO | Phone: i12345678910
+------------------------------------------
+MacBook Air M2 13-inch         | 52000.00 EGP
+-----------------------------------------------------------------------------
+ Subtotal        : 52000.00 EGP
+ Discount        : -0.00 EGP
+ Delivery Fee    : 85.00 EGP
+Packaging Fee  : 50.00 EGP
+ FINAL TOTAL     : 52135.00 EGP
+=============================================================================
+PACKAGING DETAILS:
+Type: Gift Packaging
+Total Items Packed: 1 pcs
+==========================================
+RETURN POLICY:
+- Products can be returned within 14 days.
+- Official receipt is required for returns.
+==========================================
+
+
+-----------------------------------------
+
+
+==========================================
+             OFFICIAL RECEIPT             
+==========================================
+Order ID  : ORD-108 ||  Date  : 02:08 / 13:09:2026
+Delivery  : City: ALEXANDRIA | Phone: 12345678910
+------------------------------------------
+-----------------------------------------------------------------------------
+ Subtotal        : 0.00 EGP
+ Discount        : -0.00 EGP
+ Delivery Fee    : 50.00 EGP
+Packaging Fee  : 0.00 EGP
+ FINAL TOTAL     : 50.00 EGP
+=============================================================================
+PACKAGING DETAILS:
+Type: None
+Total Items Packed: 0 pcs
+==========================================
+RETURN POLICY:
+- Products can be returned within 14 days.
+- Official receipt is required for returns.
+==========================================
+
+
+-----------------------------------------
+
+
+==========================================
+             OFFICIAL RECEIPT             
+==========================================
+Order ID  : ORD-109 ||  Date  : 03:01 / 13:09:2026
+Delivery  : City: CAIRO | Phone: 12345678910
+------------------------------------------
+Wireless Fast Charging Pad     | 950.00 EGP
+-----------------------------------------------------------------------------
+ Subtotal        : 950.00 EGP
+ Discount        : -0.00 EGP
+ Delivery Fee    : 30.00 EGP
+Packaging Fee  : 25.00 EGP
+ FINAL TOTAL     : 1005.00 EGP
+=============================================================================
+PACKAGING DETAILS:
+Type: Gift Packaging
+Total Items Packed: 1 pcs
+==========================================
+RETURN POLICY:
+- Products can be returned within 14 days.
+- Official receipt is required for returns.
+==========================================
+
+
+-----------------------------------------
+
