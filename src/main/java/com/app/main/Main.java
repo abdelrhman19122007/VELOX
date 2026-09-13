@@ -24,6 +24,11 @@ import com.app.payment.PaymentMethod;
 import com.app.payment.WalletPayment;
 import com.app.service.DeliverySimulator;
 import com.app.service.ReturnService;
+import com.app.service.CustomerAccountService;
+import com.app.service.LoyaltyService;
+import com.app.service.OfferService;
+import com.app.util.InvoicePdfExporter;
+import java.nio.file.Path;
 import com.app.util.OrderRepository;
 import com.app.util.PromoCodeManager;
 import com.app.util.ReceiptGenerator;
@@ -35,6 +40,7 @@ import java.security.SecureRandom;
 import com.app.model.order.Review;
 import com.app.enums.Size;
 import com.app.model.product.*;
+import com.app.enums.Governorate;
 import com.app.enums.Zone;
 import com.app.model.order.Cart;
 import com.app.util.StoreRepository;
@@ -89,27 +95,16 @@ public class Main {
 
             switch (mainMenuChoice) {
                 case 1 -> {
-                    // إدخال بيانات العميل (المدينة، الهاتف، الميزانية)
-                    System.out.print("\nEnter Delivery City (CAIRO/GIZA/ALEXANDRIA/DAMIETTA): ");
-                    String inputCity = scanner.nextLine();
-                    Zone selectedZone = parseZone(inputCity);
-                    System.out.print("Enter Customer Name: ");
-                    String customerName = scanner.nextLine().trim();
-                    if (customerName.isEmpty()) {
-                        customerName = "VELOX-Customer";
-                    }
-                    System.out.print("Enter Phone Number (11 digits, e.g. 01xxxxxxxxx): ");
-                    String phone = scanner.nextLine().trim();
-                    if (!isValidPhone(phone)) {
-                        System.out.println("[WARNING] Invalid phone format. Order will still be created but please verify.");
-                    }
+                    // تصفح وطلب بدون تسجيل — تسجيل الدخول مطلوب عند الدفع فقط
+                    System.out.println("\n[NOTE]: You can browse and fill your cart as a guest.");
+                    System.out.println("Login (or a new account) is required at checkout to pay.");
+                    // عنوان التوصيل: اختيار المحافظة بالكود من الليستة
+                    Governorate selectedGov = readGovernorate(scanner, "DELIVERY GOVERNORATE");
                     // إدخال الميزانية المتاحة مع العميل
                     double userBudget = readDouble(scanner, "Enter your available Budget (EGP): ");
 
-                    String generatedOrderId = "ORD-" + getNextOrderId(orderHistory);
-                    // إنشاء كائن طلب جديد
-                    Order order = new Order(generatedOrderId, selectedZone.name(), phone);
-                    order.setCustomerNameForDelivery(customerName);
+                    // سلة ضيف مؤقتة (تتحول لطلب حقيقي مربوط بالحساب بعد الدخول عند الدفع)
+                    Order order = new Order("GUEST-CART", selectedGov.name(), "01000000000");
                     boolean shopping = true;
                     // عرض أقسام المتاجر المتاحة واختيار المنتجات وإضافتها للسلة
                     while (shopping) {
@@ -214,12 +209,41 @@ public class Main {
                         // التأكد من صحة بيانات الطلب
                         validateOrder(order);
 
+                        // الدفع يتطلب تسجيل الدخول (أو حساب جديد لأول مرة)
+                        Session session = requireLogin(scanner);
+                        if (session == null) {
+                            System.out.println("Checkout cancelled. Your cart was discarded.");
+                            break;
+                        }
+                        String userKey = session.userKey;
+                        String phone = session.phone;
+                        String customerName = session.name;
+                        System.out.println("\n[ACCOUNT]: Welcome " + customerName
+                                + " (" + session.email + " | " + phone + " | " + session.governorate + ")");
+                        System.out.println("[LOYALTY]: " + LoyaltyService.progressMessage(userKey));
+                        System.out.println("--- OFFERS FOR YOU ---");
+                        for (String offer : OfferService.personalizedOffers(
+                                CustomerAccountService.loadUserOrders(userKey))) {
+                            System.out.println("  * " + offer);
+                        }
+
+                        // تحويل سلة الضيف لطلب حقيقي مربوط بإيميل الحساب (للواجهة وسجل العميل)
+                        Order finalOrder = new Order("ORD-" + getNextOrderId(orderHistory),
+                                session.email, order.getCity(), phone);
+                        finalOrder.setCustomerNameForDelivery(customerName);
+                        finalOrder.getProducts().addAll(order.getProducts());
+                        order = finalOrder;
+
                         Cart tempCart = new Cart();
                         for (Product p : order.getProducts()) {
                             tempCart.addProduct(p); // أو اسم دالة إضافة المنتج للسلة لديك
                         }
-                        Zone zone = parseZone(order.getCity());
-                        double deliveryFee = tempCart.createDelivery(order.getCustomerName(), zone).calculatePrice();
+                        // سعر التوصيل = سعر شحن المحافظة + الوزن + رسوم النوع
+                        double deliveryFee = tempCart.createDelivery(order.getCustomerName(), selectedGov).calculatePrice();
+                        System.out.printf(java.util.Locale.US,
+                                "[DELIVERY]: %s | Area: %.0f EGP | ~%d day(s) | Total w/ weight & handling: %.2f EGP%n",
+                                selectedGov.name(), selectedGov.getShippingPrice(),
+                                selectedGov.getDeliveryDays(), deliveryFee);
                         System.out.print("\nEnter Promo Code (or press Enter to skip): ");
                         String promoInput = scanner.nextLine().trim();
                         // تطبيق أكواد الخصم والتوصيل المجاني
@@ -249,6 +273,14 @@ public class Main {
                             else {
                                 System.out.println("Invalid or expired promo code.");
                             }
+                        }
+
+                        // مكافأة الولاء: كل 5 طلبات ناجحة = توصيل مجاني مرة
+                        boolean loyaltyRewardApplied = false;
+                        if (deliveryFee > 0 && LoyaltyService.isRewardAvailable(userKey)) {
+                            deliveryFee = 0;
+                            loyaltyRewardApplied = true;
+                            System.out.println(">>> Loyalty reward applied: FREE delivery (5 successful orders)!");
                         }
 
                        // تحديد نوع التغليف وحساب التكلفة
@@ -338,12 +370,24 @@ public class Main {
                         }
                         PackagingService.packageOrder(order);
                         order.setStatus(OrderStatus.PAID);
+                        if (loyaltyRewardApplied) {
+                            LoyaltyService.consumeReward(userKey);
+                            CustomerAccountService.recordReward(userKey, order.getOrderId());
+                        }
 
                         // 2. خطوة إنشاء وطباعة الفاتورة
                         String receipt = ReceiptGenerator.generateReceipt(order, deliveryFee, totalPackagingFee,
                                 packagingType);
                         System.out.println(receipt);
                         OrderRepository.saveReceiptText(receipt);
+                        try {
+                            Path pdfPath = CustomerAccountService.invoicePdfPath(userKey, order.getOrderId());
+                            InvoicePdfExporter.export(receipt, order.getOrderId(), pdfPath);
+                            CustomerAccountService.recordPdf(userKey, order.getOrderId(), pdfPath);
+                            System.out.println("[PDF]: Invoice saved to " + pdfPath);
+                        } catch (Exception ex) {
+                            System.out.println("[PDF WARNING]: Could not export PDF: " + ex.getMessage());
+                        }
 
                         // -----------------------------------
                         DeliverySimulator simulator = new DeliverySimulator();
@@ -357,7 +401,7 @@ public class Main {
                         int complaintCheck = readInt(scanner, "Select choice (1-2): ");
 
                         if (complaintCheck == 2) {
-                            handleComplaintSection(scanner);
+                            handleComplaintSection(scanner, userKey);
                         } else {
                             System.out.println("\nThank you for shopping with us! Have a great day.");
                         }
@@ -393,7 +437,9 @@ public class Main {
                        // حفظ الطلب في قاعدة البيانات
                         orderHistory.add(order);
                         OrderRepository.saveOrders(orderHistory);
+                        CustomerAccountService.recordCompletedOrder(order);
                         System.out.println("[DATABASE]: Order saved successfully!");
+                        System.out.println("[LOYALTY]: " + LoyaltyService.progressMessage(userKey));
 
                         // الانتظار لقراءة الفاتورة قبل العودة للمنيو
                         System.out.print("\nPress Enter to return to Main Menu...");
@@ -404,8 +450,12 @@ public class Main {
                     }
                 }
 
-                case 2 -> {// معالجة طلبات الإرجاع برقم الطلب
+                case 2 -> {// معالجة طلبات الإرجاع برقم الطلب (تسجيل دخول + ملكية)
                     System.out.println("\n=== RETURN REQUEST ===");
+                    Session session = requireLogin(scanner);
+                    if (session == null) {
+                        break;
+                    }
                     System.out.print("Enter Order ID to return: ");
                     String searchId = scanner.nextLine().trim();
 
@@ -419,10 +469,13 @@ public class Main {
 
                     if (foundOrder == null) {
                         System.out.println("[NOT FOUND] Order ID does not exist!");
+                    } else if (!isOwner(foundOrder, session)) {
+                        System.out.println("[DENIED] This order belongs to another account.");
                     } else {
                         try {
                             Response<Double> returnResponse = returnService.processReturn(foundOrder);
                             OrderRepository.saveOrders(orderHistory);
+                            CustomerAccountService.recordReturn(foundOrder);
                             System.out.println("\n[RETURN SUCCESS]: " + returnResponse.getMessage());
                         } catch (ReturnPolicyException e) {
                             System.out.println("\n[RETURN REJECTED]: " + e.getMessage());
@@ -506,8 +559,116 @@ public class Main {
         }
         return phone.trim().matches("01\\d{9}");
     }
+
+    /** يعرض ليستة المحافظات بالأكواد ويقرأ كود أو اسم حتى يدخل قيمة صحيحة. */
+    public static Governorate readGovernorate(Scanner scanner, String title) {
+        System.out.println("\n--- " + title + " (enter CODE 1-27 or name) ---");
+        for (Governorate g : Governorate.values()) {
+            System.out.println(Governorate.menuLine(g));
+        }
+        while (true) {
+            System.out.print("Choose governorate: ");
+            String input = scanner.nextLine().trim();
+            try {
+                return Governorate.fromCodeOrName(input);
+            } catch (IllegalArgumentException e) {
+                System.out.println("[ERROR] " + e.getMessage());
+            }
+        }
+    }
+
+    /** Logged-in customer carried through one menu operation. */
+    private static class Session {
+        final String email;
+        final String userKey;
+        final String name;
+        final String phone;
+        final String governorate;
+
+        Session(CustomerAccountService.Profile p) {
+            this.email = p.email;
+            this.userKey = CustomerAccountService.keyForEmail(p.email);
+            this.name = p.name;
+            this.phone = p.phone;
+            this.governorate = p.governorate;
+        }
+    }
+
+    /** Login-or-register gate: returns null when the user aborts/fails. */
+    private static Session requireLogin(Scanner scanner) {
+        System.out.println("\n=== ACCOUNT LOGIN (required) ===");
+        System.out.println("1. Login with email + password");
+        System.out.println("2. Register new account");
+        int choice = readInt(scanner, "Choose (1-2): ");
+        if (choice == 1) {
+            return doLogin(scanner);
+        } else if (choice == 2) {
+            return doRegister(scanner);
+        }
+        System.out.println("Cancelled.");
+        return null;
+    }
+
+    private static Session doLogin(Scanner scanner) {
+        for (int attempt = 1; attempt <= 3; attempt++) {
+            System.out.print("Email: ");
+            String email = scanner.nextLine().trim();
+            System.out.print("Password: ");
+            String password = scanner.nextLine();
+            try {
+                return new Session(CustomerAccountService.login(email, password));
+            } catch (IllegalArgumentException e) {
+                System.out.println("[LOGIN FAILED]: " + e.getMessage()
+                        + " (attempt " + attempt + "/3)");
+            }
+        }
+        System.out.println("Too many failed attempts. Back to menu.");
+        return null;
+    }
+
+    private static Session doRegister(Scanner scanner) {
+        System.out.println("\n--- NEW ACCOUNT ---");
+        System.out.print("Full name: ");
+        String name = scanner.nextLine().trim();
+        System.out.print("Email: ");
+        String email = scanner.nextLine().trim();
+        System.out.print("Phone (11 digits, e.g. 01xxxxxxxxx): ");
+        String phone = scanner.nextLine().trim();
+        Governorate regGov = readGovernorate(scanner, "YOUR GOVERNORATE");
+        String governorate = regGov.name();
+        System.out.print("Password (min 8 chars): ");
+        String pw1 = scanner.nextLine();
+        System.out.print("Confirm password: ");
+        String pw2 = scanner.nextLine();
+        if (!pw1.equals(pw2)) {
+            System.out.println("[REGISTER FAILED]: Passwords do not match.");
+            return null;
+        }
+        try {
+            CustomerAccountService.Profile p =
+                    CustomerAccountService.register(email, pw1, name, phone, governorate);
+            System.out.println("[REGISTERED]: Welcome " + p.name + "!");
+            return new Session(p);
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            System.out.println("[REGISTER FAILED]: " + e.getMessage());
+            return null;
+        }
+    }
+
+    /** An order belongs to the session when email or phone matches (legacy compatible). */
+    private static boolean isOwner(Order order, Session s) {
+        if (order == null || s == null) {
+            return false;
+        }
+        String uid = order.getUserId();
+        if (uid != null && (uid.equalsIgnoreCase(s.email) || uid.equals(s.phone))) {
+            return true;
+        }
+        String ph = order.getPhone();
+        return ph != null && ph.replaceAll("[^0-9]", "").equals(s.phone.replaceAll("[^0-9]", ""));
+    }
     // إدارة الشكاوى وتوليد كود التعويض
-    public static void handleComplaintSection(Scanner scanner) {
+    public static void handleComplaintSection(Scanner scanner, String userKey) {
         System.out.println("\n--- COMPLAINT & SUPPORT SYSTEM ---");
         System.out.print("Enter Order ID related to your complaint: ");
         String orderId = scanner.nextLine().trim();
@@ -527,6 +688,9 @@ public class Main {
         com.app.model.order.Complaint complaint = new com.app.model.order.Complaint(complaintId, orderId, details);
 
         com.app.util.ComplaintRepository.saveComplaintToFile(complaint);
+        if (userKey != null && !userKey.isBlank()) {
+            CustomerAccountService.recordComplaint(userKey, complaintId, orderId);
+        }
 
         System.out.println("\n==========================================");
         System.out.println("Complaint Submitted Successfully!");
@@ -565,10 +729,22 @@ public class Main {
         if (order.getCity() == null || order.getCity().trim().isEmpty()) {
             throw new InvalidOrderException("Cannot process checkout: Delivery city is missing.");
         }
+        // المدينة المقبولة: Zone قديمة أو أي محافظة من الـ 27
+        boolean areaOk = false;
         try {
             parseZoneStrict(order.getCity());
-        } catch (IllegalArgumentException ex) {
-            throw new InvalidOrderException("Cannot process checkout: " + ex.getMessage());
+            areaOk = true;
+        } catch (IllegalArgumentException ignored) {
+            try {
+                Governorate.fromName(order.getCity());
+                areaOk = true;
+            } catch (IllegalArgumentException ignored2) {
+                areaOk = false;
+            }
+        }
+        if (!areaOk) {
+            throw new InvalidOrderException("Cannot process checkout: Unsupported delivery area '"
+                    + order.getCity() + "'.");
         }
         if (order.getAddress().getPhone() == null || order.getAddress().getPhone().trim().isEmpty()) {
             throw new InvalidOrderException("Cannot process checkout: Phone number is missing.");

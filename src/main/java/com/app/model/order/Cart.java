@@ -10,6 +10,7 @@ package com.app.model.order;
  */
 
 
+import com.app.enums.Governorate;
 import com.app.enums.ProductType;
 import com.app.enums.Size;
 import com.app.enums.Zone;
@@ -85,6 +86,30 @@ public class Cart {
         }
         if (containsType(ProductType.CLOTHES)) {
             return new ClothesDelivery(customerName, zone, totalWeight);
+        }
+
+        throw new IllegalStateException("No supported product type found in cart");
+    }
+
+    public Delivery createDelivery(String customerName, Governorate governorate) {
+        if (products.isEmpty()) {
+            throw new IllegalStateException("Cannot create delivery for an empty cart");
+        }
+        if (governorate == null) {
+            throw new IllegalArgumentException("Governorate cannot be null");
+        }
+
+        double totalWeight = calculateTotalWeight();
+
+        // أولوية الشحن: الطعام ثم الإلكترونيات ثم الملابس
+        if (containsType(ProductType.FOOD)) {
+            return new FoodDelivery(customerName, governorate, totalWeight);
+        }
+        if (containsType(ProductType.TECH)) {
+            return new TechDelivery(customerName, governorate, totalWeight);
+        }
+        if (containsType(ProductType.CLOTHES)) {
+            return new ClothesDelivery(customerName, governorate, totalWeight);
         }
 
         throw new IllegalStateException("No supported product type found in cart");
