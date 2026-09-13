@@ -17,10 +17,12 @@ public class Order implements Serializable {
     private boolean isReturned;
     //----------------------
     private final String orderId;
+    private String userId;
     private OrderStatus status;
     private final ArrayList<Product> products = new ArrayList<>();
     private DiscountStrategy discountStrategy;
     private final DeliveryAddress address;
+    private String customerName = "VELOX-Customer";
 
     
        //--------------------------------------------------
@@ -42,7 +44,12 @@ public class Order implements Serializable {
     }
 
     public Order(String orderId, String city, String phone) {
+        this(orderId, phone, city, phone);
+    }
+
+    public Order(String orderId, String userId, String city, String phone) {
         this.orderId = orderId;
+        this.userId = (userId != null && !userId.isBlank()) ? userId : phone;
         this.status = OrderStatus.PENDING;
         this.address = new DeliveryAddress(city, phone);
         //----------------------------------------
@@ -54,12 +61,20 @@ public class Order implements Serializable {
     }
 
     public String getOrderId() { return orderId; }
+    public String getUserId() { return userId; }
+    public void setUserId(String userId) { this.userId = userId; }
     public OrderStatus getStatus() { return status; }
     public void setStatus(OrderStatus status) { this.status = status; }
     public DeliveryAddress getAddress() { return address; }
     public ArrayList<Product> getProducts() { return products; }
     public String getCity() { return address.getCity(); }
       public String getPhone() {return address.getPhone();}
+    public String getCustomerName() { return customerName; }
+    public void setCustomerNameForDelivery(String customerName) {
+        if (customerName != null && !customerName.trim().isEmpty()) {
+            this.customerName = customerName.trim();
+        }
+    }
 
     //--------------------------------------------------------
     public LocalDateTime getOrderDate() { return orderDate; }

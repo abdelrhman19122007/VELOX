@@ -33,8 +33,16 @@ public class OrderRepository {
         }
 
         try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(FILE_PATH))) {
-            return (List<Order>) ois.readObject();
-        } catch (IOException | ClassNotFoundException e) {
+            // Deserialization filter: allow only app model classes to reduce gadget risk
+            ObjectInputFilter filter = ObjectInputFilter.Config.createFilter(
+                "com.app.model.order.*;com.app.model.product.*;com.app.model.store.*;com.app.enums.*;com.app.discount.*;java.util.*;java.time.*;java.lang.*;!*");
+            ois.setObjectInputFilter(filter);
+            Object obj = ois.readObject();
+            if (obj instanceof List) {
+                return (List<Order>) obj;
+            }
+            return new ArrayList<>();
+        } catch (IOException | ClassNotFoundException | SecurityException e) {
             System.err.println("[Error] Failed to load previous orders: " + e.getMessage());
             return new ArrayList<>();
         }

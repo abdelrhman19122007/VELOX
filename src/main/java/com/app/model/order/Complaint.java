@@ -9,9 +9,6 @@ package com.app.model.order;
  * @author 3bdelr7man
 **/
 import com.app.enums.ComplaintStatus;
-
-
-import com.app.enums.ComplaintStatus;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -27,9 +24,15 @@ public class Complaint implements Serializable {
     private final LocalDateTime createdAt;
 
     public Complaint(String complaintId, String orderId, String details) {
-        this.complaintId = complaintId;
-        this.orderId = orderId;
-        this.details = details;
+        if (complaintId == null || complaintId.trim().isEmpty()) {
+            throw new IllegalArgumentException("Complaint ID is required");
+        }
+        if (orderId == null || orderId.trim().isEmpty()) {
+            throw new IllegalArgumentException("Order ID is required");
+        }
+        this.complaintId = complaintId.trim();
+        this.orderId = orderId.trim();
+        this.details = details == null ? "" : details.trim();
         this.status = ComplaintStatus.PENDING;
         this.createdAt = LocalDateTime.now();
     }

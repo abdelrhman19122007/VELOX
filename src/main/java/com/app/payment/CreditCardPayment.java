@@ -13,8 +13,39 @@ public class CreditCardPayment implements PaymentMethod {
 
     // المُنشئ (Constructor): لتهيئة الكائن برقم البطاقة والرصيد المبدئي
     public CreditCardPayment(String cardNumber, double balance) {
-        this.cardNumber = cardNumber;
+        if (!isValidCardNumber(cardNumber)) {
+            throw new IllegalArgumentException("Invalid credit card number: must be 16 digits and pass Luhn check");
+        }
+        if (balance < 0) {
+            throw new IllegalArgumentException("Balance cannot be negative");
+        }
+        this.cardNumber = cardNumber.replaceAll("\\s|-", "");
         this.balance = balance;
+    }
+
+    public static boolean isValidCardNumber(String cardNumber) {
+        if (cardNumber == null) {
+            return false;
+        }
+        String digits = cardNumber.replaceAll("\\s|-", "");
+        if (!digits.matches("\\d{16}")) {
+            return false;
+        }
+        // Luhn check
+        int sum = 0;
+        boolean alternate = false;
+        for (int i = digits.length() - 1; i >= 0; i--) {
+            int n = digits.charAt(i) - '0';
+            if (alternate) {
+                n *= 2;
+                if (n > 9) {
+                    n -= 9;
+                }
+            }
+            sum += n;
+            alternate = !alternate;
+        }
+        return sum % 10 == 0;
     }
 
     // تطبيق دالة الدفع لمعالجة المعاملة وخصم الرصيد

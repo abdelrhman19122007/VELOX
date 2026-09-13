@@ -10,18 +10,21 @@ package com.app.model.order;
  */
 
 
-import java.util.Scanner;
-
-
 public class Review {
-    private int rating;
-    private String comment;
+    private final int rating;
+    private final String comment;
 
     
     public Review(int rating, String comment) {
+        if (rating < 1 || rating > 5) {
+            throw new IllegalArgumentException("Rating must be between 1 and 5");
+        }
         this.rating = rating;
-        this.comment = comment;
+        this.comment = comment == null ? "" : comment.trim();
     }
+
+    public int getRating() { return rating; }
+    public String getComment() { return comment; }
 
     public void displayReview() {
         System.out.println("\n--- Service Review ---");

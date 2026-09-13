@@ -44,14 +44,7 @@ public class ProductDAO {
             }
             
         } catch (SQLException e) {
-            System.err.println("❌ خطأ أثناء جلب المنتجات!");
-            e.printStackTrace();
+            System.err.println("[ProductDAO] fetch failed: " + e.getMessage());
         }
-    }
-
-    // ميثود للاختبار السريع
-    public static void main(String[] args) {
-        ProductDAO productDAO = new ProductDAO();
-        productDAO.displayAllProducts();
     }
 }
