@@ -74,8 +74,23 @@ public class NotificationService {
         return out;
     }
 
-    public int markAllRead(int userId) {
+    public int unreadCount(int userId) {
         try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement s = conn.prepareStatement(
+                     "SELECT COUNT(*) FROM user_notifications WHERE user_id = ? AND is_read = 0")) {
+            s.setInt(1, userId);
+            try (ResultSet rs = s.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("[Notifications] count failed: " + e.getMessage());
+        }
+        return 0;
+    }
+
+    public int markAllRead(int userId) {        try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement s = conn.prepareStatement(
                      "UPDATE user_notifications SET is_read = 1 WHERE user_id = ? AND is_read = 0")) {
             s.setInt(1, userId);

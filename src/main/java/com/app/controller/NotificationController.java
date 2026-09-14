@@ -28,6 +28,19 @@ public class NotificationController {
     private final NotificationService notifications = new NotificationService();
     private final WebOrderDAO lookup = new WebOrderDAO();
 
+    @GetMapping("/unread-count")
+    public ResponseEntity<?> unreadCount(
+            @RequestHeader(value = "Authorization", required = false) String authorization,
+            @RequestParam String userId) {
+        Integer id = selfIdOrNull(authorization, userId);
+        if (id == null) {
+            return ResponseEntity.status(403).body(Map.of("message", "Forbidden."));
+        }
+        Map<String, Object> out = new LinkedHashMap<>();
+        out.put("unread", new NotificationService().unreadCount(id));
+        return ResponseEntity.ok(out);
+    }
+
     @GetMapping
     public ResponseEntity<?> list(
             @RequestHeader(value = "Authorization", required = false) String authorization,

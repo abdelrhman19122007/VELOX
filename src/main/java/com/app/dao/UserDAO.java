@@ -72,7 +72,7 @@ public class UserDAO {
             return null;
         }
         String sql = "SELECT id, full_name, email, password_hash, phone_number, governorate,"
-                + " current_budget, remaining_budget FROM users WHERE email = ? LIMIT 1";
+                + " current_budget, remaining_budget, is_active FROM users WHERE email = ? LIMIT 1";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, email.trim().toLowerCase());
@@ -87,6 +87,7 @@ public class UserDAO {
                     m.put("governorate", rs.getString("governorate"));
                     m.put("current_budget", rs.getDouble("current_budget"));
                     m.put("remaining_budget", rs.getDouble("remaining_budget"));
+                    m.put("is_active", rs.getInt("is_active"));
                     return m;
                 }
             }
@@ -96,10 +97,10 @@ public class UserDAO {
         return null;
     }
 
-    /** Inserts a DB user, returning the generated id (or -1). */
+    /** Inserts a DB user as INACTIVE (OTP verification activates it). */
     public int createUser(String fullName, String email, String passwordHash, String phone, String governorate) {
-        String sql = "INSERT INTO users (full_name, email, password_hash, phone_number, governorate)"
-                + " VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO users (full_name, email, password_hash, phone_number, governorate, is_active)"
+                + " VALUES (?, ?, ?, ?, ?, 0)";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql, java.sql.Statement.RETURN_GENERATED_KEYS)) {
             stmt.setString(1, fullName);
@@ -140,6 +141,19 @@ public class UserDAO {
             System.err.println("[UserDAO] phone lookup failed: " + e.getMessage());
         }
         return null;
+    }
+
+    public boolean setActive(int userId, boolean active) {
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(
+                     "UPDATE users SET is_active = ? WHERE id = ?")) {
+            stmt.setInt(1, active ? 1 : 0);
+            stmt.setInt(2, userId);
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("[UserDAO] set-active failed: " + e.getMessage());
+            return false;
+        }
     }
 
     public boolean updatePasswordHash(int userId, String newHash) {
@@ -194,19 +208,22 @@ public class UserDAO {
         }
     }
 
-    /** Saves a card reference (last 4 + brand only, never the full number). */
-    public boolean saveCard(int userId, String holderName, String last4, String brand) {
+    /** Saves a payment reference (last 4 + brand/provider only, never the full number). */
+    public boolean saveCard(int userId, String holderName, String last4, String brand,
+                            String methodType, String provider) {
         if (userId <= 0 || last4 == null || !last4.matches("\\d{4}")) {
             return false;
         }
-        String sql = "INSERT INTO user_payment_cards (user_id, cardholder_name, last_4_digits, card_brand)"
-                + " VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO user_payment_cards (user_id, method_type, cardholder_name,"
+                + " last_4_digits, card_brand, provider) VALUES (?, ?, ?, ?, ?, ?)";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, userId);
-            stmt.setString(2, holderName == null || holderName.isBlank() ? "" : holderName.trim());
-            stmt.setString(3, last4);
-            stmt.setString(4, brand == null ? "Unknown" : brand);
+            stmt.setString(2, methodType == null ? "CARD" : methodType);
+            stmt.setString(3, holderName == null || holderName.isBlank() ? "" : holderName.trim());
+            stmt.setString(4, last4);
+            stmt.setString(5, brand == null ? "Unknown" : brand);
+            stmt.setString(6, provider);
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
             System.err.println("[UserDAO] save card failed: " + e.getMessage());
@@ -214,9 +231,10 @@ public class UserDAO {
         }
     }
 
+    /** Saved payment methods (references only). */
     public java.util.List<java.util.Map<String, Object>> listCards(int userId) {
         java.util.List<java.util.Map<String, Object>> out = new java.util.ArrayList<>();
-        String sql = "SELECT id, cardholder_name, last_4_digits, card_brand, created_at"
+        String sql = "SELECT id, method_type, cardholder_name, last_4_digits, card_brand, provider, created_at"
                 + " FROM user_payment_cards WHERE user_id = ? ORDER BY id DESC";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -225,6 +243,8 @@ public class UserDAO {
                 while (rs.next()) {
                     java.util.Map<String, Object> m = new java.util.LinkedHashMap<>();
                     m.put("id", rs.getInt("id"));
+                    m.put("method_type", rs.getString("method_type"));
+                    m.put("provider", rs.getString("provider"));
                     m.put("cardholder_name", rs.getString("cardholder_name"));
                     m.put("last_4_digits", rs.getString("last_4_digits"));
                     m.put("card_brand", rs.getString("card_brand"));

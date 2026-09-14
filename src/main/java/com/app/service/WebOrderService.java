@@ -66,7 +66,7 @@ public class WebOrderService {
             walletCharged = quote.subtotal() + gov.getShippingPrice();
             if (!users.debit(userId, walletCharged)) {
                 throw new IllegalArgumentException(
-                        "Insufficient wallet balance (need " + String.format("%.2f", walletCharged) + " EGP).");
+                        "Insufficient wallet balance (need " + String.format(java.util.Locale.US, "%.2f", walletCharged) + " EGP).");
             }
         }
         WebOrderDAO.PlacedOrder placed;

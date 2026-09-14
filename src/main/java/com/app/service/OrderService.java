@@ -29,7 +29,6 @@ public class OrderService {
             OrderStatus.PENDING,
             OrderStatus.PROCESSING,
             OrderStatus.IN_TRANSIT,
-            OrderStatus.SHIPPED,
             OrderStatus.ARRIVED,
             OrderStatus.DELIVERED
     );
@@ -242,9 +241,9 @@ public class OrderService {
     }
 
     private OrderStatus normalize(OrderStatus status) {
-        // Paid-but-not-shipped behaves like SHIPPED in the timeline.
-        if (status == OrderStatus.PAID) {
-            return OrderStatus.SHIPPED;
+        // SHIPPED and paid-but-not-shipped behave like IN_TRANSIT in the timeline.
+        if (status == OrderStatus.SHIPPED || status == OrderStatus.PAID) {
+            return OrderStatus.IN_TRANSIT;
         }
         return status;
     }

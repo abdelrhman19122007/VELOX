@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.LinkedHashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -27,6 +28,7 @@ import java.util.Map;
  * so old and new clients both work.
  *
  * POST /api/auth/register {email,password,name|full_name,phone|phone_number,governorate}
+ *   -> {pending:true, email, otp} then POST /api/auth/verify-otp {email, code}
  * POST /api/auth/login    {email,password}
  * GET  /api/auth/profile?userId={email}
  */
@@ -44,6 +46,29 @@ public class AuthController {
                     first(body.get("name"), body.get("full_name")),
                     first(body.get("phone"), body.get("phone_number")),
                     body.get("governorate"));
+            // Account stays inactive until the OTP is verified (dev-mode: code returned).
+            String otp = com.app.service.OtpService.issue(p.email);
+            Map<String, Object> out = new LinkedHashMap<>();
+            out.put("pending", true);
+            out.put("email", p.email);
+            out.put("otp", otp);
+            out.put("message", "Enter the verification code to activate your account.");
+            return ResponseEntity.ok(out);
+        } catch (IllegalArgumentException | IllegalStateException ex) {
+            return ResponseEntity.badRequest().body(Map.of("message", ex.getMessage()));
+        }
+    }
+
+    @PostMapping("/verify-otp")
+    public ResponseEntity<?> verifyOtp(@RequestBody Map<String, String> body) {
+        String email = body.get("email");
+        String code = body.get("code") != null ? body.get("code") : body.get("otp");
+        if (email == null || code == null) {
+            return ResponseEntity.badRequest().body(Map.of("message", "email and code are required."));
+        }
+        try {
+            CustomerAccountService.confirmRegistration(email, code);
+            CustomerAccountService.Profile p = CustomerAccountService.profileOf(email);
             return ResponseEntity.ok(sessionView(p));
         } catch (IllegalArgumentException | IllegalStateException ex) {
             return ResponseEntity.badRequest().body(Map.of("message", ex.getMessage()));

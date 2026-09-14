@@ -58,23 +58,54 @@ public class WalletController {
         if (id == null) {
             return ResponseEntity.status(401).body(Map.of("message", "Login required."));
         }
-        // Optional card top-up: validate (Luhn) without ever storing the full number.
-        boolean cardSaved = false;
-        String cardNumber = body.get("card_number") != null ? String.valueOf(body.get("card_number")) : null;
-        if (cardNumber == null && body.get("cardNumber") != null) {
-            cardNumber = String.valueOf(body.get("cardNumber"));
+        // Recharge source: e-wallet (Vodafone Cash / WE Pay) or credit card.
+        // Only references (provider / last-4) are stored, never secrets.
+        boolean methodSaved = false;
+        String methodSavedAs = null;
+        String method = first(body, "method", "recharge_method");
+        String cardNumber = first(body, "card_number", "cardNumber");
+        String walletNumber = first(body, "wallet_number", "walletNumber", "phone");
+        String providerRaw = first(body, "provider", "wallet_provider");
+        if (method == null) {
+            method = cardNumber != null ? "CARD" : (walletNumber != null ? "WALLET" : null);
+        } else {
+            method = method.trim().toUpperCase();
         }
-        if (cardNumber != null && !cardNumber.isBlank()) {
+        if (method == null || (!method.equals("CARD") && !method.equals("WALLET"))) {
+            return ResponseEntity.badRequest().body(Map.of(
+                    "message", "Choose recharge method: CARD or WALLET (Vodafone Cash / WE Pay)."));
+        }
+        Object saveFlag = body.get("save_card") != null ? body.get("save_card") : body.get("saveCard");
+        boolean save = saveFlag != null && String.valueOf(saveFlag).equalsIgnoreCase("true");
+        Object holderRaw = body.get("cardholder_name") != null ? body.get("cardholder_name") : body.get("cardholderName");
+        String holder = holderRaw == null ? "" : String.valueOf(holderRaw);
+        if (method.equals("WALLET")) {
+            String provider = normalizeWalletProvider(providerRaw);
+            if (provider == null) {
+                return ResponseEntity.badRequest().body(Map.of(
+                        "message", "Wallet provider must be Vodafone Cash or WE Pay."));
+            }
+            if (walletNumber == null || !walletNumber.trim().matches("01\\d{9}")) {
+                return ResponseEntity.badRequest().body(Map.of("message", "Invalid wallet number."));
+            }
+            String digits = walletNumber.trim().replaceAll("[^0-9]", "");
+            if (save) {
+                methodSaved = users.saveCard(id, holder, digits.substring(digits.length() - 4),
+                        providerLabel(provider), "WALLET", provider);
+                methodSavedAs = providerLabel(provider);
+            }
+        } else {
+            if (cardNumber == null || cardNumber.isBlank()) {
+                return ResponseEntity.badRequest().body(Map.of("message", "Card number is required."));
+            }
             String digits = cardNumber.replaceAll("[\\s-]", "");
             if (!digits.matches("\\d{13,19}") || !luhnOk(digits)) {
                 return ResponseEntity.badRequest().body(Map.of("message", "Invalid card number."));
             }
-            Object saveFlag = body.get("save_card") != null ? body.get("save_card") : body.get("saveCard");
-            boolean save = saveFlag != null && String.valueOf(saveFlag).equalsIgnoreCase("true");
             if (save) {
-                Object holder = body.get("cardholder_name") != null ? body.get("cardholder_name") : body.get("cardholderName");
-                String name = holder == null ? "" : String.valueOf(holder);
-                cardSaved = users.saveCard(id, name, digits.substring(digits.length() - 4), brandOf(digits));
+                methodSaved = users.saveCard(id, holder, digits.substring(digits.length() - 4),
+                        brandOf(digits), "CARD", brandOf(digits));
+                methodSavedAs = brandOf(digits);
             }
         }
         if (!users.topUp(id, amount)) {
@@ -83,8 +114,39 @@ public class WalletController {
         Map<String, Object> out = new LinkedHashMap<>();
         out.put("success", true);
         out.put("balance", users.getBalance(id));
-        out.put("cardSaved", cardSaved);
+        out.put("methodSaved", methodSaved);
+        if (methodSavedAs != null) {
+            out.put("savedAs", methodSavedAs);
+        }
+        out.put("cardSaved", methodSaved);
         return ResponseEntity.ok(out);
+    }
+
+    private static String first(Map<String, Object> body, String... keys) {
+        for (String k : keys) {
+            if (body.get(k) != null && !String.valueOf(body.get(k)).isBlank()) {
+                return String.valueOf(body.get(k));
+            }
+        }
+        return null;
+    }
+
+    private static String normalizeWalletProvider(String raw) {
+        if (raw == null) {
+            return null;
+        }
+        String c = raw.trim().toUpperCase().replace(" ", "_");
+        if (c.contains("VODAFONE")) {
+            return "VODAFONE_CASH";
+        }
+        if (c.equals("WE_PAY") || c.equals("WE") || c.contains("WE_PAY")) {
+            return "WE_PAY";
+        }
+        return null;
+    }
+
+    private static String providerLabel(String code) {
+        return "VODAFONE_CASH".equals(code) ? "Vodafone Cash" : "WE Pay";
     }
 
     private static boolean luhnOk(String digits) {

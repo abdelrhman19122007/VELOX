@@ -65,3 +65,8 @@ UPDATE products SET image_url = 'https://images.unsplash.com/photo-1517336714731
 UPDATE products SET image_url = 'https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?auto=format&fit=crop&w=900&q=82', name_ar = 'Samsung Galaxy S24 Ultra', description_ar = 'هاتف سامسونج الرائد للأداء القوي.' WHERE id = 25;
 UPDATE products SET image_url = 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=900&q=82', name_ar = 'Galaxy Watch 6', description_ar = 'ساعة ذكية لمتابعة النشاط والإشعارات.' WHERE id = 26;
 UPDATE products SET image_url = 'assets/images/products/wireless-charger-user.jpeg', name_ar = 'قاعدة شحن لاسلكية سريعة', description_ar = 'شحن لاسلكي سريع وعملي للمكتب والمنزل.' WHERE id = 27;
+
+-- Post-release asset links (files added to assets/images/products/ later).
+UPDATE products SET image_url = 'assets/images/products/airpods-pro.jpg' WHERE id = 5;
+UPDATE products SET image_url = 'assets/images/products/tshirt-set.jpg' WHERE id = 4;
+UPDATE products SET image_url = 'assets/images/products/koshary-large.jpg' WHERE id = 3;
