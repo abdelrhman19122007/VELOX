@@ -50,11 +50,16 @@ invoices_history.txt
 data/
 application-local.properties
 .env
+# Local DB credentials (use application.properties.example as template)
+src/main/resources/application.properties
 
 # VELOX DB dumps with secrets / local dumps
 DB/
 *.SQL
 VELOX_D2.SQL
+
+# ...but versioned migration scripts MUST be tracked
+!migrations/*.sql
 
 # Local build artifacts (already covered by *.jar + target/, kept explicit)
 Velox.jar

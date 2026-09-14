@@ -4,21 +4,22 @@ import com.app.dto.OrderHistoryDto;
 import com.app.dto.OrderTrackingDto;
 import com.app.dto.PagedResponse;
 import com.app.enums.OrderStatus;
-import com.app.model.order.Order;
-import com.app.util.OrderRepository;
+import com.app.util.DatabaseConnection;
 import org.springframework.stereotype.Service;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 /**
- * KAN-90: Order history + real-time tracking logic.
+ * Order history + real-time tracking, backed by MySQL ({@code orders} is the
+ * single source of truth). Status changes are persisted, not kept in memory.
  * Canonical flow: PENDING -> PROCESSING -> SHIPPED -> DELIVERED
  */
 @Service
@@ -31,96 +32,212 @@ public class OrderService {
             OrderStatus.DELIVERED
     );
 
-    private final Map<String, Order> store = new ConcurrentHashMap<>();
-    private final Map<String, LocalDateTime> lastUpdated = new ConcurrentHashMap<>();
-
-    public OrderService() {
-        // Load persisted orders (file-based) if any; fallback to demo seed.
-        try {
-            List<Order> persisted = OrderRepository.loadOrders();
-            if (persisted != null) {
-                for (Order o : persisted) {
-                    if (o.getUserId() == null) {
-                        o.setUserId(o.getPhone());
-                    }
-                    store.put(o.getOrderId(), o);
-                    lastUpdated.put(o.getOrderId(), o.getOrderDate());
-                }
-            }
-        } catch (Exception ignored) {
-        }
-        if (store.isEmpty()) {
-            seedDemoData();
-        }
-    }
-
     public PagedResponse<OrderHistoryDto> getOrdersByUserId(String userId, int page, int size) {
         if (userId == null || userId.isBlank()) {
             throw new IllegalArgumentException("userId is required");
         }
-        if (page < 0) page = 0;
-        if (size <= 0 || size > 100) size = 10;
+        if (page < 0) {
+            page = 0;
+        }
+        if (size <= 0 || size > 100) {
+            size = 10;
+        }
+        Integer dbId = resolveUserId(userId.trim());
+        if (dbId == null) {
+            return new PagedResponse<>(new ArrayList<>(), page, size, 0, 0);
+        }
 
-        List<OrderHistoryDto> all = store.values().stream()
-                .filter(o -> userId.equalsIgnoreCase(o.getUserId()) || userId.equals(o.getPhone()))
-                .sorted((a, b) -> b.getOrderDate().compareTo(a.getOrderDate()))
-                .map(OrderHistoryDto::from)
-                .collect(Collectors.toList());
+        int total = 0;
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement s = conn.prepareStatement(
+                     "SELECT COUNT(*) FROM orders WHERE user_id = ?")) {
+            s.setInt(1, dbId);
+            try (ResultSet rs = s.executeQuery()) {
+                rs.next();
+                total = rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            throw new IllegalStateException("History unavailable: " + e.getMessage());
+        }
 
-        int total = all.size();
         int totalPages = (int) Math.ceil((double) total / size);
-        int from = Math.min(page * size, total);
-        int to = Math.min(from + size, total);
-        List<OrderHistoryDto> content = all.subList(from, to);
-
+        List<OrderHistoryDto> content = new ArrayList<>();
+        String sql = "SELECT o.id, o.order_code, o.status, o.order_date, o.final_amount,"
+                + " o.shipping_address, COALESCE(SUM(oi.quantity), 0) AS items"
+                + " FROM orders o LEFT JOIN order_items oi ON oi.order_id = o.id"
+                + " WHERE o.user_id = ? GROUP BY o.id ORDER BY o.order_date DESC LIMIT ? OFFSET ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement s = conn.prepareStatement(sql)) {
+            s.setInt(1, dbId);
+            s.setInt(2, size);
+            s.setInt(3, page * size);
+            try (ResultSet rs = s.executeQuery()) {
+                while (rs.next()) {
+                    String code = rs.getString("order_code");
+                    content.add(new OrderHistoryDto(
+                            code != null ? code : ("ORD-" + rs.getInt("id")),
+                            userId.trim(),
+                            OrderStatus.valueOf(rs.getString("status")),
+                            rs.getTimestamp("order_date").toLocalDateTime(),
+                            rs.getInt("items"),
+                            rs.getDouble("final_amount"),
+                            rs.getString("shipping_address")));
+                }
+            }
+        } catch (SQLException e) {
+            throw new IllegalStateException("History unavailable: " + e.getMessage());
+        }
         return new PagedResponse<>(content, page, size, total, totalPages);
     }
 
     public OrderTrackingDto getTracking(String orderId) {
-        Order order = requireOrder(orderId);
-        return buildTracking(order);
+        Row row = requireRow(orderId);
+        OrderTrackingDto dto = buildTracking(row);
+        dto.setDriverLocation(driverLocationOf(row.id()));
+        return dto;
+    }
+
+    /** Latest courier position for the order's delivery, if simulated yet. */
+    private String driverLocationOf(int orderDbId) {
+        String sql = "SELECT l.latitude, l.longitude FROM driver_locations l"
+                + " JOIN deliveries d ON d.driver_id = l.driver_id"
+                + " WHERE d.order_id = ? LIMIT 1";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement s = conn.prepareStatement(sql)) {
+            s.setInt(1, orderDbId);
+            try (ResultSet rs = s.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getDouble(1) + "," + rs.getDouble(2);
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("[OrderService] driver lookup failed: " + e.getMessage());
+        }
+        return null;
     }
 
     public OrderTrackingDto updateStatus(String orderId, OrderStatus newStatus) {
-        Order order = requireOrder(orderId);
-        validateTransition(order.getStatus(), newStatus);
-        order.setStatus(newStatus);
-        lastUpdated.put(orderId, LocalDateTime.now());
-        return buildTracking(order);
+        Row row = requireRow(orderId);
+        validateTransition(row.status(), newStatus);
+        String sql = "UPDATE orders SET status = ? WHERE id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement s = conn.prepareStatement(sql)) {
+            s.setString(1, newStatus.name());
+            s.setInt(2, row.id());
+            s.executeUpdate();
+        } catch (SQLException e) {
+            throw new IllegalStateException("Status update failed: " + e.getMessage());
+        }
+        return buildTracking(new Row(row.id(), row.code(), newStatus, LocalDateTime.now()));
+    }
+
+    /** True when the DB order belongs to the given account email. */
+    public boolean ownsOrder(String orderId, String email) {
+        if (orderId == null || email == null) {
+            return false;
+        }
+        String sql = "SELECT 1 FROM orders o JOIN users u ON u.id = o.user_id"
+                + " WHERE (o.id = ? OR o.order_code = ?) AND u.email = ? LIMIT 1";
+        int numeric = toIntOr(orderId, -1);
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement s = conn.prepareStatement(sql)) {
+            s.setInt(1, numeric);
+            s.setString(2, orderId.trim());
+            s.setString(3, email.trim().toLowerCase());
+            try (ResultSet rs = s.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            return false;
+        }
     }
 
     // ---- helpers ----
 
-    private Order requireOrder(String orderId) {
-        return Optional.ofNullable(store.get(orderId))
-                .orElseThrow(() -> new IllegalArgumentException("Order not found: " + orderId));
+    private record Row(int id, String code, OrderStatus status, LocalDateTime updated) {
     }
 
-    private OrderTrackingDto buildTracking(Order order) {
-        int currentIdx = TRACKING_FLOW.indexOf(normalize(order.getStatus()));
+    private Row requireRow(String orderId) {
+        if (orderId == null || orderId.isBlank()) {
+            throw new IllegalArgumentException("Order not found: " + orderId);
+        }
+        String sql = "SELECT id, order_code, status, order_date FROM orders WHERE id = ? OR order_code = ? LIMIT 1";
+        int numeric = toIntOr(orderId.trim(), -1);
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement s = conn.prepareStatement(sql)) {
+            s.setInt(1, numeric);
+            s.setString(2, orderId.trim());
+            try (ResultSet rs = s.executeQuery()) {
+                if (rs.next()) {
+                    String code = rs.getString("order_code");
+                    Timestamp ts = rs.getTimestamp("order_date");
+                    return new Row(rs.getInt("id"),
+                            code != null ? code : ("ORD-" + rs.getInt("id")),
+                            OrderStatus.valueOf(rs.getString("status")),
+                            ts != null ? ts.toLocalDateTime() : LocalDateTime.now());
+                }
+            }
+        } catch (SQLException e) {
+            throw new IllegalStateException("Tracking unavailable: " + e.getMessage());
+        }
+        throw new IllegalArgumentException("Order not found: " + orderId);
+    }
+
+    private Integer resolveUserId(String userId) {
+        int numeric = toIntOr(userId, -1);
+        String sql = "SELECT id FROM users WHERE id = ? OR email = ? OR phone_number = ? LIMIT 1";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement s = conn.prepareStatement(sql)) {
+            s.setInt(1, numeric);
+            s.setString(2, userId.toLowerCase());
+            s.setString(3, userId);
+            try (ResultSet rs = s.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("id");
+                }
+            }
+        } catch (SQLException e) {
+            throw new IllegalStateException("History unavailable: " + e.getMessage());
+        }
+        return null;
+    }
+
+    private static int toIntOr(String v, int fallback) {
+        try {
+            return Integer.parseInt(v.trim());
+        } catch (NumberFormatException e) {
+            return fallback;
+        }
+    }
+
+    private OrderTrackingDto buildTracking(Row row) {
+        int currentIdx = TRACKING_FLOW.indexOf(normalize(row.status()));
         List<OrderTrackingDto.TrackingStep> timeline = new ArrayList<>();
         for (int i = 0; i < TRACKING_FLOW.size(); i++) {
             timeline.add(new OrderTrackingDto.TrackingStep(
                     TRACKING_FLOW.get(i), currentIdx >= 0 && i <= currentIdx));
         }
-        return new OrderTrackingDto(
-                order.getOrderId(),
-                order.getStatus(),
-                lastUpdated.getOrDefault(order.getOrderId(), order.getOrderDate()),
-                timeline
-        );
+        return new OrderTrackingDto(row.code(), row.status(), row.updated(), timeline, null);
     }
 
     private OrderStatus normalize(OrderStatus status) {
         // Backward compat: IN_TRANSIT ~ SHIPPED, ARRIVED/PAID ~ between SHIPPED and DELIVERED
-        if (status == OrderStatus.IN_TRANSIT) return OrderStatus.SHIPPED;
-        if (status == OrderStatus.ARRIVED || status == OrderStatus.PAID) return OrderStatus.SHIPPED;
+        if (status == OrderStatus.IN_TRANSIT) {
+            return OrderStatus.SHIPPED;
+        }
+        if (status == OrderStatus.ARRIVED || status == OrderStatus.PAID) {
+            return OrderStatus.SHIPPED;
+        }
         return status;
     }
 
     private void validateTransition(OrderStatus from, OrderStatus to) {
-        if (to == null) throw new IllegalArgumentException("status is required");
-        if (from == to) return;
+        if (to == null) {
+            throw new IllegalArgumentException("status is required");
+        }
+        if (from == to) {
+            return;
+        }
         int fromIdx = TRACKING_FLOW.indexOf(normalize(from));
         int toIdx = TRACKING_FLOW.indexOf(normalize(to));
         if (toIdx < 0) {
@@ -129,20 +246,5 @@ public class OrderService {
         if (fromIdx < 0 || toIdx != fromIdx + 1) {
             throw new IllegalStateException("Invalid transition: " + from + " -> " + to + ". Expected flow: " + TRACKING_FLOW);
         }
-    }
-
-    private void seedDemoData() {
-        Order o1 = new Order("ORD-1001", "user-1", "Cairo", "01000000001");
-        o1.setStatus(OrderStatus.DELIVERED);
-        Order o2 = new Order("ORD-1002", "user-1", "Giza", "01000000001");
-        o2.setStatus(OrderStatus.SHIPPED);
-        Order o3 = new Order("ORD-1003", "user-1", "Alexandria", "01000000001");
-        o3.setStatus(OrderStatus.PROCESSING);
-        store.put(o1.getOrderId(), o1);
-        store.put(o2.getOrderId(), o2);
-        store.put(o3.getOrderId(), o3);
-        lastUpdated.put(o1.getOrderId(), LocalDateTime.now().minusDays(2));
-        lastUpdated.put(o2.getOrderId(), LocalDateTime.now().minusHours(5));
-        lastUpdated.put(o3.getOrderId(), LocalDateTime.now().minusHours(1));
     }
 }
