@@ -207,6 +207,10 @@ public final class CustomerAccountService {
         if (row == null || !PasswordUtil.verify(rawPassword, stored)) {
             throw new IllegalArgumentException("Invalid email or password.");
         }
+        Object active = row.get("is_active");
+        if (active instanceof Number n && n.intValue() == 0) {
+            throw new IllegalArgumentException("Account not verified. Please confirm the OTP code.");
+        }
         if (PasswordUtil.needsRehash(stored)) {
             String upgraded = PasswordUtil.encode(rawPassword);
             Object id = row.get("id");
@@ -239,6 +243,26 @@ public final class CustomerAccountService {
                 String.valueOf(row.getOrDefault("full_name", "")),
                 String.valueOf(row.getOrDefault("phone_number", "")),
                 String.valueOf(row.getOrDefault("governorate", "")));
+    }
+
+    /**
+     * Confirms a pending registration with its OTP code and activates the
+     * account (console + API share this path).
+     */
+    public static Profile confirmRegistration(String email, String code) {
+        String cleanEmail = email == null ? "" : email.trim().toLowerCase();
+        OtpService.verify(cleanEmail, code);
+        com.app.dao.UserDAO dao = new com.app.dao.UserDAO();
+        java.util.Map<String, Object> row = dao.findFullByEmail(cleanEmail);
+        if (row == null) {
+            throw new IllegalStateException("Account disappeared. Please register again.");
+        }
+        Object id = row.get("id");
+        if (id instanceof Number n) {
+            dao.setActive(n.intValue(), true);
+        }
+        log(keyForEmail(cleanEmail), "ACCOUNT_VERIFIED", cleanEmail);
+        return profileOf(cleanEmail);
     }
 
     /** Best-effort local cache refresh (invoices dir + audit log live here). */

@@ -19,7 +19,6 @@ import com.app.model.store.FashionStore;
 import com.app.model.store.Restaurant;
 import com.app.model.store.TechStore;
 import com.app.payment.CashOnDelivery;
-import com.app.payment.CreditCardPayment;
 import com.app.payment.PaymentMethod;
 import com.app.payment.WalletPayment;
 import com.app.service.DeliverySimulator;
@@ -27,6 +26,7 @@ import com.app.service.ReturnService;
 import com.app.service.CustomerAccountService;
 import com.app.service.LoyaltyService;
 import com.app.service.OfferService;
+import com.app.service.OtpService;
 import com.app.util.InvoicePdfExporter;
 import java.nio.file.Path;
 import com.app.util.OrderRepository;
@@ -305,18 +305,18 @@ public class Main {
                         int totalItemsCount = order.getProducts().size();
                         double totalPackagingFee = unitPackagingFee * totalItemsCount;
                         double amountToPay = order.calculateFinalTotal() + deliveryFee + totalPackagingFee;
-                        // تحديد طريقة الدفع (محفظة، كارت، كاش)
-                        System.out.println("1. Wallet");
-                        System.out.println("2. Credit Card");
-                        System.out.println("3. Cash on Delivery");
-                        int payChoice = readInt(scanner, "Select Payment Method: ");
+                        // تحديد طريقة الدفع: كاش عند الاستلام أو رصيد الأكونت فقط
+                        System.out.println("1. Cash on Delivery");
+                        System.out.println("2. Wallet / Account balance");
+                        int payChoice = readInt(scanner, "Select Payment Method (1-2): ");
 
                         // 1. إنشاء كائن وسيلة الدفع بناءً على اختيار المستخدم
                         PaymentMethod payment = null;
                         String paymentError = null;
 
-                        if (payChoice == 1) {
-                            // Real wallet balance from MySQL (not the simulated budget)
+                        if (payChoice == 2) {
+                            // Real wallet balance from MySQL (not the simulated budget).
+                            // Cards top up the wallet (website/account page); checkout spends it.
                             com.app.dao.WebOrderDAO webUsers = new com.app.dao.WebOrderDAO();
                             Integer walletUserId = webUsers.findUserId(session.email);
                             double walletBalance = walletUserId == null ? -1
@@ -326,30 +326,10 @@ public class Main {
                             } else {
                                 System.out.printf(java.util.Locale.US,
                                         "[WALLET]: balance = %.2f EGP%n", walletBalance);
-                                // طلب رقم المحفظة من المستخدم
-                                System.out.print("Enter your Wallet Phone Number: ");
-                                String walletNumber = scanner.nextLine().trim();
-                                try {
-                                    // إنشاء كائن المحفظة بالرصيد الحقيقي
-                                    payment = new WalletPayment(walletNumber, walletBalance);
-                                } catch (IllegalArgumentException ex) {
-                                    paymentError = ex.getMessage();
-                                }
+                                payment = new WalletPayment(phone, walletBalance);
                             }
 
-                        } else if (payChoice == 2) {
-                            // طلب رقم كارت الائتمان من المستخدم
-                            System.out.print("Enter your 16-digit Credit Card Number: ");
-                            String cardNumber = scanner.nextLine().trim();
-
-                            try {
-                                // إنشاء كائن الكريدت كارد برقم الكارت الذي أدخله المستخدم
-                                payment = new CreditCardPayment(cardNumber, userBudget);
-                            } catch (IllegalArgumentException ex) {
-                                paymentError = ex.getMessage();
-                            }
-
-                        } else if (payChoice == 3) {
+                        } else if (payChoice == 1) {
                             // الدفع عند الاستلام لا يتطلب إدخال أرقام
                             payment = new CashOnDelivery(userBudget);
                         } else {
@@ -367,19 +347,43 @@ public class Main {
                         boolean isPaymentSuccessful = payment.getPaymentStatus();
                         // 2. تنفيذ الدفع والتحقق من الحالة
                         if (!isPaymentSuccessful) {
-                            System.out.println(
-                                    "\n>>> Would you like to remove items from your cart to reduce the total? (1: Yes / 2: No)");
-                            int choice = readInt(scanner, "Choice (1-2): ");
-
-                            if (choice == 1) {
-                                manageCart(scanner, order); // تحويله لواجهة حذف المنتجات من السلة
-                                System.out.println("Please restart checkout to re-pay with updated cart. Order NOT completed.");
+                            if (payChoice == 2) {
+                                System.out.println(
+                                        "\n>>> Wallet balance insufficient. Top up your account first (website/account page),");
+                                int w = readInt(scanner,
+                                        ">>> or switch to Cash on Delivery? (1: Cash / 2: Edit cart / 3: Cancel): ");
+                                if (w == 1) {
+                                    payment = new CashOnDelivery(userBudget);
+                                    payment.pay(amountToPay);
+                                    isPaymentSuccessful = payment.getPaymentStatus();
+                                    if (!isPaymentSuccessful) {
+                                        System.out.println("Order cancelled due to payment failure.");
+                                        break;
+                                    }
+                                } else if (w == 2) {
+                                    manageCart(scanner, order);
+                                    System.out.println("Please restart checkout to re-pay with updated cart. Order NOT completed.");
+                                    break;
+                                } else {
+                                    System.out.println("Order cancelled due to payment failure.");
+                                    break;
+                                }
                             } else {
-                                System.out.println("Order cancelled due to payment failure.");
+                                System.out.println(
+                                        "\n>>> Would you like to remove items from your cart to reduce the total? (1: Yes / 2: No)");
+                                int choice = readInt(scanner, "Choice (1-2): ");
+
+                                if (choice == 1) {
+                                    manageCart(scanner, order); // تحويله لواجهة حذف المنتجات من السلة
+                                    System.out.println("Please restart checkout to re-pay with updated cart. Order NOT completed.");
+                                    break;
+                                } else {
+                                    System.out.println("Order cancelled due to payment failure.");
+                                    break;
+                                }
                             }
-                            break;
                         }
-                        if (payChoice == 1) {
+                        if (payChoice == 2) {
                             // Persist the wallet debit in MySQL (atomic: fails if balance moved).
                             Integer walletUserId = new com.app.dao.WebOrderDAO().findUserId(session.email);
                             if (walletUserId == null
@@ -693,15 +697,29 @@ public class Main {
             System.out.println("[REGISTER FAILED]: Passwords do not match.");
             return null;
         }
+        CustomerAccountService.Profile pending;
         try {
-            CustomerAccountService.Profile p =
-                    CustomerAccountService.register(email, pw1, name, phone, governorate);
-            System.out.println("[REGISTERED]: Welcome " + p.name + "!");
-            return new Session(p);
+            pending = CustomerAccountService.register(email, pw1, name, phone, governorate);
         } catch (IllegalArgumentException | IllegalStateException e) {
             System.out.println("[REGISTER FAILED]: " + e.getMessage());
             return null;
         }
+        // OTP verification (dev-mode: code shown on screen; production sends SMS).
+        String otp = OtpService.issue(pending.email);
+        System.out.println("[OTP]: Your verification code (dev-mode shown here): " + otp);
+        for (int attempt = 1; attempt <= 3; attempt++) {
+            System.out.print("Enter OTP code: ");
+            String code = scanner.nextLine().trim();
+            try {
+                CustomerAccountService.Profile p = CustomerAccountService.confirmRegistration(pending.email, code);
+                System.out.println("[REGISTERED]: Welcome " + p.name + "!");
+                return new Session(p);
+            } catch (IllegalArgumentException | IllegalStateException e) {
+                System.out.println("[OTP FAILED]: " + e.getMessage() + " (attempt " + attempt + "/3)");
+            }
+        }
+        System.out.println("Verification failed. Your account stays inactive until verified.");
+        return null;
     }
 
     /** An order belongs to the session when email or phone matches (legacy compatible). */
