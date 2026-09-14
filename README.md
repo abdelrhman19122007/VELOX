@@ -17,16 +17,16 @@ console app — all API reads/writes go to the database.
 
 ```powershell
 $env:JAVA_HOME = 'C:\Program Files\Eclipse Adoptium\jdk-25.0.4.7-hotspot'
-cd C:\Users\NV\Documents\NetBeansProjects\VELOX
-& 'C:\Users\NV\AppData\Local\Temp\opencode\maven\apache-maven-3.9.11\bin\mvn.cmd' spring-boot:run
+cd velox-backend
+.\mvnw.cmd spring-boot:run
 ```
 
 DB config: `src/main/resources/application.properties` (local only, **git-ignored** —
 copy `application.properties.example`). Env vars win when set:
 `VELOX_DB_URL`, `VELOX_DB_USER`, `VELOX_DB_PASSWORD`.
-Requires MySQL with `velox_db` imported (see `VELOX_D2.SQL` + `migrations/`).
+Requires MySQL with `velox_db` imported (see `velox-db/VELOX_D2.SQL` + `velox-db/migrations/` in numeric order).
 
-Console app: `mvn exec:java` (runs `com.app.main.Main`). Note: `java -jar`
+Console app: `.\mvnw.cmd exec:java` (runs `com.app.main.Main`). Note: `java -jar`
 runs the API (`VeloxApplication`), not the console.
 
 ## Endpoints (all JSON, `/api` prefix, CORS open)
