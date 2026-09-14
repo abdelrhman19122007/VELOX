@@ -173,6 +173,7 @@ public class AuthController {
         Integer dbId = users.findUserId(p.email);
         if (dbId != null) {
             view.put("id", dbId);
+            view.put("cards", new com.app.dao.UserDAO().listCards(dbId));
         }
         view.put("email", p.email);
         view.put("name", p.name);

@@ -10,7 +10,7 @@ import java.util.List;
 
 /**
  * KAN-90: Real-time tracking response.
- * Timeline follows: PENDING -> PROCESSING -> SHIPPED -> DELIVERED
+ * Timeline follows: PENDING -> PROCESSING -> IN_TRANSIT -> SHIPPED -> ARRIVED -> DELIVERED
  */
 @Data
 @NoArgsConstructor

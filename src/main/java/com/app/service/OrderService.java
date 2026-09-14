@@ -28,7 +28,9 @@ public class OrderService {
     private static final List<OrderStatus> TRACKING_FLOW = Arrays.asList(
             OrderStatus.PENDING,
             OrderStatus.PROCESSING,
+            OrderStatus.IN_TRANSIT,
             OrderStatus.SHIPPED,
+            OrderStatus.ARRIVED,
             OrderStatus.DELIVERED
     );
 
@@ -128,7 +130,26 @@ public class OrderService {
         } catch (SQLException e) {
             throw new IllegalStateException("Status update failed: " + e.getMessage());
         }
+        notifyOwner(row.id(), row.code(), newStatus);
         return buildTracking(new Row(row.id(), row.code(), newStatus, LocalDateTime.now()));
+    }
+
+    private void notifyOwner(int orderDbId, String orderCode, OrderStatus newStatus) {
+        String sql = "SELECT u.id, u.email FROM orders o JOIN users u ON u.id = o.user_id WHERE o.id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement s = conn.prepareStatement(sql)) {
+            s.setInt(1, orderDbId);
+            try (ResultSet rs = s.executeQuery()) {
+                if (rs.next()) {
+                    new NotificationService().notify(rs.getInt("id"),
+                            "تحديث حالة الطلب " + orderCode,
+                            "طلبك " + orderCode + " أصبح الآن: " + newStatus.name(),
+                            "ORDER_STATUS");
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("[OrderService] notify failed: " + e.getMessage());
+        }
     }
 
     /** True when the DB order belongs to the given account email. */
@@ -221,11 +242,8 @@ public class OrderService {
     }
 
     private OrderStatus normalize(OrderStatus status) {
-        // Backward compat: IN_TRANSIT ~ SHIPPED, ARRIVED/PAID ~ between SHIPPED and DELIVERED
-        if (status == OrderStatus.IN_TRANSIT) {
-            return OrderStatus.SHIPPED;
-        }
-        if (status == OrderStatus.ARRIVED || status == OrderStatus.PAID) {
+        // Paid-but-not-shipped behaves like SHIPPED in the timeline.
+        if (status == OrderStatus.PAID) {
             return OrderStatus.SHIPPED;
         }
         return status;
