@@ -140,20 +140,31 @@ public final class CustomerAccountService {
         }
         String gov;
         try {
-            gov = Governorate.fromName(governorate).name();
+            gov = Governorate.fromNameLenient(governorate).name();
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException(
                     "Unknown governorate. Use e.g. CAIRO, GIZA, ALEXANDRIA, DAMIETTA.");
         }
 
         String key = keyForEmail(cleanEmail);
-        if (Files.exists(profileFile(key))) {
+        com.app.dao.UserDAO dao = new com.app.dao.UserDAO();
+        if (dao.findFullByEmail(cleanEmail) != null) {
             throw new IllegalArgumentException("This email is already registered. Please login.");
         }
-        String phoneOwner = findEmailByPhone(cleanPhone);
+        String phoneOwner = dao.findEmailByPhone(cleanPhone);
+        if (phoneOwner == null) {
+            phoneOwner = findEmailByPhone(cleanPhone);
+        }
         if (phoneOwner != null) {
             throw new IllegalArgumentException(
                     "This phone is already registered with " + phoneOwner + ". Please login.");
+        }
+
+        // MySQL is the source of truth; the file profile below is only a local cache.
+        String hash = PasswordUtil.encode(rawPassword);
+        int dbId = dao.createUser(cleanName, cleanEmail, hash, cleanPhone, gov);
+        if (dbId <= 0) {
+            throw new IllegalStateException("Could not create account. Please try again.");
         }
 
         // Adopt a legacy phone-keyed folder (created before email accounts existed).
@@ -167,10 +178,10 @@ public final class CustomerAccountService {
             p.setProperty("name", cleanName);
             p.setProperty("phone", cleanPhone);
             p.setProperty("governorate", gov);
-            p.setProperty("passwordHash", PasswordUtil.sha256(rawPassword));
+            p.setProperty("passwordHash", hash);
             p.setProperty("created", LocalDateTime.now().format(TS));
             try (var out = Files.newOutputStream(profileFile(key))) {
-                p.store(out, "VELOX customer profile");
+                p.store(out, "VELOX customer profile (cache — truth is MySQL users)");
             }
             log(key, "ACCOUNT_REGISTERED", cleanEmail + " | " + cleanName + " | " + gov);
         } catch (IOException e) {
@@ -180,34 +191,80 @@ public final class CustomerAccountService {
     }
 
     /**
-     * Authenticates by email + password. Throws IllegalArgumentException
-     * when the account is missing or the password is wrong (same message
-     * for both, so emails can't be probed).
+     * Authenticates against MySQL (BCrypt, with transparent upgrade of legacy
+     * SHA-256 hashes). Throws IllegalArgumentException when the account is
+     * missing or the password is wrong (same message for both, so emails
+     * can't be probed).
      */
     public static Profile login(String email, String rawPassword) {
         String cleanEmail = email == null ? "" : email.trim().toLowerCase();
         if (!PasswordUtil.isValidEmail(cleanEmail)) {
             throw new IllegalArgumentException("Invalid email or password.");
         }
-        Properties p = readProfile(keyForEmail(cleanEmail));
-        if (p == null || !PasswordUtil.verify(rawPassword, p.getProperty("passwordHash", ""))) {
+        com.app.dao.UserDAO dao = new com.app.dao.UserDAO();
+        java.util.Map<String, Object> row = dao.findFullByEmail(cleanEmail);
+        String stored = row == null ? "" : String.valueOf(row.getOrDefault("password_hash", ""));
+        if (row == null || !PasswordUtil.verify(rawPassword, stored)) {
             throw new IllegalArgumentException("Invalid email or password.");
         }
+        if (PasswordUtil.needsRehash(stored)) {
+            String upgraded = PasswordUtil.encode(rawPassword);
+            Object id = row.get("id");
+            if (id instanceof Number n) {
+                dao.updatePasswordHash(n.intValue(), upgraded);
+            }
+            stored = upgraded;
+        }
         Profile profile = new Profile(cleanEmail,
-                p.getProperty("name", ""),
-                p.getProperty("phone", ""),
-                p.getProperty("governorate", ""));
+                String.valueOf(row.getOrDefault("full_name", "")),
+                String.valueOf(row.getOrDefault("phone_number", "")),
+                String.valueOf(row.getOrDefault("governorate", "")));
+        refreshFileCache(profile, stored);
         log(keyForEmail(cleanEmail), "LOGIN", cleanEmail);
         return profile;
     }
 
-    public static Profile profileOf(String userKey) {
-        Properties p = readProfile(userKey);
-        if (p == null || p.getProperty("email", "").isEmpty()) {
+    public static Profile profileOf(String userKeyOrEmail) {
+        String email = userKeyOrEmail != null && userKeyOrEmail.contains("@")
+                ? userKeyOrEmail.trim().toLowerCase()
+                : new com.app.dao.UserDAO().findEmailByPhone(userKeyOrEmail);
+        if (email == null) {
             return null;
         }
-        return new Profile(p.getProperty("email", ""), p.getProperty("name", ""),
-                p.getProperty("phone", ""), p.getProperty("governorate", ""));
+        java.util.Map<String, Object> row = new com.app.dao.UserDAO().findFullByEmail(email);
+        if (row == null) {
+            return null;
+        }
+        return new Profile(email,
+                String.valueOf(row.getOrDefault("full_name", "")),
+                String.valueOf(row.getOrDefault("phone_number", "")),
+                String.valueOf(row.getOrDefault("governorate", "")));
+    }
+
+    /** Best-effort local cache refresh (invoices dir + audit log live here). */
+    private static void refreshFileCache(Profile profile, String passwordHash) {
+        try {
+            String key = keyForEmail(profile.email);
+            Files.createDirectories(userDir(key));
+            Files.createDirectories(userDir(key).resolve("invoices"));
+            Properties p = new Properties();
+            p.setProperty("email", profile.email);
+            p.setProperty("name", profile.name);
+            p.setProperty("phone", profile.phone);
+            p.setProperty("governorate", profile.governorate);
+            p.setProperty("passwordHash", passwordHash == null ? "" : passwordHash);
+            try (var out = Files.newOutputStream(profileFile(key))) {
+                p.store(out, "VELOX customer profile (cache — truth is MySQL users)");
+            }
+        } catch (IOException e) {
+            System.err.println("[Account] cache refresh failed: " + e.getMessage());
+        }
+    }
+
+    /** Stored SHA-256 hash (for DB user sync). Never expose to clients. */
+    public static String passwordHashOf(String userKey) {
+        Properties p = readProfile(userKey);
+        return p == null ? "" : p.getProperty("passwordHash", "");
     }
 
     // ---------------- orders / transactions ----------------

@@ -1,0 +1,105 @@
+package com.app.controller;
+
+import com.app.dao.WebOrderDAO;
+import com.app.service.AuthTokenStore;
+import com.app.service.OrderService;
+import com.app.util.DatabaseConnection;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+/**
+ * Complaints & suggestions. POST /api/complaints {orderId?, details}
+ * Stored in MySQL complaints (replaces the console-only fake form).
+ */
+@RestController
+@RequestMapping("/api/complaints")
+public class ComplaintController {
+
+    private final WebOrderDAO lookup = new WebOrderDAO();
+    private final OrderService orders = new OrderService();
+
+    @PostMapping
+    public ResponseEntity<?> submit(
+            @RequestHeader(value = "Authorization", required = false) String authorization,
+            @RequestBody Map<String, Object> body) {
+        String email = AuthTokenStore.resolve(authorization);
+        if (email == null) {
+            return ResponseEntity.status(401).body(Map.of("message", "Login required."));
+        }
+        Integer userId = lookup.findUserId(email);
+        if (userId == null) {
+            return ResponseEntity.status(401).body(Map.of("message", "Login required."));
+        }
+        Object details = body.get("details");
+        if (details == null || String.valueOf(details).isBlank()) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Details are required."));
+        }
+        Integer orderDbId = null;
+        Object oid = body.get("orderId") != null ? body.get("orderId") : body.get("order_id");
+        if (oid != null && !String.valueOf(oid).isBlank()) {
+            String code = String.valueOf(oid).trim();
+            try {
+                orders.getTracking(code);
+            } catch (IllegalArgumentException e) {
+                return ResponseEntity.badRequest().body(Map.of("message", "Order not found."));
+            }
+            if (!orders.ownsOrder(code, email)) {
+                return ResponseEntity.status(403).body(Map.of("message", "Forbidden."));
+            }
+            orderDbId = resolveDbId(code);
+        }
+        String sql = "INSERT INTO complaints (user_id, order_id, details) VALUES (?, ?, ?)";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement s = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            s.setInt(1, userId);
+            if (orderDbId == null) {
+                s.setNull(2, java.sql.Types.BIGINT);
+            } else {
+                s.setInt(2, orderDbId);
+            }
+            s.setString(3, String.valueOf(details));
+            s.executeUpdate();
+            try (ResultSet keys = s.getGeneratedKeys()) {
+                keys.next();
+                Map<String, Object> out = new LinkedHashMap<>();
+                out.put("success", true);
+                out.put("id", keys.getInt(1));
+                out.put("status", "PENDING");
+                return ResponseEntity.ok(out);
+            }
+        } catch (SQLException e) {
+            return ResponseEntity.status(500).body(Map.of("message", "Submit failed."));
+        }
+    }
+
+    private Integer resolveDbId(String codeOrId) {
+        try {
+            return Integer.parseInt(codeOrId.trim());
+        } catch (NumberFormatException e) {
+            try (Connection conn = DatabaseConnection.getConnection();
+                 PreparedStatement s = conn.prepareStatement(
+                         "SELECT id FROM orders WHERE order_code = ? LIMIT 1")) {
+                s.setString(1, codeOrId.trim());
+                try (ResultSet rs = s.executeQuery()) {
+                    if (rs.next()) {
+                        return rs.getInt(1);
+                    }
+                }
+            } catch (SQLException ignored) {
+            }
+            return null;
+        }
+    }
+}

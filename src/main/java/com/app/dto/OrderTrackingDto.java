@@ -20,6 +20,8 @@ public class OrderTrackingDto {
     private OrderStatus currentStatus;
     private LocalDateTime lastUpdated;
     private List<TrackingStep> timeline;
+    /** Latest courier position as "lat,lng" (null when no simulation tick yet). */
+    private String driverLocation;
 
     @Data
     @NoArgsConstructor

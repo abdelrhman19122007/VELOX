@@ -1,186 +1,177 @@
 package com.app.util;
 
+import com.lowagie.text.Document;
+import com.lowagie.text.Element;
+import com.lowagie.text.Font;
+import com.lowagie.text.PageSize;
+import com.lowagie.text.Paragraph;
+import com.lowagie.text.Phrase;
+import com.lowagie.text.pdf.BaseFont;
+import com.lowagie.text.pdf.PdfPCell;
+import com.lowagie.text.pdf.PdfPTable;
+import com.lowagie.text.pdf.PdfWriter;
+
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
- * Minimal PDF exporter for VELOX invoices.
- * Pure JDK only (no external PDF library) using standard Type1 fonts.
- * The receipt text produced by {@link ReceiptGenerator} is Latin-based,
- * so Helvetica/WinAnsi is sufficient. Non-encodable chars become '?'.
+ * VELOX invoice PDFs with Arabic support (embedded Amiri font, OpenPDF).
+ * Same static API as before, so console callers are untouched.
  */
 public final class InvoicePdfExporter {
 
-    private static final int PAGE_W = 595;   // A4 width (pt)
-    private static final int PAGE_H = 842;   // A4 height (pt)
-    private static final int MARGIN = 50;
-    private static final int TITLE_SIZE = 14;
-    private static final int BODY_SIZE = 10;
-    private static final int LEADING = 13;
-    private static final int BODY_LINES_PER_PAGE = 55;
+    private static final DateTimeFormatter STAMP = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
     private InvoicePdfExporter() {
     }
 
     /**
-     * Exports receipt text to a PDF file, creating parent dirs as needed.
-     *
-     * @param receiptText plain-text receipt from {@link ReceiptGenerator}
-     * @param orderId     used in the PDF title
-     * @param target      destination .pdf path
-     * @return the target path
+     * Exports plain receipt text (console flow).
      */
-    public static Path export(String receiptText, String orderId, Path target) throws IOException {
+    public static Path export(String receiptText, String orderId, Path target) throws Exception {
         if (receiptText == null) {
             receiptText = "";
         }
         if (orderId == null || orderId.isBlank()) {
             orderId = "UNKNOWN";
         }
-        List<String> body = sanitizeLines(receiptText);
-        List<List<String>> pages = paginate(body);
-
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        List<Integer> offsets = new ArrayList<>();
-
-        write(out, "%PDF-1.4\n%\u00e2\u00e3\u00cf\u00d3\n");
-
-        // Object numbering: 1 catalog, 2 pages, 3 font regular, 4 font bold,
-        // then per page: page object + content object.
-        int pageCount = pages.size();
-        int firstPageObj = 5;
-        List<Integer> pageObjs = new ArrayList<>();
-        List<Integer> contentObjs = new ArrayList<>();
-        for (int i = 0; i < pageCount; i++) {
-            pageObjs.add(firstPageObj + i * 2);
-            contentObjs.add(firstPageObj + i * 2 + 1);
+        Document doc = new Document(PageSize.A4, 50, 50, 50, 50);
+        PdfWriter.getInstance(doc, out);
+        doc.open();
+        Font title = font(15, Font.BOLD);
+        Font body = font(10, Font.NORMAL);
+        addLine(doc, "VELOX - Official Receipt - " + orderId, title);
+        addLine(doc, "Exported: " + LocalDateTime.now().format(STAMP), body);
+        addLine(doc, " ", body);
+        for (String raw : receiptText.split("\r?\n")) {
+            addLine(doc, raw, body);
         }
-        int nextObj = firstPageObj + pageCount * 2;
+        doc.close();
+        return write(target, out);
+    }
 
-        // 1 catalog
-        offsets.add(out.size());
-        write(out, "1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n");
+    /**
+     * Exports a database invoice (header + lines from WebOrderDAO.invoiceData).
+     */
+    @SuppressWarnings("unchecked")
+    public static Path exportInvoice(Map<String, Object> header, Path target) throws Exception {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        Document doc = new Document(PageSize.A4, 50, 50, 50, 50);
+        PdfWriter.getInstance(doc, out);
+        doc.open();
+        Font title = font(16, Font.BOLD);
+        Font head = font(11, Font.NORMAL);
+        Font cell = font(10, Font.NORMAL);
+        Font cellBold = font(10, Font.BOLD);
 
-        // 2 pages
-        StringBuilder kids = new StringBuilder();
-        for (int p : pageObjs) {
-            kids.append(p).append(" 0 R ");
-        }
-        offsets.add(out.size());
-        write(out, "2 0 obj\n<< /Type /Pages /Kids [" + kids + "] /Count " + pageCount + " >>\nendobj\n");
+        addLine(doc, "VELOX - Official Invoice", title);
+        addLine(doc, "Order: " + header.getOrDefault("orderCode", "")
+                + "  |  Status: " + header.getOrDefault("status", ""), head);
+        addLine(doc, "Date: " + header.getOrDefault("orderDate", ""), head);
+        addLine(doc, "Customer: " + header.getOrDefault("customer", "")
+                + "  |  " + header.getOrDefault("email", "")
+                + "  |  " + header.getOrDefault("phone", ""), head);
+        addLine(doc, "Shipping: " + header.getOrDefault("shipping", ""), head);
+        addLine(doc, " ", head);
 
-        // 3/4 fonts
-        offsets.add(out.size());
-        write(out, "3 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>\nendobj\n");
-        offsets.add(out.size());
-        write(out, "4 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>\nendobj\n");
-
-        String stamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
-        for (int i = 0; i < pageCount; i++) {
-            // page object
-            offsets.add(out.size());
-            write(out, pageObjs.get(i) + " 0 obj\n<< /Type /Page /Parent 2 0 R "
-                    + "/MediaBox [0 0 " + PAGE_W + " " + PAGE_H + "] "
-                    + "/Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> "
-                    + "/Contents " + contentObjs.get(i) + " 0 R >>\nendobj\n");
-
-            // content stream (each line uses absolute Tm positioning)
-            StringBuilder sb = new StringBuilder();
-            float y = PAGE_H - MARGIN;
-            if (i == 0) {
-                sb.append(textLine("/F2", TITLE_SIZE, MARGIN, y, "VELOX - Official Receipt - " + orderId));
-                y -= TITLE_SIZE + 8;
-                sb.append(textLine("/F1", 9, MARGIN, y, "Exported: " + stamp + "   |   Page " + (i + 1) + "/" + pageCount));
-                y -= LEADING + 4;
-            } else {
-                sb.append(textLine("/F1", 9, MARGIN, y, "Order " + orderId + " (cont.)   |   Page " + (i + 1) + "/" + pageCount));
-                y -= LEADING + 4;
+        PdfPTable table = new PdfPTable(new float[]{4, 1, 2, 2});
+        table.setWidthPercentage(100);
+        table.addCell(cell("Item", cellBold));
+        table.addCell(cell("Qty", cellBold));
+        table.addCell(cell("Unit (EGP)", cellBold));
+        table.addCell(cell("Subtotal (EGP)", cellBold));
+        Object lines = header.get("lines");
+        if (lines instanceof List<?> list) {
+            for (Object o : list) {
+                if (o instanceof Map<?, ?> line) {
+                    table.addCell(cell(String.valueOf(line.get("name")), cell));
+                    table.addCell(cell(String.valueOf(line.get("quantity")), cell));
+                    table.addCell(cell(String.valueOf(line.get("unit")), cell));
+                    table.addCell(cell(String.valueOf(line.get("subtotal")), cell));
+                }
             }
-            for (String line : pages.get(i)) {
-                sb.append(textLine("/F1", BODY_SIZE, MARGIN, y, line));
-                y -= LEADING;
+        }
+        doc.add(table);
+        addLine(doc, " ", head);
+        addLine(doc, "Subtotal: " + header.getOrDefault("subtotal", "") + " EGP", head);
+        addLine(doc, "Discount: -" + header.getOrDefault("discount", "") + " EGP", head);
+        addLine(doc, "Delivery: " + header.getOrDefault("deliveryFee", "") + " EGP", head);
+        addLine(doc, "TOTAL: " + header.getOrDefault("total", "") + " EGP", cellBold);
+        addLine(doc, " ", head);
+        addLine(doc, "Products can be returned within 14 days with this receipt.", head);
+        doc.close();
+        return write(target, out);
+    }
+
+    // ---- internals ----
+
+    private static void addLine(Document doc, String text, Font font) {
+        if (text == null) {
+            text = "";
+        }
+        if (containsArabic(text)) {
+            PdfPTable t = new PdfPTable(1);
+            t.setWidthPercentage(100);
+            PdfPCell c = new PdfPCell(new Phrase(text, font));
+            c.setBorder(PdfPCell.NO_BORDER);
+            c.setRunDirection(PdfWriter.RUN_DIRECTION_RTL);
+            c.setHorizontalAlignment(Element.ALIGN_RIGHT);
+            t.addCell(c);
+            doc.add(t);
+        } else {
+            doc.add(new Paragraph(text, font));
+        }
+    }
+
+    private static PdfPCell cell(String text, Font font) {
+        PdfPCell c = new PdfPCell(new Phrase(text == null ? "" : text, font));
+        if (containsArabic(c.getPhrase().getContent())) {
+            c.setRunDirection(PdfWriter.RUN_DIRECTION_RTL);
+        }
+        return c;
+    }
+
+    private static boolean containsArabic(String s) {
+        if (s == null) {
+            return false;
+        }
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+            if (c >= 0x0600 && c <= 0x06FF) {
+                return true;
             }
-            byte[] stream = sb.toString().getBytes(StandardCharsets.ISO_8859_1);
-            offsets.add(out.size());
-            write(out, contentObjs.get(i) + " 0 obj\n<< /Length " + stream.length + " >>\nstream\n");
-            out.write(stream);
-            write(out, "\nendstream\nendobj\n");
         }
+        return false;
+    }
 
-        int xrefPos = out.size();
-        write(out, "xref\n0 " + nextObj + "\n");
-        write(out, "0000000000 65535 f \n");
-        for (int off : offsets) {
-            write(out, String.format("%010d 00000 n \n", off));
+    private static Font font(int size, int style) throws Exception {
+        BaseFont base = baseFont();
+        return new Font(base, size, style);
+    }
+
+    private static BaseFont baseFont() throws Exception {
+        try (InputStream in = InvoicePdfExporter.class.getResourceAsStream("/fonts/Amiri-Regular.ttf")) {
+            if (in == null) {
+                throw new IllegalStateException("Amiri font not found on classpath");
+            }
+            byte[] ttf = in.readAllBytes();
+            return BaseFont.createFont("Amiri-Regular.ttf", BaseFont.IDENTITY_H,
+                    BaseFont.EMBEDDED, true, ttf, null);
         }
-        write(out, "trailer\n<< /Size " + nextObj + " /Root 1 0 R >>\nstartxref\n" + xrefPos + "\n%%EOF");
+    }
 
+    private static Path write(Path target, ByteArrayOutputStream out) throws Exception {
         if (target.getParent() != null) {
             Files.createDirectories(target.getParent());
         }
         Files.write(target, out.toByteArray());
         return target;
-    }
-
-    private static List<String> sanitizeLines(String text) {
-        List<String> lines = new ArrayList<>();
-        for (String raw : text.split("\r?\n")) {
-            StringBuilder sb = new StringBuilder(raw.length());
-            for (int i = 0; i < raw.length(); i++) {
-                char c = raw.charAt(i);
-                if (c == '\t') {
-                    sb.append("    ");
-                } else if (c >= 32 && c <= 126) {
-                    sb.append(c);
-                } else if (c >= 160 && c <= 255) {
-                    sb.append(c);
-                } else {
-                    sb.append('?');
-                }
-            }
-            // Wrap long lines at 95 chars to fit A4 with font 10
-            String line = sb.toString();
-            while (line.length() > 95) {
-                lines.add(line.substring(0, 95));
-                line = line.substring(95);
-            }
-            lines.add(line);
-        }
-        if (lines.isEmpty()) {
-            lines.add("(empty receipt)");
-        }
-        return lines;
-    }
-
-    private static List<List<String>> paginate(List<String> body) {
-        List<List<String>> pages = new ArrayList<>();
-        for (int i = 0; i < body.size(); i += BODY_LINES_PER_PAGE) {
-            pages.add(new ArrayList<>(body.subList(i, Math.min(i + BODY_LINES_PER_PAGE, body.size()))));
-        }
-        if (pages.isEmpty()) {
-            List<String> one = new ArrayList<>();
-            one.add("(empty)");
-            pages.add(one);
-        }
-        return pages;
-    }
-
-    private static String textLine(String font, int size, float x, float y, String text) {
-        return "BT " + font + " " + size + " Tf 1 0 0 1 " + x + " " + y + " Tm (" + escape(text) + ") Tj ET\n";
-    }
-
-    private static String escape(String s) {
-        return s.replace("\\", "\\\\").replace("(", "\\(").replace(")", "\\)");
-    }
-
-    private static void write(ByteArrayOutputStream out, String s) throws IOException {
-        out.write(s.getBytes(StandardCharsets.ISO_8859_1));
     }
 }

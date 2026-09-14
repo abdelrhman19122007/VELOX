@@ -92,7 +92,31 @@ public enum Governorate {
     }
 
     /**
-     * Accepts either a numeric code ("7") or a name ("FAYOUM").
+     * Lenient lookup accepting old frontend misspellings too
+     * (MONUFIA/SHARQIA/ASSUIT/MATRUH). New code should use canonical names.
+     */
+    public static Governorate fromNameLenient(String name) {
+        if (name == null) {
+            throw new IllegalArgumentException("Governorate name cannot be null");
+        }
+        String normalized = name.trim().toUpperCase().replace(" ", "_");
+        String canonical = switch (normalized) {
+            case "MONUFIA", "MENOUFIA" -> "MENOFIA";
+            case "SHARQIA" -> "SHARKIA";
+            case "ASSUIT", "ASSIUT" -> "ASYUT";
+            case "MATRUH", "MATROH" -> "MATROUH";
+            default -> normalized;
+        };
+        for (Governorate g : values()) {
+            if (g.name().equals(canonical)) {
+                return g;
+            }
+        }
+        throw new IllegalArgumentException("Unknown governorate: " + name);
+    }
+
+    /**
+     * Accepts either a numeric code ("7") or a name ("fayoum").
      * Throws IllegalArgumentException when neither matches.
      */
     public static Governorate fromCodeOrName(String input) {

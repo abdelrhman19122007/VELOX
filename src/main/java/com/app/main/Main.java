@@ -220,7 +220,7 @@ public class Main {
                         String customerName = session.name;
                         System.out.println("\n[ACCOUNT]: Welcome " + customerName
                                 + " (" + session.email + " | " + phone + " | " + session.governorate + ")");
-                        System.out.println("[LOYALTY]: " + LoyaltyService.progressMessage(userKey));
+                        System.out.println("[LOYALTY]: " + LoyaltyService.progressMessage(session.email));
                         System.out.println("--- OFFERS FOR YOU ---");
                         for (String offer : OfferService.personalizedOffers(
                                 CustomerAccountService.loadUserOrders(userKey))) {
@@ -277,7 +277,7 @@ public class Main {
 
                         // مكافأة الولاء: كل 5 طلبات ناجحة = توصيل مجاني مرة
                         boolean loyaltyRewardApplied = false;
-                        if (deliveryFee > 0 && LoyaltyService.isRewardAvailable(userKey)) {
+                        if (deliveryFee > 0 && LoyaltyService.isRewardAvailable(session.email)) {
                             deliveryFee = 0;
                             loyaltyRewardApplied = true;
                             System.out.println(">>> Loyalty reward applied: FREE delivery (5 successful orders)!");
@@ -316,14 +316,25 @@ public class Main {
                         String paymentError = null;
 
                         if (payChoice == 1) {
-                            // طلب رقم المحفظة من المستخدم
-                            System.out.print("Enter your Wallet Phone Number: ");
-                            String walletNumber = scanner.nextLine().trim();
-                            try {
-                                // إنشاء كائن المحفظة برقم المحفظة والرصيد المتاح
-                                payment = new WalletPayment(walletNumber, userBudget);
-                            } catch (IllegalArgumentException ex) {
-                                paymentError = ex.getMessage();
+                            // Real wallet balance from MySQL (not the simulated budget)
+                            com.app.dao.WebOrderDAO webUsers = new com.app.dao.WebOrderDAO();
+                            Integer walletUserId = webUsers.findUserId(session.email);
+                            double walletBalance = walletUserId == null ? -1
+                                    : new com.app.dao.UserDAO().getBalance(walletUserId);
+                            if (walletUserId == null) {
+                                paymentError = "No database account found for wallet payment.";
+                            } else {
+                                System.out.printf(java.util.Locale.US,
+                                        "[WALLET]: balance = %.2f EGP%n", walletBalance);
+                                // طلب رقم المحفظة من المستخدم
+                                System.out.print("Enter your Wallet Phone Number: ");
+                                String walletNumber = scanner.nextLine().trim();
+                                try {
+                                    // إنشاء كائن المحفظة بالرصيد الحقيقي
+                                    payment = new WalletPayment(walletNumber, walletBalance);
+                                } catch (IllegalArgumentException ex) {
+                                    paymentError = ex.getMessage();
+                                }
                             }
 
                         } else if (payChoice == 2) {
@@ -368,10 +379,47 @@ public class Main {
                             }
                             break;
                         }
+                        if (payChoice == 1) {
+                            // Persist the wallet debit in MySQL (atomic: fails if balance moved).
+                            Integer walletUserId = new com.app.dao.WebOrderDAO().findUserId(session.email);
+                            if (walletUserId == null
+                                    || !new com.app.dao.UserDAO().debit(walletUserId, amountToPay)) {
+                                System.out.println("[WALLET WARNING]: MySQL debit failed. Order kept as paid locally.");
+                            } else {
+                                System.out.println("[WALLET]: Debited from MySQL wallet.");
+                            }
+                        }
+                        // Mirror to MySQL (single source of truth; receipt math stays console-side).
+                        try {
+                            com.app.dao.WebOrderDAO mirror = new com.app.dao.WebOrderDAO();
+                            Integer mirrorUser = mirror.findUserId(session.email);
+                            if (mirrorUser != null) {
+                                java.util.Map<Integer, Integer> qty = new java.util.LinkedHashMap<>();
+                                for (Product p : order.getProducts()) {
+                                    try {
+                                        int pid = Integer.parseInt(p.getId());
+                                        qty.merge(pid, 1, Integer::sum);
+                                    } catch (NumberFormatException ignored) {
+                                    }
+                                }
+                                java.util.List<int[]> mirrorItems = new java.util.ArrayList<>();
+                                for (java.util.Map.Entry<Integer, Integer> e : qty.entrySet()) {
+                                    mirrorItems.add(new int[]{e.getKey(), e.getValue()});
+                                }
+                                double discount = order.calculateRawTotal() - order.calculateFinalTotal();
+                                mirror.placeOrderWithTotals(order.getOrderId(), mirrorUser,
+                                        order.getCity() + ", " + phone, order.getCity(),
+                                        order.calculateRawTotal(), discount, deliveryFee, amountToPay,
+                                        "PAID", mirrorItems);
+                                System.out.println("[DATABASE]: Order mirrored to MySQL.");
+                            }
+                        } catch (Exception ex) {
+                            System.out.println("[DATABASE WARNING]: MySQL mirror failed: " + ex.getMessage());
+                        }
                         PackagingService.packageOrder(order);
                         order.setStatus(OrderStatus.PAID);
                         if (loyaltyRewardApplied) {
-                            LoyaltyService.consumeReward(userKey);
+                            LoyaltyService.consumeReward(session.email);
                             CustomerAccountService.recordReward(userKey, order.getOrderId());
                         }
 
@@ -439,7 +487,7 @@ public class Main {
                         OrderRepository.saveOrders(orderHistory);
                         CustomerAccountService.recordCompletedOrder(order);
                         System.out.println("[DATABASE]: Order saved successfully!");
-                        System.out.println("[LOYALTY]: " + LoyaltyService.progressMessage(userKey));
+                        System.out.println("[LOYALTY]: " + LoyaltyService.progressMessage(session.email));
 
                         // الانتظار لقراءة الفاتورة قبل العودة للمنيو
                         System.out.print("\nPress Enter to return to Main Menu...");
@@ -476,6 +524,7 @@ public class Main {
                             Response<Double> returnResponse = returnService.processReturn(foundOrder);
                             OrderRepository.saveOrders(orderHistory);
                             CustomerAccountService.recordReturn(foundOrder);
+                            new com.app.dao.WebOrderDAO().markReturnedByCode(foundOrder.getOrderId());
                             System.out.println("\n[RETURN SUCCESS]: " + returnResponse.getMessage());
                         } catch (ReturnPolicyException e) {
                             System.out.println("\n[RETURN REJECTED]: " + e.getMessage());

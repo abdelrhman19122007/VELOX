@@ -1,0 +1,9 @@
+
+# VELOX DB config - COPY this file to application.properties and fill real values.
+# NEVER commit application.properties with a real password.
+# Preferred: use environment variables VELOX_DB_URL, VELOX_DB_USER, VELOX_DB_PASSWORD
+# Example: setx VELOX_DB_PASSWORD "your-secret-password"
+db.url=jdbc:mysql://localhost:3306/velox_db
+db.user=root
+# Leave empty here; DatabaseConnection prefers env var VELOX_DB_PASSWORD
+db.password=
