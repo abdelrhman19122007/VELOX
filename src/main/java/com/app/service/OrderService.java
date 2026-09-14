@@ -140,10 +140,12 @@ public class OrderService {
             s.setInt(1, orderDbId);
             try (ResultSet rs = s.executeQuery()) {
                 if (rs.next()) {
+                    boolean delivered = newStatus == OrderStatus.DELIVERED;
                     new NotificationService().notify(rs.getInt("id"),
-                            "تحديث حالة الطلب " + orderCode,
-                            "طلبك " + orderCode + " أصبح الآن: " + newStatus.name(),
-                            "ORDER_STATUS");
+                            delivered ? "تم توصيل طلبك " + orderCode : "تحديث حالة الطلب " + orderCode,
+                            delivered ? "طلبك " + orderCode + " تم توصيله. اضغط لتحميل الفاتورة."
+                                    : "طلبك " + orderCode + " أصبح الآن: " + newStatus.name(),
+                            delivered ? "ORDER_DELIVERED" : "ORDER_STATUS");
                 }
             }
         } catch (SQLException e) {

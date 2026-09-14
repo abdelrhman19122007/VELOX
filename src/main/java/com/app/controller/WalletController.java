@@ -132,8 +132,10 @@ public class WalletController {
     }
 
     private static String normalizeWalletProvider(String raw) {
-        if (raw == null) {
-            return null;
+        // Generic e-wallets only (no brand-specific options); legacy
+        // Vodafone/WE values still map for backward compatibility.
+        if (raw == null || raw.isBlank()) {
+            return "E_WALLET";
         }
         String c = raw.trim().toUpperCase().replace(" ", "_");
         if (c.contains("VODAFONE")) {
@@ -142,11 +144,17 @@ public class WalletController {
         if (c.equals("WE_PAY") || c.equals("WE") || c.contains("WE_PAY")) {
             return "WE_PAY";
         }
-        return null;
+        return "E_WALLET";
     }
 
     private static String providerLabel(String code) {
-        return "VODAFONE_CASH".equals(code) ? "Vodafone Cash" : "WE Pay";
+        if ("VODAFONE_CASH".equals(code)) {
+            return "Vodafone Cash";
+        }
+        if ("WE_PAY".equals(code)) {
+            return "WE Pay";
+        }
+        return "E-Wallet";
     }
 
     private static boolean luhnOk(String digits) {

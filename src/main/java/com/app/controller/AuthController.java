@@ -59,9 +59,31 @@ public class AuthController {
         }
     }
 
-    @PostMapping("/verify-otp")
-    public ResponseEntity<?> verifyOtp(@RequestBody Map<String, String> body) {
+    @PostMapping("/resend-otp")
+    public ResponseEntity<?> resendOtp(@RequestBody Map<String, String> body) {
         String email = body.get("email");
+        if (email == null || !com.app.util.PasswordUtil.isValidEmail(email.trim())) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Valid email is required."));
+        }
+        com.app.dao.UserDAO dao = new com.app.dao.UserDAO();
+        java.util.Map<String, Object> row = dao.findFullByEmail(email.trim());
+        if (row == null) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Account not found. Please register first."));
+        }
+        Object active = row.get("is_active");
+        if (active instanceof Number n && n.intValue() == 1) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Account already verified. Please login."));
+        }
+        String otp = com.app.service.OtpService.issue(email.trim());
+        Map<String, Object> out = new LinkedHashMap<>();
+        out.put("email", email.trim().toLowerCase());
+        out.put("otp", otp);
+        out.put("message", "A new verification code was issued.");
+        return ResponseEntity.ok(out);
+    }
+
+    @PostMapping("/verify-otp")
+    public ResponseEntity<?> verifyOtp(@RequestBody Map<String, String> body) {        String email = body.get("email");
         String code = body.get("code") != null ? body.get("code") : body.get("otp");
         if (email == null || code == null) {
             return ResponseEntity.badRequest().body(Map.of("message", "email and code are required."));
