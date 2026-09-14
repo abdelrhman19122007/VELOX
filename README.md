@@ -1,75 +1,82 @@
-# VELOX Backend
+# VELOX — All-in-One Express Delivery
 
-Spring Boot 3.3 REST API + console app sharing one MySQL database (`velox_db`).
+نظام توصيل متكامل: تطبيق كونسول + REST API (Spring Boot) + واجهة ويب (HTML/CSS/JS) + قاعدة بيانات MySQL — كلهم شغالين على **نفس الداتابيز** كمصدر واحد للحقيقة.
 
-## Architecture note (read first)
+```
+velox-project/
+├── velox-backend/                 # Spring Boot API + console app (Maven, Java 17+)
+│   ├── src/                       # الكود (controllers, services, dao, model, util)
+│   ├── velox-db/                  # سكربتات الداتابيز
+│   │   ├── VELOX_D2.SQL           # الهيكل الأساسي + كتالوج المنتجات
+│   │   └── migrations/            # ترحيلات V2..V6 (تطبق بالترتيب بعد الأساسي)
+│   ├── pom.xml
+│   ├── mvnw / mvnw.cmd            # Maven Wrapper (مش محتاج تثبت Maven)
+│   └── README.md                  # خريطة الـ endpoints والمعمارية بالتفصيل
+├── velox-frontend/                # المتجر (HTML/CSS/JS بدون build)
+│   ├── index.html                 # الواجهة الرئيسية (ابدأ من هنا)
+│   ├── account/orders/...html     # الحساب والطلبات وباقي الصفحات
+│   └── js/ + css/ + assets/       # المنطق والتنسيقات والصور
+├── .gitignore
+└── README.md                      # (الملف ده)
+```
 
-This project uses **raw JDBC** (`java.sql` via `util/DatabaseConnection`), **not
-JPA/Hibernate**. There are no `@Entity` classes: every query lives in `dao/*`
-and DTOs in `dto/*` are populated manually from `ResultSet`s. Keep it that way
-unless the team explicitly migrates to Spring Data JPA.
+## المزايا الشغالة
 
-**Single source of truth is MySQL.** File stores under `data/` (`orders.dat`,
-per-user folders, `transactions.log`) are local caches/audit trails for the
-console app — all API reads/writes go to the database.
+- تسجيل/دخول بالإيميل والباسورد + كود تحقق OTP (6 أرقام) + توكن جلسات في الداتابيز.
+- كتالوج منتجات من الداتابيز (صور + عربي/إنجليزي)، أقسام، محافظات الـ 27 بأسعار الشحن.
+- طلبات من الموقع بسعر محسوب في السيرفر + خصم مخزون + فاتورة PDF بالعربي.
+- محفظة (شحن كارت/محفظة إلكترونية + حفظ طرق الدفع) والدفع منها.
+- ولاء (كل 5 طلبات ناجحة = توصيل مجاني)، عروض مخصصة، إشعارات دائمة، تتبع حي.
+- إرجاع بدورة كاملة (طلب → مراجعة → موافقة → استرداد للمحفظة = الإجمالي − 2× الشحن).
+- شكاوى وتقييمات مربوطة بالطلبات. تطبيق الكونسول مربوط بنفس الداتابيز.
 
-## Run
+## التشغيل من الصفر (أي جهاز)
 
+### المتطلبات
+- **JDK 17** أو أحدث (متجرب على Temurin 25).
+- **MySQL 8** شغالة.
+- متصفح حديث. (المافن بينزل لوحده أول مرة — محتاج إنترنت).
+
+### 1. الداتابيز (مرة واحدة)
+1. اعمل داتابيز فاضية اسمها `velox_db`.
+2. استورد `velox-backend/velox-db/VELOX_D2.SQL` الأول.
+3. طبّق ملفات `velox-backend/velox-db/migrations/` **بالترتيب الرقمي** (V2 ثم V3...).
+4. تأكد: جدول `products` ≈ 25 صف، وجداول `sessions` و`return_requests` و`user_notifications` و`otp_codes` موجودة.
+
+### 2. إعدادات الباك (مرة واحدة لكل جهاز)
+انسخ `velox-backend/src/main/resources/application.properties.example`
+إلى `application.properties` (نفس المجلد) واكتب باسورد MySQL بتاع جهازك،
+**أو** (الأفضل) عرّف متغيرات البيئة — هي اللي بتتكسب دايماً:
 ```powershell
-$env:JAVA_HOME = 'C:\Program Files\Eclipse Adoptium\jdk-25.0.4.7-hotspot'
+setx VELOX_DB_URL "jdbc:mysql://localhost:3306/velox_db"
+setx VELOX_DB_USER "root"
+setx VELOX_DB_PASSWORD "باسورد جهازك"
+```
+> ملف `application.properties` خارج تتبع Git عمداً — كل جهاز يحتفظ بنسخته.
+
+### 3. تشغيل الباك اند
+```powershell
 cd velox-backend
 .\mvnw.cmd spring-boot:run
 ```
+استنى سطر `Started VeloxApplication`، وجرّب في المتصفح:
+`http://localhost:8080/api/governorates/CAIRO` (لازم يرجع JSON).
 
-DB config: `src/main/resources/application.properties` (local only, **git-ignored** —
-copy `application.properties.example`). Env vars win when set:
-`VELOX_DB_URL`, `VELOX_DB_USER`, `VELOX_DB_PASSWORD`.
-Requires MySQL with `velox_db` imported (see `velox-db/VELOX_D2.SQL` + `velox-db/migrations/` in numeric order).
+### 4. تشغيل الفرونت
+دبل كليك على `velox-frontend/index.html` (الباك لازم يكون شغال الأول).
+سجّل حساب جديد (أي محافظة حتى أسيوط/المنوفية) → أكّد كود الـ OTP →
+تصفح → اشحن المحفظة → اطلب → حمّل الفاتورة → تابع التتبع.
 
-Console app: `.\mvnw.cmd exec:java` (runs `com.app.main.Main`). Note: `java -jar`
-runs the API (`VeloxApplication`), not the console.
+### 5. الكونسول (اختياري)
+```powershell
+cd velox-backend
+.\mvnw.cmd exec:java
+```
+ملاحظة: `java -jar` بيشغل الـ API مش الكونسول.
 
-## Endpoints (all JSON, `/api` prefix, CORS open)
-
-| Method & path | Auth | Description |
-|---|---|---|
-| POST `/auth/register` | no | `{email,password,name\|full_name,phone\|phone_number,governorate}` → `{token,user}` |
-| POST `/auth/login` | no | `{email,password}` → `{token,user}` |
-| POST `/auth/logout` | Bearer | revokes token |
-| GET `/auth/profile?userId=` | Bearer (self) | profile + loyalty + offers |
-| PUT `/auth/profile` | Bearer (self) | update name/phone/governorate |
-| GET `/products` | no | catalog in storefront shape (incl. `image`, Arabic names) |
-| GET `/api/categories` … `/categories` | no | all/food/fashion/electronics with counts |
-| GET `/governorates`, `/{name}`, `/{name}/shipping` | no | 27 governorates, codes, prices |
-| GET `/orders/history?userId=&page=&size=` | Bearer (self) | paged history from MySQL |
-| POST `/orders` | Bearer | `{items:[{product_id,quantity}], governorate?, paymentMethod?}` server-priced |
-| GET `/orders/{id}/tracking` | Bearer (owner) | timeline + driver location |
-| PATCH `/orders/{id}/status?status=` | Bearer (owner) | forward-only transitions, persisted |
-| GET `/orders/{id}/invoice` | Bearer (owner) | `application/pdf` (Arabic-capable) |
-| GET `/offers/personalized?userId=` | Bearer (self) | offers from purchase history |
-| GET `/loyalty/status?userId=` | Bearer (self) | progress toward free delivery |
-| GET `/wallet/balance?userId=` | Bearer (self) | `remaining_budget` |
-| POST `/wallet/topup` | Bearer | `{amount}` |
-| POST `/reviews` | Bearer | `{orderId?, rating 1-5, comment?}` |
-| POST `/complaints` | Bearer | `{orderId?, details}` |
-
-Error shape: `{ "message": "..." }` with 400/401/403/404/500 as appropriate.
-
-## Background jobs
-
-`DeliverySimulationService` (`@Scheduled`, 30s tick) advances PENDING (older
-than 60s) → PROCESSING → IN_TRANSIT → ARRIVED → DELIVERED, writing
-`orders.status`, `deliveries` and `driver_locations` (system courier
-`courier@velox.local`).
-
-## Tables with no writers (documented, not wired)
-
-`payments`, `promo_codes`, `promotions_and_offers`, `reviews_and_complaints`:
-schema exists for future use; nothing reads/writes them yet. Notifications are
-frontend-local only (no `notifications` table by design decision).
-
-## Migrations
-
-Versioned SQL in `migrations/` (apply in order): `V2` (27 governorates,
-`SHIPPED`, `order_code`, loyalty counter, `sessions`, product images/Arabic),
-`V3` (deliveries zone widen, nullable review/complaint order links, courier).
+## للمطورين
+- خريطة الـ endpoints الكاملة: `velox-backend/README.md`.
+- البنية JDBC خام (مش JPA) — أي استعلام في `velox-backend/src/main/java/com/app/dao/`.
+- Single source of truth هي MySQL؛ ملفات `data/` كاش محلي (متتجاهَلة).
+- الفروع: الشغل الأساسي على `main`. ممنوع push مباشر لأسرار أو ملفات `.dat`.
+- مشاكل شائعة: `Access denied` = MySQL واقفة أو الباسورد غلط؛ `Port 8080 in use` = شباك سيرفر قديم مفتوح؛ أحمر في IntelliJ = Maven Reload + JDK 17+ + تفعيل annotation processing (Lombok).

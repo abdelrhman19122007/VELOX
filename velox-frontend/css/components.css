@@ -1,0 +1,12 @@
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:48px;padding:0 20px;border:1px solid transparent;border-radius:15px;font-weight:800;white-space:nowrap;transition:transform var(--duration-fast) var(--ease-out),box-shadow var(--duration-fast) var(--ease-out),background-color var(--duration-fast) var(--ease-out),border-color var(--duration-fast) var(--ease-out);}
+.btn:active{transform:scale(.98)}
+.btn-primary{background:linear-gradient(135deg,var(--velox-blue),#6858ff);color:#fff;box-shadow:0 12px 26px rgba(59,91,255,.27)}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 15px 30px rgba(59,91,255,.32)}
+.btn-ghost{background:var(--color-surface);color:var(--color-text);border-color:var(--color-border);box-shadow:var(--shadow-sm)}
+.btn-ghost:hover{border-color:#C9D2EA;background:var(--color-surface-alt)}
+.btn-block{width:100%}
+.spinner{width:18px;height:18px;border:2.5px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;display:none;animation:spin .7s linear infinite}
+.btn.is-loading .spinner{display:block}.btn.is-loading{pointer-events:none;opacity:.8}.btn.is-loading .btn-label{opacity:.85}
+@keyframes spin{to{transform:rotate(360deg)}}
+.field{display:flex;flex-direction:column;gap:7px;margin-bottom:14px}.field label{font-size:13px;font-weight:800}.field input,.field select{width:100%;height:48px;padding:0 14px;border:1.5px solid var(--color-border);border-radius:13px;background:var(--color-surface);color:var(--color-text);transition:border-color .15s,box-shadow .15s}.field input:focus,.field select:focus{outline:none;border-color:var(--color-primary);box-shadow:0 0 0 4px rgba(59,91,255,.12)}.field-hint{font-size:11px;min-height:1.1em;color:var(--color-text-muted)}.input-wrap{position:relative}.input-wrap .input-icon-btn{position:absolute;inset-inline-end:7px;top:7px;width:34px;height:34px;border:0;border-radius:10px;background:transparent;color:var(--color-text-muted)}.input-wrap input{padding-inline-end:46px}.form-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}.text-btn{border:0;background:none;color:var(--color-primary);font-weight:800}.text-btn:hover{text-decoration:underline}
+.alert{padding:10px 12px;border-radius:12px;font-size:12px;font-weight:700;margin:10px 0}.alert-success{background:var(--color-success-bg);color:var(--color-success)}.alert-error{background:rgba(216,62,86,.10);color:var(--color-error)}

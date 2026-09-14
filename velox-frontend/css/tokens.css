@@ -1,0 +1,66 @@
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap');
+
+:root {
+  --velox-blue: #3B5BFF;
+  --velox-blue-strong: #253DD9;
+  --velox-cyan: #36D9F6;
+  --velox-pink: #FF5DA2;
+  --velox-orange: #FFB84D;
+  --velox-purple: #8E6CFF;
+  --velox-ink: #0B1020;
+  --color-primary: var(--velox-blue);
+  --color-primary-hover: var(--velox-blue-strong);
+  --color-accent: var(--velox-cyan);
+  --color-background: #F7F9FF;
+  --color-surface: #FFFFFF;
+  --color-surface-alt: #EEF2FF;
+  --color-text: #11182B;
+  --color-text-muted: #69738A;
+  --color-text-on-primary: #FFFFFF;
+  --color-border: #E5E9F4;
+  --color-border-strong: #CBD2E3;
+  --color-success: #20B486;
+  --color-success-bg: #E9FBF5;
+  --color-warning: #D88A16;
+  --color-error: #D83E56;
+  --shadow-sm: 0 4px 14px rgba(29, 45, 98, .06);
+  --shadow-md: 0 16px 38px rgba(39, 56, 119, .10);
+  --shadow-lg: 0 24px 70px rgba(28, 44, 100, .17);
+  --font-base: 'Cairo', 'Segoe UI', Tahoma, sans-serif;
+  --fs-xs: .75rem;
+  --fs-sm: .875rem;
+  --fs-base: 1rem;
+  --fs-md: 1.1rem;
+  --fs-lg: 1.4rem;
+  --fs-xl: 1.9rem;
+  --fs-2xl: 3.35rem;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 26px;
+  --radius-xl: 34px;
+  --radius-pill: 999px;
+  --ease-out: cubic-bezier(.16, 1, .3, 1);
+  --duration-fast: 160ms;
+  --duration-base: 280ms;
+}
+
+[data-theme="dark"] {
+  --color-background: #0A0F20;
+  --color-surface: #12192B;
+  --color-surface-alt: #182137;
+  --color-text: #F3F6FF;
+  --color-text-muted: #9EA9C2;
+  --color-border: #26304A;
+  --color-border-strong: #394763;
+  --shadow-sm: 0 4px 14px rgba(0, 0, 0, .2);
+  --shadow-md: 0 16px 38px rgba(0, 0, 0, .25);
+  --shadow-lg: 0 24px 70px rgba(0, 0, 0, .34);
+}
