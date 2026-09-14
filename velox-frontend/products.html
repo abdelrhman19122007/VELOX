@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="VELOX — استكشف المنتجات حسب القسم وشاهد الصور والتفاصيل بوضوح.">
+  <title>VELOX — المنتجات</title>
+  <script>(function(){var theme=localStorage.getItem('velox_theme')||(window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',theme);var lang=localStorage.getItem('velox_lang')||'ar';document.documentElement.setAttribute('lang',lang);document.documentElement.setAttribute('dir',lang==='ar'?'rtl':'ltr');})();</script>
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/home.css">
+</head>
+<body class="storefront-page catalog-page">
+  <header class="site-header" id="top">
+    <button type="button" class="menu-toggle" id="side-menu-toggle" aria-label="فتح القائمة"><span>☰</span></button>
+    <div class="container header-inner">
+      <a class="brand-lockup" href="index.html" aria-label="VELOX"><img src="assets/images/velox-logo.jpeg" alt="VELOX" class="brand-logo"><span class="brand-copy"><strong>VELOX</strong><small data-i18n="app.tagline">كل شيء يوصلك في مكان واحد</small></span></a>
+      <div class="header-search"><label class="search-box" for="product-search"><span class="search-icon" aria-hidden="true">⌕</span><input id="product-search" type="search" data-i18n-placeholder="home.searchPlaceholder" placeholder="ابحث عن منتج، مطعم، أو متجر..." autocomplete="off" aria-controls="product-grid"><button type="button" id="search-clear" class="search-clear" hidden aria-label="مسح البحث">×</button><kbd>⌘ K</kbd></label></div>
+      <div class="header-actions"><button type="button" class="header-btn hide-mobile" id="theme-toggle" data-i18n-aria-label="nav.toggleTheme" aria-label="تبديل الوضع الليلي"><span aria-hidden="true">◐</span></button><button type="button" class="header-btn hide-mobile lang-btn" id="lang-toggle" data-i18n="nav.toggleLang">English</button><button type="button" class="header-btn account-btn" id="account-btn"><span class="account-icon" aria-hidden="true">◉</span><span id="account-label" data-i18n="home.login">تسجيل الدخول</span></button><a class="header-btn notification-btn" href="notifications.html" aria-label="الإشعارات" title="الإشعارات"><span aria-hidden="true">◌</span><b class="notification-count">3</b></a><button type="button" class="cart-btn" id="cart-toggle" aria-label="السلة" title="السلة"><span aria-hidden="true">🛒</span><b class="cart-count" id="cart-count">0</b></button></div>
+    </div>
+  </header>
+  <aside class="side-nav" id="side-nav" aria-label="التنقل الرئيسي" aria-hidden="true">
+    <div class="side-nav-head"><div class="side-brand"><span class="side-brand-dot">V</span><div><strong>VELOX</strong><small data-i18n="sidebar.quick">اختصارات سريعة</small></div></div><button type="button" class="side-close" id="side-nav-close" aria-label="إغلاق">×</button></div>
+    <div class="side-nav-section-label" data-i18n="sidebar.nav">التنقل</div><nav class="side-nav-links"><a href="index.html"><span>⌂</span><span data-i18n="sidebar.home">الرئيسية</span></a><a href="index.html#categories"><span>◫</span><span data-i18n="sidebar.categories">الأقسام</span></a><a href="products.html?category=all"><span>▦</span><span data-i18n="sidebar.products">المنتجات</span><b id="side-product-count">22</b></a><button type="button" id="side-cart-link"><span>🛒</span><span data-i18n="sidebar.cart">السلة</span><b id="side-cart-count">0</b></button><a href="orders.html"><span>◴</span><span data-i18n="sidebar.orders">طلباتي</span></a><a href="favorites.html"><span>♡</span><span data-i18n="sidebar.favorites">المفضلة</span></a></nav>
+    <div class="side-nav-section-label" data-i18n="sidebar.yourAccount">حسابك</div><nav class="side-nav-links side-nav-links-secondary"><a href="account.html"><span>◉</span><span data-i18n="sidebar.profile">الحساب الشخصي</span></a><a href="notifications.html"><span>◌</span><span data-i18n="sidebar.notifications">الإشعارات</span><b class="notification-badge">3</b></a><a href="settings.html"><span>⚙</span><span data-i18n="sidebar.settings">الضبط</span></a><a href="support.html"><span>?</span><span data-i18n="sidebar.support">المساعدة والتواصل</span></a><a href="feedback.html"><span>✎</span><span data-i18n="sidebar.feedback">الشكاوى والاقتراحات</span></a><a href="rating.html"><span>★</span><span data-i18n="sidebar.rating">تقييم التطبيق</span></a></nav>
+    <div class="side-nav-bottom"><button type="button" id="side-theme-link"><span>◐</span><span data-i18n="sidebar.theme">الوضع الليلي</span></button><button type="button" id="side-lang-link"><span>文</span><span data-i18n="sidebar.language">English</span></button></div>
+  </aside><div class="side-nav-backdrop" id="side-nav-backdrop" hidden></div>
+  <main>
+    <section class="catalog-page-hero"><div class="container"><a class="back-link" href="index.html">← <span data-i18n="catalog.backHome">العودة للرئيسية</span></a><div class="catalog-page-head"><div><span class="eyebrow" data-i18n="catalog.eyebrow">متجر VELOX</span><h1 id="catalog-title">كل منتجات VELOX</h1><p id="catalog-subtitle">اختار قسمًا أو ابحث عن منتج، ثم افتح الصورة لرؤية التفاصيل بوضوح.</p></div><div class="catalog-count"><strong id="catalog-count">22</strong><span data-i18n="catalog.items">منتج</span></div></div><div class="products-toolbar"><div class="filter-pills" id="filter-pills"></div><div class="search-meta" id="search-meta" hidden></div></div></div></section>
+    <section class="products-section catalog-products"><div class="container section-shell"><div class="product-grid" id="product-grid"></div><div class="empty-products" id="empty-products" hidden><div class="empty-icon">⌕</div><h3 data-empty-title data-i18n="home.emptyTitle">مفيش نتائج بالشكل ده</h3><p data-empty-subtitle data-i18n="home.emptySubtitle">جرّب كلمة بحث تانية أو اختار فئة مختلفة.</p></div></div></section>
+  </main>
+  <footer class="site-footer"><div class="container footer-inner"><div class="brand-lockup footer-brand"><img src="assets/images/velox-logo.jpeg" alt="VELOX" class="brand-logo"><span class="brand-copy"><strong>VELOX</strong><small data-i18n="app.tagline">كل شيء يوصلك في مكان واحد</small></span></div></div></footer>
+
+  <div class="modal-backdrop" id="product-modal" hidden><div class="modal-card product-modal-card" role="dialog" aria-modal="true" aria-labelledby="product-modal-title"><button class="modal-close" type="button" data-close-modal aria-label="إغلاق">×</button><div class="product-modal-layout"><div class="product-modal-visual"><span class="product-badge" id="product-modal-badge" hidden></span><img id="product-modal-image" src="" alt=""><div class="product-modal-thumbs" id="product-modal-thumbs" hidden></div></div><div class="product-modal-info"><span class="eyebrow" id="product-modal-store">VELOX</span><h2 id="product-modal-title">—</h2><p id="product-modal-desc">—</p><div class="product-modal-price"><strong id="product-modal-price">0 EGP</strong><span>EGP</span></div><button type="button" class="btn btn-primary btn-block" id="product-modal-add"><span data-i18n="catalog.addToCart">إضافة للسلة</span><span>←</span></button></div></div></div></div>
+  <!-- Auth modal: optional on browsing, required only at checkout. -->
+  <div class="modal-backdrop" id="auth-modal" hidden>
+    <div class="modal-card auth-modal-card" role="dialog" aria-modal="true" aria-labelledby="auth-modal-title">
+      <button class="modal-close" type="button" data-close-modal aria-label="إغلاق">×</button>
+      <div class="modal-logo"><img src="assets/images/velox-logo.jpeg" alt="VELOX"></div>
+      <div class="modal-intro"><span class="eyebrow" data-i18n="authModal.eyebrow">حساب VELOX</span><h2 id="auth-modal-title">تسجيل الدخول</h2><p id="auth-modal-subtitle">سجّل الدخول لإكمال طلبك بسرعة وأمان.</p></div>
+      <div class="auth-tabs"><button class="auth-tab is-active" data-auth-tab="login" data-i18n="authModal.loginTab">تسجيل الدخول</button><button class="auth-tab" data-auth-tab="register" data-i18n="authModal.registerTab">حساب جديد</button></div>
+
+      <form id="modal-login-form" class="modal-form" novalidate>
+        <div class="field"><label for="modal-login-email" data-i18n="form.email.label">البريد الإلكتروني</label><input type="email" id="modal-login-email" name="email" autocomplete="email" placeholder="name@example.com"><div class="field-hint"></div></div>
+        <div class="field"><label for="modal-login-password" data-i18n="form.password.label">كلمة المرور</label><div class="input-wrap"><input type="password" id="modal-login-password" name="password" autocomplete="current-password" placeholder="••••••••"><button type="button" class="input-icon-btn" data-toggle-password="modal-login-password" aria-label="إظهار كلمة المرور">◉</button></div><div class="field-hint"></div></div>
+        <div id="modal-login-alert" aria-live="polite"></div>
+        <button type="submit" class="btn btn-primary btn-block" id="modal-login-submit"><span class="spinner"></span><span class="btn-label" data-i18n="login.submit">تسجيل الدخول</span></button>
+      </form>
+
+      <form id="modal-register-form" class="modal-form" hidden novalidate>
+        <div class="form-grid-2">
+          <div class="field"><label for="modal-register-name" data-i18n="form.fullName.label">الاسم الكامل</label><input type="text" id="modal-register-name" name="full_name" data-i18n-placeholder="form.fullName.placeholder" placeholder="مثال: هدى ياسر"><div class="field-hint"></div></div>
+          <div class="field"><label for="modal-register-phone" data-i18n="form.phone.label">رقم الهاتف</label><input type="tel" id="modal-register-phone" name="phone_number" placeholder="01xxxxxxxxx"><div class="field-hint"></div></div>
+        </div>
+        <div class="field"><label for="modal-register-email" data-i18n="form.email.label">البريد الإلكتروني</label><input type="email" id="modal-register-email" name="email" placeholder="name@example.com"><div class="field-hint"></div></div>
+        <div class="form-grid-2">
+          <div class="field"><label for="modal-register-governorate" data-i18n="form.governorate.label">المحافظة</label><select id="modal-register-governorate" name="governorate"><option value="">اختر المحافظة</option><option value="CAIRO" data-i18n="form.governorate.CAIRO">القاهرة</option><option value="GIZA" data-i18n="form.governorate.GIZA">الجيزة</option><option value="ALEXANDRIA" data-i18n="form.governorate.ALEXANDRIA">الإسكندرية</option><option value="DAMIETTA" data-i18n="form.governorate.DAMIETTA">دمياط</option><option value="BEHEIRA" data-i18n="form.governorate.BEHEIRA">البحيرة</option><option value="KAFR_EL_SHEIKH" data-i18n="form.governorate.KAFR_EL_SHEIKH">كفر الشيخ</option><option value="GHARBIA" data-i18n="form.governorate.GHARBIA">الغربية</option><option value="MENOFIA" data-i18n="form.governorate.MENOFIA">المنوفية</option><option value="QALYUBIA" data-i18n="form.governorate.QALYUBIA">القليوبية</option><option value="SHARKIA" data-i18n="form.governorate.SHARKIA">الشرقية</option><option value="DAKAHLIA" data-i18n="form.governorate.DAKAHLIA">الدقهلية</option><option value="PORT_SAID" data-i18n="form.governorate.PORT_SAID">بورسعيد</option><option value="ISMAILIA" data-i18n="form.governorate.ISMAILIA">الإسماعيلية</option><option value="SUEZ" data-i18n="form.governorate.SUEZ">السويس</option><option value="NORTH_SINAI" data-i18n="form.governorate.NORTH_SINAI">شمال سيناء</option><option value="SOUTH_SINAI" data-i18n="form.governorate.SOUTH_SINAI">جنوب سيناء</option><option value="FAYOUM" data-i18n="form.governorate.FAYOUM">الفيوم</option><option value="BENI_SUEF" data-i18n="form.governorate.BENI_SUEF">بني سويف</option><option value="MINYA" data-i18n="form.governorate.MINYA">المنيا</option><option value="ASYUT" data-i18n="form.governorate.ASYUT">أسيوط</option><option value="SOHAG" data-i18n="form.governorate.SOHAG">سوهاج</option><option value="QENA" data-i18n="form.governorate.QENA">قنا</option><option value="LUXOR" data-i18n="form.governorate.LUXOR">الأقصر</option><option value="ASWAN" data-i18n="form.governorate.ASWAN">أسوان</option><option value="NEW_VALLEY" data-i18n="form.governorate.NEW_VALLEY">الوادي الجديد</option><option value="MATROUH" data-i18n="form.governorate.MATROUH">مطروح</option><option value="RED_SEA" data-i18n="form.governorate.RED_SEA">البحر الأحمر</option></select><div class="field-hint"></div></div>
+          <div class="field"><label for="modal-register-password" data-i18n="form.password.label">كلمة المرور</label><input type="password" id="modal-register-password" name="password" autocomplete="new-password" placeholder="••••••••"><div class="field-hint"></div></div>
+        </div>
+        <div id="modal-register-alert" aria-live="polite"></div>
+        <button type="submit" class="btn btn-primary btn-block" id="modal-register-submit"><span class="spinner"></span><span class="btn-label" data-i18n="register.submit">إنشاء الحساب</span></button>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="location-modal" hidden>
+    <div class="modal-card location-modal-card" role="dialog" aria-modal="true" aria-labelledby="location-title">
+      <button class="modal-close" type="button" data-close-modal aria-label="إغلاق">×</button>
+      <div class="modal-icon-bubble">📍</div>
+      <span class="eyebrow" data-i18n="locationModal.eyebrow">التوصيل عندك</span>
+      <h2 id="location-title" data-i18n="locationModal.title">اختار المحافظة</h2>
+      <p data-i18n="locationModal.subtitle">هنستخدم اختيارك لتصفية المتاجر والمنتجات المناسبة لاحقًا.</p>
+      <div class="location-grid" id="location-grid"><button type="button" data-location="CAIRO">القاهرة</button><button type="button" data-location="GIZA">الجيزة</button><button type="button" data-location="ALEXANDRIA">الإسكندرية</button><button type="button" data-location="DAMIETTA">دمياط</button><button type="button" data-location="BEHEIRA">البحيرة</button><button type="button" data-location="KAFR_EL_SHEIKH">كفر الشيخ</button><button type="button" data-location="GHARBIA">الغربية</button><button type="button" data-location="MENOFIA">المنوفية</button><button type="button" data-location="QALYUBIA">القليوبية</button><button type="button" data-location="SHARKIA">الشرقية</button><button type="button" data-location="DAKAHLIA">الدقهلية</button><button type="button" data-location="PORT_SAID">بورسعيد</button><button type="button" data-location="ISMAILIA">الإسماعيلية</button><button type="button" data-location="SUEZ">السويس</button><button type="button" data-location="NORTH_SINAI">شمال سيناء</button><button type="button" data-location="SOUTH_SINAI">جنوب سيناء</button><button type="button" data-location="FAYOUM">الفيوم</button><button type="button" data-location="BENI_SUEF">بني سويف</button><button type="button" data-location="MINYA">المنيا</button><button type="button" data-location="ASYUT">أسيوط</button><button type="button" data-location="SOHAG">سوهاج</button><button type="button" data-location="QENA">قنا</button><button type="button" data-location="LUXOR">الأقصر</button><button type="button" data-location="ASWAN">أسوان</button><button type="button" data-location="NEW_VALLEY">الوادي الجديد</button><button type="button" data-location="MATROUH">مطروح</button><button type="button" data-location="RED_SEA">البحر الأحمر</button></div>
+    </div>
+  </div>
+
+  
+
+  <script src="js/config.js"></script>
+  <script src="js/i18n.js"></script>
+  <script src="js/theme.js"></script>
+  <script src="js/navControls.js"></script>
+  <script src="js/utils/validation.js"></script>
+  <script src="js/utils/domUtils.js"></script>
+  <script src="js/services/apiClient.js"></script>
+  <script src="js/services/authService.js"></script>
+  <script src="js/services/catalogService.js"></script>
+  <script src="js/services/orderService.js"></script>
+  <script src="js/pages/storefrontPage.js"></script>
+<aside class="cart-drawer fixed top-0 bottom-0 h-full" id="cart-drawer" aria-label="سلة التسوق" aria-hidden="true" hidden>
+    <div class="cart-drawer-header"><div><span class="eyebrow" data-i18n="cart.eyebrow">سلتك</span><h2 data-i18n="cart.title">مراجعة الطلب</h2></div><button class="modal-close" type="button" id="cart-close" aria-label="إغلاق">×</button></div>
+    <div class="cart-items" id="cart-items"></div>
+    <div class="cart-empty" id="cart-empty"><div class="empty-icon">🛒</div><h3 data-i18n="cart.emptyTitle">السلة فاضية</h3><p data-i18n="cart.emptySubtitle">أضف منتجات من الصفحة الرئيسية وهتظهر هنا.</p></div>
+    <div class="cart-drawer-footer" id="cart-footer" hidden>
+      <div class="cart-total"><span data-i18n="cart.total">الإجمالي</span><strong id="cart-total">0 EGP</strong></div>
+      <div class="pay-method-row"><label for="pay-method" data-i18n="cart.payMethod">طريقة الدفع</label><select id="pay-method"><option value="CASH_ON_DELIVERY" data-i18n="cart.payCash">كاش عند الاستلام</option><option value="WALLET" data-i18n="cart.payWallet">المحفظة</option></select></div>
+      <button type="button" class="btn btn-primary btn-block" id="checkout-btn"><span data-i18n="cart.checkout">متابعة لإتمام الطلب</span><span>←</span></button>
+      <small data-i18n="cart.checkoutHint">سيُطلب تسجيل الدخول عند تأكيد الأوردر فقط.</small>
+    </div>
+  </aside>
+  <div class="drawer-backdrop" id="drawer-backdrop" hidden></div>
+</body>
+</html>
