@@ -65,9 +65,107 @@ public class DeliverySimulationService {
                 setDelivered(id);
                 setDeliveryStatus(id, "DELIVERED");
             }
+            // Return pipeline: one step per tick with a notification each time.
+            advanceReturns();
         } catch (Exception e) {
             System.err.println("[Simulator] tick failed: " + e.getMessage());
         }
+    }
+
+    /**
+     * Return pipeline: one step per tick + wallet refund on approval.
+     * Refund = total paid - 2 x delivery fee (original + return shipping),
+     * floored at zero. A notification fires at every stage.
+     */
+    private void advanceReturns() {
+        for (ReturnRow r : returnRows("RETURN_REQUESTED")) {
+            setReturnStatus(r.id(), "RETURN_UNDER_REVIEW");
+            notifyUser(r.userId(), "طلبك قيد المراجعة",
+                    "طلب إرجاع الطلب " + r.code() + " قيد المراجعة الآن.", "RETURN");
+        }
+        for (ReturnRow r : returnRows("RETURN_UNDER_REVIEW")) {
+            double refund = Math.max(0, r.total() - 2 * r.deliveryFee());
+            try (Connection conn = DatabaseConnection.getConnection()) {
+                try (PreparedStatement s = conn.prepareStatement(
+                        "UPDATE return_requests SET status = 'RETURN_APPROVED' WHERE id = ?")) {
+                    s.setInt(1, r.id());
+                    s.executeUpdate();
+                }
+                try (PreparedStatement s = conn.prepareStatement(
+                        "UPDATE users SET remaining_budget = remaining_budget + ? WHERE id = ?")) {
+                    s.setDouble(1, refund);
+                    s.setInt(2, r.userId());
+                    s.executeUpdate();
+                }
+            } catch (SQLException e) {
+                System.err.println("[Simulator] return approve failed: " + e.getMessage());
+                continue;
+            }
+            notifyUser(r.userId(), "تمت الموافقة على الإرجاع",
+                    "تمت الموافقة على إرجاع الطلب " + r.code() + " وتحويل "
+                            + String.format(java.util.Locale.US, "%.2f", refund) + " EGP لمحفظتك.",
+                    "RETURN");
+        }
+        for (ReturnRow r : returnRows("RETURN_APPROVED")) {
+            try (Connection conn = DatabaseConnection.getConnection();
+                 PreparedStatement s = conn.prepareStatement(
+                         "UPDATE return_requests SET status = 'REFUND_PROCESSED' WHERE id = ?")) {
+                s.setInt(1, r.id());
+                s.executeUpdate();
+            } catch (SQLException e) {
+                System.err.println("[Simulator] return finalize failed: " + e.getMessage());
+                continue;
+            }
+            try (Connection conn = DatabaseConnection.getConnection();
+                 PreparedStatement s = conn.prepareStatement(
+                         "UPDATE orders SET status = 'RETURNED', is_returned = 1 WHERE id = ?")) {
+                s.setInt(1, r.orderId());
+                s.executeUpdate();
+            } catch (SQLException e) {
+                System.err.println("[Simulator] return order flag failed: " + e.getMessage());
+            }
+            notifyUser(r.userId(), "تم تحويل المبلغ",
+                    "تم تحويل المبلغ المسترد إلى محفظتك عن الطلب " + r.code() + ".", "RETURN");
+        }
+    }
+
+    private record ReturnRow(int id, int orderId, int userId, String code, double total, double deliveryFee) {
+    }
+
+    private List<ReturnRow> returnRows(String status) {
+        List<ReturnRow> out = new ArrayList<>();
+        String sql = "SELECT r.id, r.order_id, r.user_id, o.order_code, o.final_amount, o.delivery_fee"
+                + " FROM return_requests r JOIN orders o ON o.id = r.order_id WHERE r.status = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement s = conn.prepareStatement(sql)) {
+            s.setString(1, status);
+            try (ResultSet rs = s.executeQuery()) {
+                while (rs.next()) {
+                    out.add(new ReturnRow(rs.getInt("id"), rs.getInt("order_id"), rs.getInt("user_id"),
+                            rs.getString("order_code"), rs.getDouble("final_amount"),
+                            rs.getDouble("delivery_fee")));
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("[Simulator] return list failed: " + e.getMessage());
+        }
+        return out;
+    }
+
+    private void setReturnStatus(int id, String status) {
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement s = conn.prepareStatement(
+                     "UPDATE return_requests SET status = ? WHERE id = ?")) {
+            s.setString(1, status);
+            s.setInt(2, id);
+            s.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println("[Simulator] return status failed: " + e.getMessage());
+        }
+    }
+
+    private void notifyUser(int userId, String title, String message, String type) {
+        new NotificationService().notify(userId, title, message, type);
     }
 
     private int courierId() {

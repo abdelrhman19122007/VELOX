@@ -194,6 +194,49 @@ public class UserDAO {
         }
     }
 
+    /** Saves a card reference (last 4 + brand only, never the full number). */
+    public boolean saveCard(int userId, String holderName, String last4, String brand) {
+        if (userId <= 0 || last4 == null || !last4.matches("\\d{4}")) {
+            return false;
+        }
+        String sql = "INSERT INTO user_payment_cards (user_id, cardholder_name, last_4_digits, card_brand)"
+                + " VALUES (?, ?, ?, ?)";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, userId);
+            stmt.setString(2, holderName == null || holderName.isBlank() ? "" : holderName.trim());
+            stmt.setString(3, last4);
+            stmt.setString(4, brand == null ? "Unknown" : brand);
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("[UserDAO] save card failed: " + e.getMessage());
+            return false;
+        }
+    }
+
+    public java.util.List<java.util.Map<String, Object>> listCards(int userId) {
+        java.util.List<java.util.Map<String, Object>> out = new java.util.ArrayList<>();
+        String sql = "SELECT id, cardholder_name, last_4_digits, card_brand, created_at"
+                + " FROM user_payment_cards WHERE user_id = ? ORDER BY id DESC";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, userId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    java.util.Map<String, Object> m = new java.util.LinkedHashMap<>();
+                    m.put("id", rs.getInt("id"));
+                    m.put("cardholder_name", rs.getString("cardholder_name"));
+                    m.put("last_4_digits", rs.getString("last_4_digits"));
+                    m.put("card_brand", rs.getString("card_brand"));
+                    out.add(m);
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("[UserDAO] list cards failed: " + e.getMessage());
+        }
+        return out;
+    }
+
     /** Current wallet balance (remaining_budget). */
     public double getBalance(int userId) {
         try (Connection conn = DatabaseConnection.getConnection();

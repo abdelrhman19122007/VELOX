@@ -2,6 +2,7 @@ package com.app.service;
 
 import com.app.dao.WebOrderDAO;
 import com.app.enums.Governorate;
+import com.app.enums.OrderStatus;
 import com.app.enums.Size;
 import com.app.model.order.Order;
 import com.app.model.product.ClothingItem;
@@ -112,6 +113,70 @@ public class WebOrderService {
             out.put("walletCharged", walletCharged);
         }
         return out;
+    }
+
+    /**
+     * Rebuilds the file copies (per-user + global) for a DB order,
+     * e.g. after cache cleanup. Returns false when the order is unknown.
+     */
+    @SuppressWarnings("unchecked")
+    public boolean resyncFileCopy(String codeOrId) {
+        Map<String, Object> data = dao.invoiceData(codeOrId);
+        if (data == null) {
+            return false;
+        }
+        String code = String.valueOf(data.getOrDefault("orderCode", codeOrId));
+        String email = String.valueOf(data.getOrDefault("email", ""));
+        String shipping = String.valueOf(data.getOrDefault("shipping", ""));
+        String city = shipping.contains(",") ? shipping.split(",")[0].trim() : shipping;
+        String phone = "";
+        Order order = new Order(code, email, city.isEmpty() ? "CAIRO" : city, phone);
+        order.setCustomerNameForDelivery(String.valueOf(data.getOrDefault("customer", "")));
+        // Rebuild items from DB lines (name/qty/unit known; type/size defaulted).
+        Object rawLines = data.get("lines");
+        if (rawLines instanceof List<?> list2) {
+            for (Object o : list2) {
+                if (o instanceof Map<?, ?> line) {
+                    int qty = 1;
+                    try {
+                        qty = Integer.parseInt(String.valueOf(line.get("quantity")).trim());
+                    } catch (Exception ignored) {
+                    }
+                    double unit = toDouble(line.get("unit"), 0);
+                    String nm = String.valueOf(line.get("name"));
+                    com.app.model.product.Product p =
+                            new com.app.model.product.FoodItem("0", nm, unit, "", com.app.enums.Size.MEDIUM);
+                    for (int i = 0; i < qty; i++) {
+                        order.getProducts().add(p);
+                    }
+                }
+            }
+        }
+        try {
+            OrderStatus st = OrderStatus.valueOf(String.valueOf(data.getOrDefault("status", "PENDING")));
+            order.setStatus(st);
+            if (st == OrderStatus.RETURNED) {
+                order.setReturned(true);
+            }
+        } catch (IllegalArgumentException ignored) {
+        }
+        CustomerAccountService.recordCompletedOrder(order);
+        List<Order> all = OrderRepository.loadOrders();
+        all.removeIf(x -> x.getOrderId().equalsIgnoreCase(order.getOrderId()));
+        all.add(order);
+        OrderRepository.saveOrders(all);
+        return true;
+    }
+
+    private static double toDouble(Object v, double fallback) {
+        if (v instanceof Number n) {
+            return n.doubleValue();
+        }
+        try {
+            return Double.parseDouble(String.valueOf(v).trim());
+        } catch (Exception e) {
+            return fallback;
+        }
     }
 
     private static Governorate resolveGovernorate(String raw, String profileGov) {
