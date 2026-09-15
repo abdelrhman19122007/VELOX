@@ -148,7 +148,25 @@
 .store-rating.new{color:var(--color-text-muted)}
 .promo-strip-card{display:flex;align-items:center;gap:12px;margin:14px 0 4px;padding:14px 18px;border-radius:18px;background:linear-gradient(135deg,rgba(139,92,246,.16),rgba(244,114,182,.12));border:1px solid rgba(139,92,246,.35);font-size:13px;font-weight:700}
 .promo-strip-card span{font-size:22px}
-#stores-section .category-card{cursor:pointer}
+/* ---------- All-restaurants directory (Talabat-style) ---------- */
+.rest-bar{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;background:var(--color-surface);border:1px solid var(--color-border);border-radius:18px;padding:16px 20px;margin-bottom:20px}
+.rest-bar h1{font-size:22px}
+.rest-search{width:min(320px,100%)}
+.rest-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px}
+.rest-card{display:flex;flex-direction:column;background:var(--color-surface);border:1px solid var(--color-border);border-radius:14px;overflow:hidden;cursor:pointer;padding:0;color:var(--color-text);transition:transform .18s,box-shadow .18s,border-color .18s;text-align:start}
+.rest-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-md);border-color:rgba(139,92,246,.5)}
+.rest-logo{display:grid;place-items:center;height:120px;background:#fff;padding:14px}
+.rest-logo img{max-width:100%;max-height:100%;object-fit:contain}
+.logo-fallback{font-size:44px;font-weight:900;color:#8B5CF6}
+.rest-info{display:flex;flex-direction:column;gap:3px;padding:11px 13px}
+.rest-info strong{font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rest-info small{color:var(--color-text-muted);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rest-rating{font-size:11.5px;font-weight:800;color:#D88A16}
+.rest-rating small{color:var(--color-text-muted);font-weight:400}
+.view-all-link{align-self:center;white-space:nowrap}
+@media (max-width:1100px){.rest-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media (max-width:900px){.rest-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:600px){.rest-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.rest-logo{height:96px}.rest-bar h1{font-size:18px}}
 
 /* ---------- Restaurant cards, popular rail, promo slider, store page ---------- */
 .stores-sub{font-size:16px;margin:4px 0 12px}
