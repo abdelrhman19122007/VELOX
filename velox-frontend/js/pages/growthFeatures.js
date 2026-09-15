@@ -228,6 +228,66 @@
     } catch (_) { body.innerHTML = `<p class="muted">…</p>`; }
   }
 
+  /* ---------- stores-first: directory with live ratings ---------- */
+  let storeCache = null;
+  async function loadStores() {
+    if (storeCache) return storeCache;
+    try {
+      const r = await fetch(apiBase() + '/stores');
+      storeCache = await r.json();
+    } catch (_) { storeCache = []; }
+    return storeCache;
+  }
+  window.VeloxStoreMeta = {
+    async ready() { await loadStores(); },
+    get(id) { return (storeCache || []).find((s) => Number(s.id) === Number(id)) || null; },
+  };
+
+  function stars(rating) {
+    if (rating == null) return `<span class="store-rating new">${AR() ? 'جديد' : 'New'}</span>`;
+    const full = Math.round(Number(rating));
+    return `<span class="store-rating">${'★'.repeat(Math.max(0, Math.min(5, full)))}${'☆'.repeat(Math.max(0, 5 - Math.min(5, full)))} ${Number(rating).toFixed(1)}</span>`;
+  }
+
+  async function renderStoresSection() {
+    const catSection = document.querySelector('section.category-section');
+    if (!catSection || $('#stores-section')) return;
+    const stores = await loadStores();
+    if (!stores.length) return;
+    const sec = document.createElement('section');
+    sec.id = 'stores-section';
+    sec.innerHTML = `<div class="container section-shell">`
+      + `<div class="section-heading"><div><span class="eyebrow">${AR() ? 'تسوق حسب المتجر' : 'Shop by store'}</span>`
+      + `<h2>${AR() ? 'اختار المتجر الأول' : 'Pick a store first'}</h2></div></div>`
+      + `<div class="category-grid" id="stores-grid">` + stores.map((s) => {
+        const name = AR() ? (s.nameAr || s.name) : (s.name || s.nameAr);
+        const initial = String(name || 'V').trim().charAt(0);
+        return `<button type="button" class="category-card store-card" data-store="${s.id}">`
+          + `<span class="category-icon">${esc(initial)}</span>`
+          + `<span class="category-copy"><strong>${esc(name)}</strong>`
+          + `<small>${esc(s.type || '')} · ${s.productsCount} ${AR() ? 'منتج' : 'products'}</small>`
+          + `${stars(s.rating)}</span><span class="category-arrow">↗</span></button>`;
+      }).join('') + `</div></div>`;
+    catSection.after(sec);
+    sec.querySelectorAll('[data-store]').forEach((btn) => btn.addEventListener('click', () => {
+      window.location.href = `products.html?store=${encodeURIComponent(btn.dataset.store)}`;
+    }));
+  }
+
+  /* ---------- my extra: promo strip for the new capabilities ---------- */
+  function renderPromoStrip() {
+    const catSection = document.querySelector('section.category-section');
+    if (!catSection || $('#promo-strip')) return;
+    const strip = document.createElement('div');
+    strip.id = 'promo-strip';
+    strip.innerHTML = `<div class="container"><div class="promo-strip-card">`
+      + `<span>🛍️</span><p>${AR()
+        ? 'جديد: سلة موحدة من كل المحلات + تعويض فوري + جدولة طلبك + توصيل مجاني مع Plus'
+        : 'New: one cart across all stores + instant refunds + scheduled orders + free delivery with Plus'}</p>`
+      + `</div></div>`;
+    catSection.before(strip);
+  }
+
   /* ---------- boot ---------- */
   function boot() {
     wrapOrderCreate();
@@ -235,6 +295,13 @@
     if (['index.html', 'home.html', 'products.html', ''].includes(page)) {
       bindDrawerHooks();
       bindWatchButton();
+      renderPromoStrip();
+      renderStoresSection();
+      window.VeloxStoreMeta.ready().then(() => {
+        if (new URLSearchParams(window.location.search).get('store')) {
+          window.dispatchEvent(new Event('velox:langchange'));
+        }
+      });
       // storefront scripts may load after us on slow networks
       setTimeout(() => { wrapOrderCreate(); bindDrawerHooks(); }, 1500);
     }

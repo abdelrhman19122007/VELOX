@@ -5,6 +5,7 @@
   let allProducts = [];
   const params = new URLSearchParams(window.location.search);
   let activeCategory = params.get('category') || 'all';
+  let activeStore = params.get('store') || '';
   let searchTerm = params.get('q') || '';
   let cart = readCart();
 
@@ -49,7 +50,11 @@
     return matched >= Math.max(1,Math.ceil(tokens.length/2)) ? matched : 0;
   }
 
-  function categoryUrl(category) { return `products.html?category=${encodeURIComponent(category || 'all')}`; }
+  function categoryUrl(category) {
+    let url = `products.html?category=${encodeURIComponent(category || 'all')}`;
+    if (activeStore) url += `&store=${encodeURIComponent(activeStore)}`;
+    return url;
+  }
   function navigateToCategory(category) {
     window.location.href = categoryUrl(category);
   }
@@ -78,13 +83,28 @@
 
   function getVisibleProducts() {
     const q=searchTerm.trim();
-    return allProducts.filter(p=>activeCategory==='all'||p.category===activeCategory)
+    return allProducts.filter(p=>(activeCategory==='all'||p.category===activeCategory)
+      &&(!activeStore||Number(p.store_id)===Number(activeStore)))
       .map(p=>({product:p,score:q?searchScore(p,q):1})).filter(x=>x.score>0).sort((a,b)=>b.score-a.score).map(x=>x.product);
   }
 
   function renderCatalogHeading() {
     if(!isCatalogPage) return;
     const title=$('#catalog-title'), subtitle=$('#catalog-subtitle'), count=$('#catalog-count');
+    // Store view (?store=id): heading shows the store with its rating.
+    if (activeStore) {
+      const meta = window.VeloxStoreMeta && window.VeloxStoreMeta.get
+        ? window.VeloxStoreMeta.get(activeStore) : null;
+      const sample = allProducts.find((p) => Number(p.store_id) === Number(activeStore));
+      const name = (meta && (lang()==='ar' ? meta.nameAr : meta.name))
+        || (sample && (lang()==='ar' ? sample.storeAr : sample.storeEn)) || '';
+      if (title) title.textContent = name;
+      if (subtitle) subtitle.textContent = meta && meta.rating != null
+        ? `★ ${meta.rating} · ${getVisibleProducts().length} ${lang()==='ar'?'منتج':'products'}`
+        : `${getVisibleProducts().length} ${lang()==='ar'?'منتج':'products'}`;
+      if (count) count.textContent = String(getVisibleProducts().length);
+      return;
+    }
     const cats=window.VeloxCatalogService.getCategories();
     const cat=cats.find(c=>c.id===activeCategory) || cats[0];
     if(title) title.textContent=activeCategory==='all' ? (lang()==='ar'?'كل منتجات VELOX':'All VELOX products') : t(cat?.titleKey || 'category.all');
