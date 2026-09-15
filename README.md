@@ -144,7 +144,14 @@ Unit suite: **35 tests, all green** (`mvn test` in `velox-backend`):
 
 E2E: import `velox-backend/postman/VELOX_API_Tests.postman_collection.json` into Postman and run folder-by-folder (Auth → Governorates → Orders → Catalog). Every request ships `pm.test` success **and** failure assertions (401/403/404/400). All scenarios were executed against a live server during development.
 
-## 6. Notes for developers
+## 6. Growth features (competitive edge over Talabat)
+- **Unified multi-store cart** — one checkout across stores, server-priced (`POST /api/orders/quote`, +10 EGP per extra store, per-store breakdown in the response and cart drawer).
+- **Instant wallet refund** — one-tap compensation for delivered orders (`POST /api/wallet/refund`, LATE/WRONG_ITEM/DAMAGED rules, once per order).
+- **Scheduled orders** — `scheduled_for` on checkout; the simulator only picks up due orders.
+- **VELOX Plus** — 50 EGP / 30 days, free delivery (`GET|POST /api/loyalty/subscription|subscribe`, panel on the account page).
+- **Price watches** — bell on product cards (`/api/watches` CRUD, hourly sweep notifies on drops).
+
+## 7. Notes for developers
 - Raw JDBC by decision — any query goes in `velox-backend/src/main/java/com/app/dao/`.
 - MySQL is the single source of truth; `data/` files are local caches (ignored).
 - Work on `main`. Never push secrets, `application.properties`, or `*.dat`.
