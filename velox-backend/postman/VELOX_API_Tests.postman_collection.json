@@ -1,0 +1,314 @@
+{
+  "info": {
+    "name": "VELOX API Tests (KAN-126)",
+    "description": "End-to-end API validation for the VELOX Spring Boot backend. Run with the backend up on {{baseUrl}} and MySQL seeded (VELOX_D2.SQL + migrations V2..V6). Folder order matters: Auth first (it stores {{token}} and {{email}}), then the rest.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080/api" },
+    { "key": "email", "value": "" },
+    { "key": "password", "value": "Velox1234" },
+    { "key": "token", "value": "" },
+    { "key": "orderId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register - creates pending account + OTP",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "pm.collectionVariables.set('email', 'qa' + Date.now() + '@velox.test');",
+                  "pm.collectionVariables.set('password', 'Velox1234');"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('Response is pending with OTP', () => {",
+                  "  pm.expect(body.pending).to.eql(true);",
+                  "  pm.expect(body.otp).to.match(/^\\d{6}$/);",
+                  "});",
+                  "pm.collectionVariables.set('otp', body.otp);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/auth/register",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"{{email}}\",\"password\":\"{{password}}\",\"full_name\":\"QA Tester\",\"phone_number\":\"01012345678\",\"governorate\":\"CAIRO\"}"
+            }
+          }
+        },
+        {
+          "name": "Login before OTP - FAILS 401 not verified",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 401', () => pm.response.to.have.status(401));",
+                  "pm.test('Message mentions verification', () => {",
+                  "  pm.expect(pm.response.json().message.toLowerCase()).to.include('verif');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/auth/login",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\"email\":\"{{email}}\",\"password\":\"{{password}}\"}" }
+          }
+        },
+        {
+          "name": "Verify OTP - activates account",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('Session has token + user', () => {",
+                  "  pm.expect(body.token).to.be.a('string').and.not.empty;",
+                  "  pm.expect(body.user.email).to.eql(pm.collectionVariables.get('email'));",
+                  "});",
+                  "pm.collectionVariables.set('token', body.token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/auth/verify-otp",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\"email\":\"{{email}}\",\"code\":\"{{otp}}\"}" }
+          }
+        },
+        {
+          "name": "Login - SUCCESS returns token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('Token stored for later requests', () => {",
+                  "  pm.expect(body.token).to.be.a('string').and.not.empty;",
+                  "  pm.collectionVariables.set('token', body.token);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/auth/login",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\"email\":\"{{email}}\",\"password\":\"{{password}}\"}" }
+          }
+        },
+        {
+          "name": "Login wrong password - FAILS 401",
+          "event": [
+            {
+              "listen": "test",
+              "script": { "exec": ["pm.test('Status is 401', () => pm.response.to.have.status(401));"] }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/auth/login",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\"email\":\"{{email}}\",\"password\":\"WrongPass1\"}" }
+          }
+        },
+        {
+          "name": "Get own profile - SUCCESS",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Profile email matches', () => {",
+                  "  pm.expect(pm.response.json().email).to.eql(pm.collectionVariables.get('email'));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/auth/profile?userId={{email}}",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Governorates",
+      "item": [
+        {
+          "name": "List all - 27 with prices",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "const list = pm.response.json();",
+                  "pm.test('27 governorates returned', () => pm.expect(list.length).to.eql(27));",
+                  "pm.test('Cairo costs 20 EGP', () => {",
+                  "  const cairo = list.find(g => g.name === 'CAIRO');",
+                  "  pm.expect(cairo.shippingPrice).to.eql(20.0);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": { "method": "GET", "url": "{{baseUrl}}/governorates" }
+        },
+        {
+          "name": "Get CAIRO shipping",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Payload has price + days', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b.shippingPrice).to.eql(20.0);",
+                  "  pm.expect(b.deliveryDays).to.eql(1);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": { "method": "GET", "url": "{{baseUrl}}/governorates/CAIRO/shipping" }
+        },
+        {
+          "name": "Unknown governorate - FAILS 404",
+          "event": [
+            {
+              "listen": "test",
+              "script": { "exec": ["pm.test('Status is 404', () => pm.response.to.have.status(404));"] }
+            }
+          ],
+          "request": { "method": "GET", "url": "{{baseUrl}}/governorates/ATLANTIS" }
+        }
+      ]
+    },
+    {
+      "name": "Orders",
+      "item": [
+        {
+          "name": "History - SUCCESS paged",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "const page = pm.response.json();",
+                  "pm.test('Paged envelope present', () => {",
+                  "  pm.expect(page.content).to.be.an('array');",
+                  "  pm.expect(page.totalElements).to.be.a('number');",
+                  "});",
+                  "if (page.content.length) pm.collectionVariables.set('orderId', page.content[0].orderId);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/orders/history?userId={{email}}&page=0&size=10",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
+          }
+        },
+        {
+          "name": "History without token - FAILS 403",
+          "event": [
+            {
+              "listen": "test",
+              "script": { "exec": ["pm.test('Status is 403', () => pm.response.to.have.status(403));"] }
+            }
+          ],
+          "request": { "method": "GET", "url": "{{baseUrl}}/orders/history?userId={{email}}" }
+        },
+        {
+          "name": "Tracking without token - FAILS 401",
+          "event": [
+            {
+              "listen": "test",
+              "script": { "exec": ["pm.test('Status is 401', () => pm.response.to.have.status(401));"] }
+            }
+          ],
+          "request": { "method": "GET", "url": "{{baseUrl}}/orders/1/tracking" }
+        },
+        {
+          "name": "Tracking unknown order - FAILS 404",
+          "event": [
+            {
+              "listen": "test",
+              "script": { "exec": ["pm.test('Status is 404', () => pm.response.to.have.status(404));"] }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/orders/ORDER-DOES-NOT-EXIST-999/tracking",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Catalog",
+      "item": [
+        {
+          "name": "Products - non-empty catalog",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Catalog is not empty', () => {",
+                  "  pm.expect(pm.response.json().length).to.be.above(0);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": { "method": "GET", "url": "{{baseUrl}}/products" }
+        },
+        {
+          "name": "Categories - SUCCESS",
+          "event": [
+            {
+              "listen": "test",
+              "script": { "exec": ["pm.test('Status is 200', () => pm.response.to.have.status(200));"] }
+            }
+          ],
+          "request": { "method": "GET", "url": "{{baseUrl}}/categories" }
+        }
+      ]
+    }
+  ]
+}
