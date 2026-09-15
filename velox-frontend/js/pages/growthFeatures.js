@@ -249,43 +249,215 @@
     return `<span class="store-rating">${'★'.repeat(Math.max(0, Math.min(5, full)))}${'☆'.repeat(Math.max(0, 5 - Math.min(5, full)))} ${Number(rating).toFixed(1)}</span>`;
   }
 
+  let feeCache = null;
+  let plusCache = null;
+
+  async function deliveryFee() {
+    if (feeCache != null) return feeCache;
+    try {
+      const g = await api('/governorates/CAIRO/shipping');
+      feeCache = Number(g.shippingPrice);
+    } catch (_) { feeCache = 20; }
+    return feeCache;
+  }
+
+  async function plusActive() {
+    if (plusCache != null) return plusCache;
+    plusCache = false;
+    try {
+      const e = email();
+      if (e) {
+        const st = await api('/loyalty/subscription?userId=' + encodeURIComponent(e));
+        plusCache = !!st.active;
+      }
+    } catch (_) {}
+    return plusCache;
+  }
+
+  function etaFor(store) {
+    if ((store.type || '').toUpperCase() === 'RESTAURANT') {
+      const base = 20 + (Number(store.id) * 3) % 12;
+      return AR() ? `${base}–${base + 10} دقيقة` : `${base}-${base + 10} min`;
+    }
+    return AR() ? 'خلال 1–2 يوم' : 'In 1-2 days';
+  }
+
+  function storeCard(s, fee, plus) {
+    const name = AR() ? (s.nameAr || s.name) : (s.name || s.nameAr);
+    return `<button type="button" class="store-card" data-store="${s.id}">`
+      + `<span class="store-cover">${s.cover ? `<img src="${esc(s.cover)}" alt="" loading="lazy" onerror="this.remove()">` : '🏪'}</span>`
+      + `<span class="store-body"><strong>${esc(name)}</strong>`
+      + `<small>${esc(s.type || '')}</small>`
+      + `<span class="store-meta-row">${stars(s.rating)}<span class="store-eta">⏱ ${esc(etaFor(s))}</span></span>`
+      + `<span class="store-meta-row"><span class="store-fee">🚚 ${Number(fee).toFixed(0)} EGP</span>`
+      + (plus ? `<span class="plus-badge">👑 ${AR() ? 'مجاني مع Plus' : 'Free with Plus'}</span>` : '')
+      + `</span></span></button>`;
+  }
+
   async function renderStoresSection() {
     const catSection = document.querySelector('section.category-section');
     if (!catSection || $('#stores-section')) return;
-    const stores = await loadStores();
+    const [stores, fee, plus] = await Promise.all([loadStores(), deliveryFee(), plusActive()]);
     if (!stores.length) return;
+    const rest = stores.filter((s) => (s.type || '').toUpperCase() === 'RESTAURANT');
+    const general = stores.filter((s) => (s.type || '').toUpperCase() !== 'RESTAURANT');
+    const group = (title, list) => list.length ? (title ? `<h3 class="stores-sub">${title}</h3>` : '')
+      + `<div class="stores-grid">` + list.map((s) => storeCard(s, fee, plus)).join('') + `</div>` : '';
     const sec = document.createElement('section');
     sec.id = 'stores-section';
     sec.innerHTML = `<div class="container section-shell">`
       + `<div class="section-heading"><div><span class="eyebrow">${AR() ? 'تسوق حسب المتجر' : 'Shop by store'}</span>`
-      + `<h2>${AR() ? 'اختار المتجر الأول' : 'Pick a store first'}</h2></div></div>`
-      + `<div class="category-grid" id="stores-grid">` + stores.map((s) => {
-        const name = AR() ? (s.nameAr || s.name) : (s.name || s.nameAr);
-        const initial = String(name || 'V').trim().charAt(0);
-        return `<button type="button" class="category-card store-card" data-store="${s.id}">`
-          + `<span class="category-icon">${esc(initial)}</span>`
-          + `<span class="category-copy"><strong>${esc(name)}</strong>`
-          + `<small>${esc(s.type || '')} · ${s.productsCount} ${AR() ? 'منتج' : 'products'}</small>`
-          + `${stars(s.rating)}</span><span class="category-arrow">↗</span></button>`;
-      }).join('') + `</div></div>`;
+      + `<h2>${AR() ? 'مطاعم قريبة منك' : 'Restaurants near you'}</h2></div></div>`
+      + group(AR() ? '🍽️ مطاعم' : '🍽️ Restaurants', rest)
+      + (general.length ? `<div class="section-heading" style="margin-top:26px"><div><h2>${AR() ? 'توصيل عام: أزياء وإلكترونيات' : 'General delivery: fashion & tech'}</h2></div></div>` : '')
+      + group('', general)
+      + `</div>`;
     catSection.after(sec);
     sec.querySelectorAll('[data-store]').forEach((btn) => btn.addEventListener('click', () => {
-      window.location.href = `products.html?store=${encodeURIComponent(btn.dataset.store)}`;
+      window.location.href = `store.html?id=${encodeURIComponent(btn.dataset.store)}`;
     }));
   }
 
-  /* ---------- my extra: promo strip for the new capabilities ---------- */
+  /* ---------- animated promo banner (rotating offers) ---------- */
+  const PROMOS = [
+    { icon: '🛍️', ar: 'سلة موحدة من كل المحلات بتوصيلة واحدة', en: 'One cart across all stores, one delivery' },
+    { icon: '💸', ar: 'تعويض فوري على المحفظة لو طلبك اتأخر', en: 'Instant wallet refund if your order is late' },
+    { icon: '👑', ar: 'اشترك في Plus: توصيل مجاني 30 يوم بـ 50 جنيه', en: 'Plus: free delivery for 30 days at EGP 50' },
+  ];
   function renderPromoStrip() {
     const catSection = document.querySelector('section.category-section');
     if (!catSection || $('#promo-strip')) return;
     const strip = document.createElement('div');
     strip.id = 'promo-strip';
-    strip.innerHTML = `<div class="container"><div class="promo-strip-card">`
-      + `<span>🛍️</span><p>${AR()
-        ? 'جديد: سلة موحدة من كل المحلات + تعويض فوري + جدولة طلبك + توصيل مجاني مع Plus'
-        : 'New: one cart across all stores + instant refunds + scheduled orders + free delivery with Plus'}</p>`
+    strip.innerHTML = `<div class="container"><div class="promo-slider">`
+      + PROMOS.map((p, i) => `<div class="promo-slide${i === 0 ? ' is-active' : ''}"><span>${p.icon}</span><p>${AR() ? p.ar : p.en}</p></div>`).join('')
       + `</div></div>`;
     catSection.before(strip);
+    let idx = 0;
+    const slides = strip.querySelectorAll('.promo-slide');
+    setInterval(() => {
+      slides[idx].classList.remove('is-active');
+      idx = (idx + 1) % slides.length;
+      slides[idx].classList.add('is-active');
+    }, 4000);
+    document.addEventListener('velox:langchange', () => {
+      strip.querySelectorAll('.promo-slide p').forEach((el, k) => { el.textContent = AR() ? PROMOS[k].ar : PROMOS[k].en; });
+    });
+  }
+
+  /* ---------- most-ordered rail (real sales data) ---------- */
+  async function renderPopularSection() {
+    const prodSection = document.querySelector('section.products-section');
+    if (!prodSection || $('#popular-section')) return;
+    let items = [];
+    try {
+      const r = await fetch(apiBase() + '/products/popular?limit=8');
+      items = await r.json();
+    } catch (_) {}
+    if (!items.length) return;
+    const sec = document.createElement('section');
+    sec.id = 'popular-section';
+    sec.innerHTML = `<div class="container section-shell">`
+      + `<div class="section-heading"><div><span class="eyebrow">${AR() ? 'الأكثر طلباً' : 'Most ordered'}</span>`
+      + `<h2>${AR() ? 'الناس بتشتري إيه؟' : 'What people order'}</h2></div></div>`
+      + `<div class="popular-rail">` + items.map((p) => {
+        const nm = AR() ? (p.nameAr || p.nameEn) : (p.nameEn || p.nameAr);
+        return `<article class="product-card popular-card"><div class="product-media">`
+          + (p.image ? `<img class="product-image" src="${esc(p.image)}" alt="" loading="lazy" onerror="this.style.display='none'">` : `<span>🛍️</span>`)
+          + `</div><div class="product-body"><h3>${esc(nm)}</h3>`
+          + `<div class="product-bottom"><div class="price">${Number(p.price).toFixed(0)} <small>EGP</small></div>`
+          + `<button type="button" class="add-btn" data-pop-add="${p.id}" aria-label="+">+</button></div></div></article>`;
+      }).join('') + `</div></div>`;
+    prodSection.before(sec);
+    sec.querySelectorAll('[data-pop-add]').forEach((b) => b.addEventListener('click', () => {
+      let cart = [];
+      try { cart = JSON.parse(localStorage.getItem('velox_cart') || '[]'); } catch (_) {}
+      if (!Array.isArray(cart)) cart = [];
+      const ex = cart.find((i) => Number(i.id) === Number(b.dataset.popAdd));
+      if (ex) ex.qty += 1; else cart.push({ id: Number(b.dataset.popAdd), qty: 1 });
+      try { localStorage.setItem('velox_cart', JSON.stringify(cart)); } catch (_) {}
+      document.dispatchEvent(new CustomEvent('velox:cartchange', { detail: { count: cart.reduce((s, i) => s + Number(i.qty), 0) } }));
+      toast(AR() ? 'تمت الإضافة للسلة' : 'Added to cart');
+    }));
+  }
+
+  /* ---------- one-click reorder from past orders ---------- */
+  function bindReorder() {
+    const list = $('#orders-list');
+    if (!list) return;
+    const obs = new MutationObserver(() => {
+      $$('#orders-list .order-card').forEach((card) => {
+        if (card.dataset.reorderBound) return;
+        const details = card.querySelector('.order-details');
+        if (!details) return;
+        card.dataset.reorderBound = '1';
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'btn-app secondary';
+        btn.style.cssText = 'margin-top:8px';
+        btn.textContent = AR() ? '↻ اطلب نفس الطلب' : '↻ Reorder';
+        btn.addEventListener('click', async (ev) => {
+          ev.stopPropagation();
+          const code = (card.dataset.select || '').trim();
+          if (!code) return;
+          btn.disabled = true;
+          try {
+            const lines = await api('/orders/' + encodeURIComponent(code) + '/items');
+            if (!lines.length) throw new Error('empty');
+            let cart = [];
+            try { cart = JSON.parse(localStorage.getItem('velox_cart') || '[]'); } catch (_) {}
+            if (!Array.isArray(cart)) cart = [];
+            for (const l of lines) {
+              const ex = cart.find((i) => Number(i.id) === Number(l.product_id));
+              if (ex) ex.qty += Number(l.quantity);
+              else cart.push({ id: Number(l.product_id), qty: Number(l.quantity) });
+            }
+            try { localStorage.setItem('velox_cart', JSON.stringify(cart)); } catch (_) {}
+            document.dispatchEvent(new CustomEvent('velox:cartchange', { detail: { count: cart.reduce((s, i) => s + Number(i.qty), 0) } }));
+            toast(AR() ? 'اتضافت أصناف طلبك للسلة' : 'Past order added to cart');
+          } catch (_) { toast(AR() ? 'تعذر إعادة الطلب.' : 'Could not reorder.', 'error'); }
+          finally { btn.disabled = false; }
+        });
+        details.appendChild(btn);
+      });
+    });
+    obs.observe(list, { childList: true, subtree: true });
+  }
+
+  /* ---------- live courier map (offline SVG, no tiles needed) ---------- */
+  function quadPoint(p0, p1, p2, t) {
+    const x = (1 - t) * (1 - t) * p0[0] + 2 * (1 - t) * t * p1[0] + t * t * p2[0];
+    const y = (1 - t) * (1 - t) * p0[1] + 2 * (1 - t) * t * p1[1] + t * t * p2[1];
+    return [x, y];
+  }
+
+  function bindLiveMap() {
+    const box = $('#tracking-box');
+    const fill = $('#tracking-fill');
+    if (!box || !fill) return;
+    const P0 = [30, 100], P1 = [150, 15], P2 = [270, 95];
+    let map = $('#live-map');
+    if (!map) {
+      map = document.createElement('div');
+      map.id = 'live-map';
+      map.innerHTML = `<svg viewBox="0 0 300 125" class="live-map-svg">`
+        + `<path d="M ${P0[0]},${P0[1]} Q ${P1[0]},${P1[1]} ${P2[0]},${P2[1]}" class="live-route"/>`
+        + `<circle cx="${P0[0]}" cy="${P0[1]}" r="7" class="live-point store"/>`
+        + `<circle cx="${P2[0]}" cy="${P2[1]}" r="7" class="live-point home"/>`
+        + `<g id="live-courier"><circle r="8" class="live-courier"/><text y="4" text-anchor="middle" class="live-emoji">🛵</text></g>`
+        + `<text x="${P0[0]}" y="120" text-anchor="middle" class="live-label">${AR() ? 'المتجر' : 'Store'}</text>`
+        + `<text x="${P2[0]}" y="120" text-anchor="middle" class="live-label">${AR() ? 'بيتك' : 'Home'}</text>`
+        + `</svg>`;
+      box.prepend(map);
+    }
+    const move = () => {
+      const pct = parseFloat(fill.style.width) || 0;
+      const [x, y] = quadPoint(P0, P1, P2, Math.min(1, Math.max(0, pct / 100)));
+      const g = $('#live-courier');
+      if (g) g.setAttribute('transform', `translate(${x},${y})`);
+    };
+    new MutationObserver(move).observe(fill, { attributes: true, attributeFilter: ['style'] });
+    move();
   }
 
   /* ---------- boot ---------- */
@@ -297,6 +469,7 @@
       bindWatchButton();
       renderPromoStrip();
       renderStoresSection();
+      renderPopularSection();
       window.VeloxStoreMeta.ready().then(() => {
         if (new URLSearchParams(window.location.search).get('store')) {
           window.dispatchEvent(new Event('velox:langchange'));
@@ -307,6 +480,8 @@
     }
     if (['account.html', 'orders.html'].includes(page)) {
       bindRefundButtons();
+      bindReorder();
+      if (page === 'orders.html') bindLiveMap();
       if (page === 'account.html') {
         renderPlusPanel();
         setTimeout(renderPlusPanel, 1500);

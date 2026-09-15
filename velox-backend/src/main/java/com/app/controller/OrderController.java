@@ -132,8 +132,27 @@ public class OrderController {
         }
     }
 
-    @PatchMapping("/{orderId}/status")
-    public ResponseEntity<OrderTrackingDto> updateStatus(
+    /** One-click reorder: lines of a past order (owner only). */
+    @GetMapping("/{orderId}/items")
+    public ResponseEntity<?> items(
+            @RequestHeader(value = "Authorization", required = false) String authorization,
+            @PathVariable String orderId) {
+        String email = AuthTokenStore.resolve(authorization);
+        if (email == null) {
+            return ResponseEntity.status(401).body(Map.of("message", "Login required."));
+        }
+        try {
+            orderService.getTracking(orderId);
+            if (!orderService.ownsOrder(orderId, email)) {
+                return ResponseEntity.status(403).body(Map.of("message", "Forbidden."));
+            }
+            return ResponseEntity.ok(new WebOrderDAO().orderLines(orderId));
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PatchMapping("/{orderId}/status")    public ResponseEntity<OrderTrackingDto> updateStatus(
             @RequestHeader(value = "Authorization", required = false) String authorization,
             @PathVariable String orderId,
             @RequestParam OrderStatus status) {

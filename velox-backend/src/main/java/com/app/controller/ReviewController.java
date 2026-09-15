@@ -5,10 +5,12 @@ import com.app.service.AuthTokenStore;
 import com.app.service.OrderService;
 import com.app.util.DatabaseConnection;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.sql.Connection;
@@ -16,12 +18,15 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
  * App ratings. POST /api/reviews {orderId?, rating 1-5, comment?}
  * Stored in MySQL reviews (replaces the console-only fake form).
+ * GET /api/reviews?storeId= public comments for a store page.
  */
 @RestController
 @RequestMapping("/api/reviews")
@@ -29,6 +34,43 @@ public class ReviewController {
 
     private final WebOrderDAO lookup = new WebOrderDAO();
     private final OrderService orders = new OrderService();
+
+    /** Public review comments for a store details page (latest first). */
+    @GetMapping
+    public ResponseEntity<?> forStore(@RequestParam int storeId) {
+        String sql = "SELECT u.full_name AS author, r.rating, r.comment, r.created_at"
+                + " FROM reviews r JOIN users u ON u.id = r.user_id"
+                + " JOIN orders o ON o.id = r.order_id"
+                + " JOIN order_items oi ON oi.order_id = o.id"
+                + " JOIN products p ON p.id = oi.product_id"
+                + " WHERE p.store_id = ? AND r.comment IS NOT NULL AND r.comment <> ''"
+                + " GROUP BY r.id ORDER BY r.created_at DESC LIMIT 20";
+        List<Map<String, Object>> out = new ArrayList<>();
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement s = conn.prepareStatement(sql)) {
+            s.setInt(1, storeId);
+            try (ResultSet rs = s.executeQuery()) {
+                while (rs.next()) {
+                    Map<String, Object> row = new LinkedHashMap<>();
+                    row.put("author", firstName(rs.getString("author")));
+                    row.put("rating", rs.getInt("rating"));
+                    row.put("comment", rs.getString("comment"));
+                    row.put("createdAt", String.valueOf(rs.getTimestamp("created_at")));
+                    out.add(row);
+                }
+            }
+        } catch (SQLException e) {
+            return ResponseEntity.status(500).body(Map.of("message", "Reviews unavailable."));
+        }
+        return ResponseEntity.ok(out);
+    }
+
+    private static String firstName(String full) {
+        if (full == null || full.isBlank()) {
+            return "VELOX user";
+        }
+        return full.trim().split("\\s+")[0];
+    }
 
     @PostMapping
     public ResponseEntity<?> submit(

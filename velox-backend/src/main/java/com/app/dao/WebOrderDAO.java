@@ -95,6 +95,47 @@ public class WebOrderDAO {
         }
     }
 
+    /** Lines of an order for one-click reorder: [{product_id, quantity}]. */
+    public List<Map<String, Object>> orderLines(String codeOrId) {
+        List<Map<String, Object>> out = new ArrayList<>();
+        String idSql = "SELECT id FROM orders WHERE id = ? OR order_code = ? LIMIT 1";
+        int numeric;
+        try {
+            numeric = Integer.parseInt(codeOrId.trim());
+        } catch (NumberFormatException e) {
+            numeric = -1;
+        }
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement find = conn.prepareStatement(idSql)) {
+            find.setInt(1, numeric);
+            find.setString(2, codeOrId.trim());
+            int orderId = -1;
+            try (ResultSet rs = find.executeQuery()) {
+                if (rs.next()) {
+                    orderId = rs.getInt(1);
+                }
+            }
+            if (orderId < 0) {
+                return out;
+            }
+            try (PreparedStatement s = conn.prepareStatement(
+                    "SELECT product_id, quantity FROM order_items WHERE order_id = ?")) {
+                s.setInt(1, orderId);
+                try (ResultSet rs = s.executeQuery()) {
+                    while (rs.next()) {
+                        Map<String, Object> row = new LinkedHashMap<>();
+                        row.put("product_id", rs.getInt("product_id"));
+                        row.put("quantity", rs.getInt("quantity"));
+                        out.add(row);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("[WebOrderDAO] order lines failed: " + e.getMessage());
+        }
+        return out;
+    }
+
     /** Marks a return in MySQL and restores stock. Returns false when unknown. */
     public boolean markReturnedByCode(String orderCode) {
         if (orderCode == null || orderCode.isBlank()) {

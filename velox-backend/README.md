@@ -39,6 +39,8 @@ runs the API (`VeloxApplication`), not the console.
 | GET `/auth/profile?userId=` | Bearer (self) | profile + loyalty + offers |
 | PUT `/auth/profile` | Bearer (self) | update name/phone/governorate |
 | GET `/products` | no | catalog in storefront shape (incl. `image`, Arabic names) |
+| GET `/products/popular?limit=` | no | most-ordered by sold quantity |
+| GET `/stores` | no | store directory with covers, live ratings, product counts |
 | GET `/stores` | no | store directory with live ratings + product counts |
 | GET `/api/categories` … `/categories` | no | all/food/fashion/electronics with counts |
 | GET `/governorates`, `/{name}`, `/{name}/shipping` | no | 27 governorates, codes, prices |
@@ -46,6 +48,7 @@ runs the API (`VeloxApplication`), not the console.
 | POST `/orders/quote` | no | multi-store price preview: subtotal, fees, per-store breakdown |
 | POST `/orders` | Bearer | `{items:[{product_id,quantity}], governorate?, paymentMethod?, scheduled_for?}` server-priced |
 | GET `/orders/{id}/tracking` | Bearer (owner) | timeline + driver location |
+| GET `/orders/{id}/items` | Bearer (owner) | lines for one-click reorder |
 | PATCH `/orders/{id}/status?status=` | Bearer (owner) | forward-only transitions, persisted |
 | GET `/orders/{id}/invoice` | Bearer (owner) | `application/pdf` (Arabic-capable) |
 | POST `/wallet/refund` | Bearer (owner) | `{orderId, reason: LATE\|WRONG_ITEM\|DAMAGED}` instant compensation, once per order |
@@ -59,6 +62,7 @@ runs the API (`VeloxApplication`), not the console.
 | GET `/wallet/balance?userId=` | Bearer (self) | `remaining_budget` |
 | POST `/wallet/topup` | Bearer | `{amount}` |
 | POST `/reviews` | Bearer | `{orderId?, rating 1-5, comment?}` |
+| GET `/reviews?storeId=` | no | public comments for a store page |
 | POST `/complaints` | Bearer | `{orderId?, details}` |
 
 Error shape: `{ "message": "..." }` with 400/401/403/404/500 as appropriate.
