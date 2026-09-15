@@ -149,3 +149,33 @@
 .promo-strip-card{display:flex;align-items:center;gap:12px;margin:14px 0 4px;padding:14px 18px;border-radius:18px;background:linear-gradient(135deg,rgba(139,92,246,.16),rgba(244,114,182,.12));border:1px solid rgba(139,92,246,.35);font-size:13px;font-weight:700}
 .promo-strip-card span{font-size:22px}
 #stores-section .category-card{cursor:pointer}
+
+/* ---------- Restaurant cards, popular rail, promo slider, store page ---------- */
+.stores-sub{font-size:16px;margin:4px 0 12px}
+.stores-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.store-card{display:flex;flex-direction:column;gap:0;background:var(--color-surface);border:1px solid var(--color-border);border-radius:20px;overflow:hidden;box-shadow:var(--shadow-sm);cursor:pointer;text-align:start;padding:0;transition:transform .2s,box-shadow .2s,border-color .2s;color:var(--color-text)}
+.store-card:hover{transform:translateY(-5px);box-shadow:var(--shadow-md);border-color:rgba(139,92,246,.5)}
+.store-cover{display:block;width:100%;height:150px;object-fit:cover;background:var(--color-surface-alt);font-size:44px;align-content:center;text-align:center}
+.store-cover img{width:100%;height:150px;object-fit:cover;display:block}
+.store-body{display:flex;flex-direction:column;gap:4px;padding:13px 15px}
+.store-body strong{font-size:15px}
+.store-body small{color:var(--color-text-muted);font-size:11px}
+.store-meta-row{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:11px;font-weight:800}
+.store-eta{color:var(--color-text-muted)}
+.store-fee{color:var(--color-success)}
+.plus-badge{color:#8B5CF6;background:rgba(139,92,246,.12);border-radius:999px;padding:2px 9px;font-size:10px}
+.popular-rail{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(190px,230px);gap:12px;overflow-x:auto;padding-bottom:8px}
+.popular-card{min-width:0}
+.promo-slider{position:relative;margin:14px 0 4px;border-radius:20px;overflow:hidden;min-height:86px;background:linear-gradient(135deg,#6D28D9,#8B5CF6 55%,#EC4899);box-shadow:0 14px 34px rgba(139,92,246,.35)}
+.promo-slide{position:absolute;inset:0;display:flex;align-items:center;gap:12px;padding:16px 20px;color:#fff;font-weight:800;font-size:14px;opacity:0;transform:translateY(8px);transition:opacity .5s,transform .5s;pointer-events:none}
+.promo-slide.is-active{opacity:1;transform:none}
+.promo-slide span{font-size:26px}
+.store-hero{position:relative;height:min(42vh,340px);min-height:230px;overflow:hidden}
+.store-hero img{width:100%;height:100%;object-fit:cover;display:block}
+.store-hero-overlay{position:absolute;inset:0;display:flex;align-items:flex-end;background:linear-gradient(180deg,transparent 30%,rgba(9,8,20,.82));padding:22px;color:#fff}
+.store-hero-overlay h1{font-size:30px}
+.store-hero-overlay .eyebrow{color:#C4B5FD}
+.info-chip{display:inline-block;margin-inline-end:8px;margin-bottom:8px;padding:7px 13px;border-radius:999px;background:var(--color-surface-alt);border:1px solid var(--color-border);font-size:12px;font-weight:800}
+#reviews-list .list-item{margin-bottom:10px}
+@media (max-width:900px){.stores-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:560px){.stores-grid{grid-template-columns:1fr 1fr;gap:10px}.store-cover,.store-cover img{height:110px}.promo-slide{font-size:12px}}

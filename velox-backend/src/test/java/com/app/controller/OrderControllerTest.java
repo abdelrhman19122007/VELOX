@@ -1,6 +1,7 @@
 package com.app.controller;
 
 import com.app.dao.WebOrderDAO;
+import com.app.dao.WebOrderDAO;
 import com.app.dto.OrderHistoryDto;
 import com.app.dto.OrderTrackingDto;
 import com.app.dto.PagedResponse;
@@ -20,6 +21,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
@@ -175,8 +177,40 @@ class OrderControllerTest {
     }
 
     @Test
-    void updateStatusWithIllegalJumpIsBadRequest() throws Exception {
+    void itemsReturnsLinesForOwner() throws Exception {
         when(orderService.getTracking("LX-1")).thenReturn(trackingDto());
+        when(orderService.ownsOrder("LX-1", EMAIL)).thenReturn(true);
+
+        try (MockedStatic<AuthTokenStore> auth = Mockito.mockStatic(AuthTokenStore.class);
+             MockedConstruction<WebOrderDAO> dao = Mockito.mockConstruction(WebOrderDAO.class,
+                     (mock, ctx) -> when(mock.orderLines("LX-1")).thenReturn(
+                             List.of(Map.of("product_id", 3, "quantity", 2))))) {
+            auth.when(() -> AuthTokenStore.resolve(TOKEN)).thenReturn(EMAIL);
+
+            mockMvc.perform(get("/api/orders/LX-1/items")
+                            .header("Authorization", TOKEN))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$[0].product_id", is(3)))
+                    .andExpect(jsonPath("$[0].quantity", is(2)));
+        }
+    }
+
+    @Test
+    void itemsUnknownOrderIsNotFound() throws Exception {
+        when(orderService.getTracking("NOPE"))
+                .thenThrow(new IllegalArgumentException("Order not found: NOPE"));
+
+        try (MockedStatic<AuthTokenStore> auth = Mockito.mockStatic(AuthTokenStore.class)) {
+            auth.when(() -> AuthTokenStore.resolve(TOKEN)).thenReturn(EMAIL);
+
+            mockMvc.perform(get("/api/orders/NOPE/items")
+                            .header("Authorization", TOKEN))
+                    .andExpect(status().isNotFound());
+        }
+    }
+
+    @Test
+    void updateStatusWithIllegalJumpIsBadRequest() throws Exception {        when(orderService.getTracking("LX-1")).thenReturn(trackingDto());
         when(orderService.ownsOrder("LX-1", EMAIL)).thenReturn(true);
         when(orderService.updateStatus(anyString(), any()))
                 .thenThrow(new IllegalStateException("Invalid transition"));
