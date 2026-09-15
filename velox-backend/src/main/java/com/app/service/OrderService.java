@@ -64,7 +64,7 @@ public class OrderService {
         int totalPages = (int) Math.ceil((double) total / size);
         List<OrderHistoryDto> content = new ArrayList<>();
         String sql = "SELECT o.id, o.order_code, o.status, o.order_date, o.final_amount,"
-                + " o.shipping_address, COALESCE(SUM(oi.quantity), 0) AS items"
+                + " o.shipping_address, o.scheduled_for, COALESCE(SUM(oi.quantity), 0) AS items"
                 + " FROM orders o LEFT JOIN order_items oi ON oi.order_id = o.id"
                 + " WHERE o.user_id = ? GROUP BY o.id ORDER BY o.order_date DESC LIMIT ? OFFSET ?";
         try (Connection conn = DatabaseConnection.getConnection();
@@ -75,6 +75,7 @@ public class OrderService {
             try (ResultSet rs = s.executeQuery()) {
                 while (rs.next()) {
                     String code = rs.getString("order_code");
+                    Timestamp sched = rs.getTimestamp("scheduled_for");
                     content.add(new OrderHistoryDto(
                             code != null ? code : ("ORD-" + rs.getInt("id")),
                             userId.trim(),
@@ -82,7 +83,8 @@ public class OrderService {
                             rs.getTimestamp("order_date").toLocalDateTime(),
                             rs.getInt("items"),
                             rs.getDouble("final_amount"),
-                            rs.getString("shipping_address")));
+                            rs.getString("shipping_address"),
+                            sched != null ? sched.toLocalDateTime() : null));
                 }
             }
         } catch (SQLException e) {

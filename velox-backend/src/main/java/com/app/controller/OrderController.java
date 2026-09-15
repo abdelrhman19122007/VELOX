@@ -68,15 +68,32 @@ public class OrderController {
             Object items = body.get("items");
             Object gov = body.get("governorate");
             Object pay = body.get("paymentMethod") != null ? body.get("paymentMethod") : body.get("payment_method");
+            Object scheduled = body.get("scheduled_for") != null ? body.get("scheduled_for") : body.get("scheduledFor");
             Map<String, Object> placed = webOrders.placeOrder(email,
                     (List<Map<String, Object>>) items,
                     gov == null ? null : String.valueOf(gov),
-                    pay == null ? null : String.valueOf(pay));
+                    pay == null ? null : String.valueOf(pay),
+                    scheduled == null ? null : String.valueOf(scheduled));
             return ResponseEntity.ok(placed);
         } catch (IllegalArgumentException ex) {
             return ResponseEntity.badRequest().body(Map.of("message", ex.getMessage()));
         } catch (IllegalStateException ex) {
             return ResponseEntity.status(500).body(Map.of("message", ex.getMessage()));
+        }
+    }
+
+    /** Feature 1: public multi-store price preview (no login needed). */
+    @PostMapping("/quote")
+    @SuppressWarnings("unchecked")
+    public ResponseEntity<?> quote(@RequestBody Map<String, Object> body) {
+        try {
+            Object items = body.get("items");
+            Object gov = body.get("governorate");
+            return ResponseEntity.ok(webOrders.quote(
+                    (List<Map<String, Object>>) items,
+                    gov == null ? null : String.valueOf(gov)));
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.badRequest().body(Map.of("message", ex.getMessage()));
         }
     }
 

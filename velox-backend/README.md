@@ -42,10 +42,17 @@ runs the API (`VeloxApplication`), not the console.
 | GET `/api/categories` … `/categories` | no | all/food/fashion/electronics with counts |
 | GET `/governorates`, `/{name}`, `/{name}/shipping` | no | 27 governorates, codes, prices |
 | GET `/orders/history?userId=&page=&size=` | Bearer (self) | paged history from MySQL |
-| POST `/orders` | Bearer | `{items:[{product_id,quantity}], governorate?, paymentMethod?}` server-priced |
+| POST `/orders/quote` | no | multi-store price preview: subtotal, fees, per-store breakdown |
+| POST `/orders` | Bearer | `{items:[{product_id,quantity}], governorate?, paymentMethod?, scheduled_for?}` server-priced |
 | GET `/orders/{id}/tracking` | Bearer (owner) | timeline + driver location |
 | PATCH `/orders/{id}/status?status=` | Bearer (owner) | forward-only transitions, persisted |
 | GET `/orders/{id}/invoice` | Bearer (owner) | `application/pdf` (Arabic-capable) |
+| POST `/wallet/refund` | Bearer (owner) | `{orderId, reason: LATE\|WRONG_ITEM\|DAMAGED}` instant compensation, once per order |
+| GET `/loyalty/subscription?userId=` | Bearer (self) | VELOX Plus status (50 EGP / 30 days, free delivery) |
+| POST `/loyalty/subscribe` | Bearer | activates Plus from wallet balance |
+| GET `/watches?userId=` | Bearer (self) | price-drop watch list |
+| POST `/watches` | Bearer | `{product_id, target_price?}` (no target = any drop) |
+| DELETE `/watches/{productId}` | Bearer | remove a watch |
 | GET `/offers/personalized?userId=` | Bearer (self) | offers from purchase history |
 | GET `/loyalty/status?userId=` | Bearer (self) | progress toward free delivery |
 | GET `/wallet/balance?userId=` | Bearer (self) | `remaining_budget` |

@@ -3,6 +3,7 @@ package com.app.controller;
 import com.app.dao.UserDAO;
 import com.app.dao.WebOrderDAO;
 import com.app.service.AuthTokenStore;
+import com.app.service.RefundService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,6 +28,7 @@ public class WalletController {
 
     private final UserDAO users = new UserDAO();
     private final WebOrderDAO lookup = new WebOrderDAO();
+    private final RefundService refunds = new RefundService();
 
     @GetMapping("/balance")
     public ResponseEntity<?> balance(
@@ -120,6 +122,34 @@ public class WalletController {
         }
         out.put("cardSaved", methodSaved);
         return ResponseEntity.ok(out);
+    }
+
+    /**
+     * Feature 2: instant wallet compensation.
+     * POST /api/wallet/refund {orderId, reason: LATE|WRONG_ITEM|DAMAGED}
+     * Rules live in RefundPolicy; one refund per order (DB-unique).
+     */
+    @PostMapping("/refund")
+    public ResponseEntity<?> refund(
+            @RequestHeader(value = "Authorization", required = false) String authorization,
+            @RequestBody Map<String, Object> body) {
+        String email = AuthTokenStore.resolve(authorization);
+        if (email == null) {
+            return ResponseEntity.status(401).body(Map.of("message", "Login required."));
+        }
+        Object id = body.get("orderId") != null ? body.get("orderId") : body.get("order_id");
+        Object reason = body.get("reason");
+        if (id == null || reason == null) {
+            return ResponseEntity.badRequest().body(Map.of("message", "orderId and reason are required."));
+        }
+        try {
+            return ResponseEntity.ok(refunds.claim(email,
+                    String.valueOf(id), String.valueOf(reason)));
+        } catch (SecurityException ex) {
+            return ResponseEntity.status(403).body(Map.of("message", ex.getMessage()));
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.badRequest().body(Map.of("message", ex.getMessage()));
+        }
     }
 
     private static String first(Map<String, Object> body, String... keys) {

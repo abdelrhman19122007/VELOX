@@ -26,20 +26,28 @@ public class WebOrderService {
     private final com.app.dao.UserDAO users = new com.app.dao.UserDAO();
 
     public Map<String, Object> placeOrder(String email, List<Map<String, Object>> rawItems, String governorateRaw) {
-        return placeOrder(email, rawItems, governorateRaw, null);
+        return placeOrder(email, rawItems, governorateRaw, null, null);
     }
 
     /**
      * @param paymentMethod optional "WALLET": debited from remaining_budget
      *                      (refunded automatically if placement fails).
+     * @param scheduledRaw  optional ISO datetime for Feature 3 (null = ASAP).
      */
     public Map<String, Object> placeOrder(String email, List<Map<String, Object>> rawItems,
                                           String governorateRaw, String paymentMethod) {
+        return placeOrder(email, rawItems, governorateRaw, paymentMethod, null);
+    }
+
+    public Map<String, Object> placeOrder(String email, List<Map<String, Object>> rawItems,
+                                          String governorateRaw, String paymentMethod, String scheduledRaw) {
         CustomerAccountService.Profile profile = CustomerAccountService.profileOf(email);
         if (profile == null) {
             throw new IllegalArgumentException("Account not found. Please register first.");
         }
         Governorate gov = resolveGovernorate(governorateRaw, profile.governorate);
+        // Feature 3: optional future delivery time (throws 400 when invalid).
+        java.time.LocalDateTime scheduledFor = ScheduleValidator.parse(scheduledRaw);
 
         List<int[]> items = new ArrayList<>();
         if (rawItems == null || rawItems.isEmpty()) {
@@ -60,10 +68,15 @@ public class WebOrderService {
         String shippingAddress = gov.name() + ", " + profile.phone;
         boolean wallet = paymentMethod != null && paymentMethod.trim().equalsIgnoreCase("WALLET");
         double walletCharged = 0;
-        WebOrderDAO.Quote quote = null;
+        // Feature 1: one cart may span many stores; fee = governorate base
+        // + flat consolidation fee per extra store (server-priced here).
+        // Feature 4: active VELOX Plus members ship free.
+        WebOrderDAO.DetailedQuote detailed = dao.quoteDetailed(items);
+        boolean plusFreeDelivery = new PlusService().hasActiveSub(userId);
+        double deliveryFee = plusFreeDelivery ? 0
+                : gov.getShippingPrice() + MultiStorePricing.extraFee(detailed.stores().size());
         if (wallet) {
-            quote = dao.quote(items);
-            walletCharged = quote.subtotal() + gov.getShippingPrice();
+            walletCharged = detailed.subtotal() + deliveryFee;
             if (!users.debit(userId, walletCharged)) {
                 throw new IllegalArgumentException(
                         "Insufficient wallet balance (need " + String.format(java.util.Locale.US, "%.2f", walletCharged) + " EGP).");
@@ -72,12 +85,15 @@ public class WebOrderService {
         WebOrderDAO.PlacedOrder placed;
         try {
             placed = dao.placeOrder(userId, shippingAddress, gov.name(),
-                    gov.getShippingPrice(), items);
+                    deliveryFee, items);
         } catch (RuntimeException e) {
             if (wallet && walletCharged > 0) {
                 users.topUp(userId, walletCharged); // refund on placement failure
             }
             throw e;
+        }
+        if (scheduledFor != null) {
+            dao.setScheduledFor(placed.orderId(), scheduledFor);
         }
 
         // File-account copy (PENDING: counts toward loyalty once delivered/paid).
@@ -106,12 +122,56 @@ public class WebOrderService {
         out.put("orderCode", placed.orderCode());
         out.put("subtotal", placed.subtotal());
         out.put("deliveryFee", placed.deliveryFee());
+        out.put("extraStoreFee", Math.max(0, deliveryFee - gov.getShippingPrice()));
+        out.put("plusFreeDelivery", plusFreeDelivery);
+        out.put("stores", detailed.stores().stream().map(s -> Map.of(
+                "storeId", s.storeId(),
+                "storeName", s.storeName(),
+                "subtotal", s.subtotal(),
+                "lines", s.lines())).toList());
         out.put("total", placed.total());
         out.put("status", placed.status());
         out.put("paymentMethod", wallet ? "WALLET" : "CASH_ON_DELIVERY");
+        if (scheduledFor != null) {
+            out.put("scheduledFor", scheduledFor.toString());
+        }
         if (wallet) {
             out.put("walletCharged", walletCharged);
         }
+        return out;
+    }
+
+    /**
+     * Feature 1: public price preview for a multi-store cart (no account
+     * needed). Returns subtotal, base + extra delivery fees and the
+     * per-store breakdown so the drawer can render store groups.
+     */
+    public Map<String, Object> quote(List<Map<String, Object>> rawItems, String governorateRaw) {
+        List<int[]> items = new ArrayList<>();
+        if (rawItems == null || rawItems.isEmpty()) {
+            throw new IllegalArgumentException("Cart is empty.");
+        }
+        for (Map<String, Object> it : rawItems) {
+            Object pid = it.get("product_id") != null ? it.get("product_id") : it.get("productId");
+            Object qty = it.get("quantity") != null ? it.get("quantity") : it.get("qty");
+            if (pid == null || qty == null) {
+                throw new IllegalArgumentException("Each item needs product_id and quantity.");
+            }
+            items.add(new int[]{toInt(pid, "product_id"), toInt(qty, "quantity")});
+        }
+        Governorate gov = resolveGovernorate(governorateRaw, null);
+        WebOrderDAO.DetailedQuote detailed = dao.quoteDetailed(items);
+        double extra = MultiStorePricing.extraFee(detailed.stores().size());
+        Map<String, Object> out = new LinkedHashMap<>();
+        out.put("subtotal", detailed.subtotal());
+        out.put("deliveryFee", gov.getShippingPrice());
+        out.put("extraStoreFee", extra);
+        out.put("total", detailed.subtotal() + gov.getShippingPrice() + extra);
+        out.put("stores", detailed.stores().stream().map(s -> Map.of(
+                "storeId", s.storeId(),
+                "storeName", s.storeName(),
+                "subtotal", s.subtotal(),
+                "lines", s.lines())).toList());
         return out;
     }
 

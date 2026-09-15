@@ -22,6 +22,8 @@ public class OrderHistoryDto {
     private int itemCount;
     private double total;
     private String city;
+    /** Feature 3: future delivery time, null = ASAP. */
+    private LocalDateTime scheduledFor;
 
     public static OrderHistoryDto from(Order order) {
         return new OrderHistoryDto(
@@ -31,7 +33,8 @@ public class OrderHistoryDto {
                 order.getOrderDate(),
                 order.getProducts().size(),
                 order.calculateFinalTotal(),
-                order.getCity()
+                order.getCity(),
+                null
         );
     }
 }
