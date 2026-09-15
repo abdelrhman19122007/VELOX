@@ -31,12 +31,13 @@ class OrderDtoTest {
         assertEquals(215.0, dto.getTotal());
         assertEquals("Cairo", dto.getCity());
         assertNotNull(dto.getOrderDate());
+        assertNull(dto.getScheduledFor());
     }
 
     @Test
     void pagedResponseCarriesPagingMetadata() {
         OrderHistoryDto dto = new OrderHistoryDto("LX-1", "u", OrderStatus.PENDING,
-                null, 0, 0.0, "Giza");
+                null, 0, 0.0, "Giza", null);
         PagedResponse<OrderHistoryDto> page =
                 new PagedResponse<>(List.of(dto), 1, 10, 25, 3);
 

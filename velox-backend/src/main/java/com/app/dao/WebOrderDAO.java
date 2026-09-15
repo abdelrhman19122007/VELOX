@@ -298,6 +298,21 @@ public class WebOrderDAO {
         }
     }
 
+    /** Feature 3: pins a future delivery time on an already-placed order. */
+    public void setScheduledFor(int orderId, java.time.LocalDateTime at) {
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement s = conn.prepareStatement(
+                     "UPDATE orders SET scheduled_for = ? WHERE id = ?")) {
+            s.setTimestamp(1, java.sql.Timestamp.valueOf(at));
+            s.setInt(2, orderId);
+            if (s.executeUpdate() != 1) {
+                throw new IllegalStateException("Could not schedule order.");
+            }
+        } catch (SQLException e) {
+            throw new IllegalStateException("Could not schedule order: " + e.getMessage());
+        }
+    }
+
     /** Finds the DB user id by email, creating the row from the file profile when absent. */
     public int ensureUser(String email, String fullName, String passwordHash, String phone, String governorate) {
         Integer id = findUserId(email);
@@ -434,6 +449,12 @@ public class WebOrderDAO {
     public record Quote(double subtotal, List<OrderLine> lines) {
     }
 
+    public record StoreQuote(long storeId, String storeName, double subtotal, int lines) {
+    }
+
+    public record DetailedQuote(double subtotal, List<StoreQuote> stores) {
+    }
+
     /** Price check without locking (re-validated with locks at placement). */
     public Quote quote(List<int[]> items) {
         if (items == null || items.isEmpty()) {
@@ -471,5 +492,60 @@ public class WebOrderDAO {
             throw new IllegalStateException("Quote failed: " + e.getMessage());
         }
         return new Quote(subtotal, lines);
+    }
+
+    /**
+     * Feature 1: same price check as {@link #quote(List)} but grouped per
+     * store (JOIN stores) so one cart can span many stores in a single
+     * checkout. No locking; placement re-validates.
+     */
+    public DetailedQuote quoteDetailed(List<int[]> items) {
+        if (items == null || items.isEmpty()) {
+            throw new IllegalArgumentException("Cart is empty.");
+        }
+        double subtotal = 0;
+        java.util.Map<Long, double[]> sum = new java.util.LinkedHashMap<>();
+        java.util.Map<Long, String> names = new java.util.LinkedHashMap<>();
+        try (Connection conn = DatabaseConnection.getConnection()) {
+            for (int[] it : items) {
+                int pid = it[0];
+                int qty = it[1];
+                if (qty < 1 || qty > 50) {
+                    throw new IllegalArgumentException("Invalid quantity for product " + pid + ".");
+                }
+                try (PreparedStatement s = conn.prepareStatement(
+                        "SELECT p.id, p.name, p.price, p.stock_quantity, p.is_available,"
+                                + " p.store_id, s.name AS store_name FROM products p"
+                                + " LEFT JOIN stores s ON s.id = p.store_id WHERE p.id = ?")) {
+                    s.setInt(1, pid);
+                    try (ResultSet rs = s.executeQuery()) {
+                        if (!rs.next() || rs.getInt("is_available") != 1) {
+                            throw new IllegalArgumentException("Product not available: " + pid + ".");
+                        }
+                        if (rs.getInt("stock_quantity") < qty) {
+                            throw new IllegalArgumentException(
+                                    "Only " + rs.getInt("stock_quantity") + " left in stock for product " + pid + ".");
+                        }
+                        double line = rs.getDouble("price") * qty;
+                        subtotal += line;
+                        long sid = rs.getLong("store_id");
+                        String sname = rs.getString("store_name");
+                        names.putIfAbsent(sid, sname != null ? sname : ("Store " + sid));
+                        double[] acc = sum.computeIfAbsent(sid, k -> new double[2]);
+                        acc[0] += line;
+                        acc[1] += 1;
+                    }
+                }
+            }
+        } catch (IllegalArgumentException e) {
+            throw e;
+        } catch (SQLException e) {
+            throw new IllegalStateException("Quote failed: " + e.getMessage());
+        }
+        List<StoreQuote> stores = new ArrayList<>();
+        for (java.util.Map.Entry<Long, double[]> e : sum.entrySet()) {
+            stores.add(new StoreQuote(e.getKey(), names.get(e.getKey()), e.getValue()[0], (int) e.getValue()[1]));
+        }
+        return new DetailedQuote(subtotal, stores);
     }
 }

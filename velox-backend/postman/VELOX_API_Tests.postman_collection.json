@@ -263,6 +263,31 @@
           "request": { "method": "GET", "url": "{{baseUrl}}/orders/1/tracking" }
         },
         {
+          "name": "Quote multi-store cart - SUCCESS with breakdown",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "const q = pm.response.json();",
+                  "pm.test('Breakdown has stores + extra fee', () => {",
+                  "  pm.expect(q.stores.length).to.be.above(1);",
+                  "  pm.expect(q.extraStoreFee).to.eql(10.0);",
+                  "  pm.expect(q.total).to.eql(q.subtotal + q.deliveryFee + q.extraStoreFee);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/orders/quote",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\"items\":[{\"product_id\":3,\"quantity\":1},{\"product_id\":4,\"quantity\":1}],\"governorate\":\"CAIRO\"}" }
+          }
+        },
+        {
           "name": "Tracking unknown order - FAILS 404",
           "event": [
             {
@@ -273,6 +298,96 @@
           "request": {
             "method": "GET",
             "url": "{{baseUrl}}/orders/ORDER-DOES-NOT-EXIST-999/tracking",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Growth features (5 competitive edges)",
+      "item": [
+        {
+          "name": "Refund delivered order - 200 or 400 if ineligible",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 or 400', () => {",
+                  "  pm.expect([200, 400]).to.include(pm.response.code);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/wallet/refund",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" }],
+            "body": { "mode": "raw", "raw": "{\"orderId\":\"{{orderId}}\",\"reason\":\"WRONG_ITEM\"}" }
+          }
+        },
+        {
+          "name": "Plus subscription status - SUCCESS",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Plan is PLUS_MONTHLY', () => {",
+                  "  pm.expect(pm.response.json().plan).to.eql('PLUS_MONTHLY');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/loyalty/subscription?userId={{email}}",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
+          }
+        },
+        {
+          "name": "Watch a product - SUCCESS",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Watch echoes target', () => {",
+                  "  pm.expect(pm.response.json().success).to.eql(true);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/watches",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" }],
+            "body": { "mode": "raw", "raw": "{\"product_id\":3}" }
+          }
+        },
+        {
+          "name": "List watches - SUCCESS array",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('List is array', () => {",
+                  "  pm.expect(pm.response.json()).to.be.an('array');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/watches?userId={{email}}",
             "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
           }
         }

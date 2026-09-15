@@ -71,7 +71,7 @@ class OrderControllerTest {
     @Test
     void historyReturnsPagedContentForOwner() throws Exception {
         OrderHistoryDto item = new OrderHistoryDto("LX-1", EMAIL, OrderStatus.DELIVERED,
-                LocalDateTime.of(2026, 9, 14, 10, 0), 2, 150.0, "Cairo");
+                LocalDateTime.of(2026, 9, 14, 10, 0), 2, 150.0, "Cairo", null);
         when(orderService.getOrdersByUserId(EMAIL, 0, 10))
                 .thenReturn(new PagedResponse<>(List.of(item), 0, 10, 1, 1));
 

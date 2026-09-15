@@ -188,7 +188,9 @@ public class DeliverySimulationService {
 
     private List<Integer> ordersIn(String status, int olderThanSeconds) {
         List<Integer> ids = new ArrayList<>();
+        // Feature 3: scheduled orders wait for their time (NULL = ASAP).
         String sql = "SELECT id FROM orders WHERE status = ?"
+                + " AND (scheduled_for IS NULL OR scheduled_for <= NOW())"
                 + (olderThanSeconds > 0 ? " AND order_date < NOW() - INTERVAL " + olderThanSeconds + " SECOND" : "");
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement s = conn.prepareStatement(sql)) {
