@@ -307,7 +307,8 @@
     sec.id = 'stores-section';
     sec.innerHTML = `<div class="container section-shell">`
       + `<div class="section-heading"><div><span class="eyebrow">${AR() ? 'تسوق حسب المتجر' : 'Shop by store'}</span>`
-      + `<h2>${AR() ? 'مطاعم قريبة منك' : 'Restaurants near you'}</h2></div></div>`
+      + `<h2>${AR() ? 'مطاعم قريبة منك' : 'Restaurants near you'}</h2></div>`
+      + `<a class="text-btn view-all-link" href="restaurants.html">${AR() ? 'عرض الكل ←' : 'View all →'}</a></div>`
       + group(AR() ? '🍽️ مطاعم' : '🍽️ Restaurants', rest)
       + (general.length ? `<div class="section-heading" style="margin-top:26px"><div><h2>${AR() ? 'توصيل عام: أزياء وإلكترونيات' : 'General delivery: fashion & tech'}</h2></div></div>` : '')
       + group('', general)

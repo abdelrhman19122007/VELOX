@@ -27,6 +27,7 @@ public class StoreController {
     @GetMapping
     public ResponseEntity<?> list() {
         String sql = "SELECT s.id, s.name, s.name_ar, s.store_type, s.cover_image,"
+                + " s.logo, s.cuisine, s.branch,"
                 + " COUNT(DISTINCT CASE WHEN p.is_available = 1 THEN p.id END) AS products,"
                 + " COUNT(r.id) AS reviews, ROUND(AVG(r.rating), 1) AS rating"
                 + " FROM stores s"
@@ -46,6 +47,9 @@ public class StoreController {
                 row.put("nameAr", rs.getString("name_ar"));
                 row.put("type", rs.getString("store_type"));
                 row.put("cover", rs.getString("cover_image"));
+                row.put("logo", rs.getString("logo"));
+                row.put("cuisine", rs.getString("cuisine"));
+                row.put("branch", rs.getString("branch"));
                 row.put("productsCount", rs.getInt("products"));
                 row.put("reviewsCount", rs.getInt("reviews"));
                 Object rating = rs.getObject("rating");
