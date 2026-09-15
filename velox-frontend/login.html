@@ -8,8 +8,7 @@
   <!-- Apply saved theme/language before first paint to avoid a flash of the wrong one -->
   <script>
     (function () {
-      var theme = localStorage.getItem('velox_theme') ||
-        (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      var theme = localStorage.getItem('velox_theme') || 'dark';
       document.documentElement.setAttribute('data-theme', theme);
       var lang = localStorage.getItem('velox_lang') || 'ar';
       document.documentElement.setAttribute('lang', lang);

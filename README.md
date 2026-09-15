@@ -91,7 +91,7 @@ Auth: `Bearer <token>` from `POST /auth/login` (or `/verify-otp`). Error shape: 
 | `user_notifications` | id, user_id, title, message, type, is_read |
 | `user_payment_cards` | id, user_id, method_type, cardholder_name, last_4_digits, card_brand, provider |
 
-Seed: `products ≈ 25` rows. Migrations V2 (governorates, SHIPPED, sessions, images), V3 (deliveries widen, nullable review/complaint links), V4 (returns, saved cards), V5 (notifications), V6 (payment methods, OTP).
+Seed: `products = 38` rows. Migrations V2 (governorates, SHIPPED, sessions, images), V3 (deliveries widen, nullable review/complaint links), V4 (returns, saved cards), V5 (notifications), V6 (payment methods, OTP).
 
 ## 4. Run from scratch (any machine)
 
@@ -101,7 +101,7 @@ Requirements: **JDK 17+**, **MySQL 8** running, a browser, internet on first Mav
 1. Create empty database `velox_db`.
 2. Import the base dump `VELOX_D2.SQL` first (**not tracked in Git by design** — `*.SQL` is git-ignored because dumps may carry local data; get the file from the repo maintainer or your teammate's `velox-backend/velox-db/` copy).
 3. Apply `velox-backend/velox-db/migrations/` in numeric order (V2 → V6).
-4. Verify: `products ≈ 25` rows; tables `sessions`, `return_requests`, `user_notifications`, `otp_codes` exist.
+4. Verify: `products = 38` rows; tables `sessions`, `return_requests`, `user_notifications`, `otp_codes` exist.
 
 ### 4.2 Backend config (once per machine)
 Copy `velox-backend/src/main/resources/application.properties.example` → `application.properties` (same folder, git-ignored) and set your MySQL password — or preferably env vars (they always win):
