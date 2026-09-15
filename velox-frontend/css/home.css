@@ -125,3 +125,20 @@
 @media (max-width:1050px){.catalog-page .product-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.product-modal-layout{grid-template-columns:1fr 1fr}}
 @media (max-width:760px){.catalog-page-head{align-items:start}.catalog-count{min-width:88px;padding:14px}.catalog-count strong{font-size:22px}.catalog-page .product-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.catalog-page .product-media{height:190px}.product-modal-layout{grid-template-columns:1fr}.product-modal-visual{height:48vh;min-height:240px}.product-modal-info{padding:8px 5px 14px}.product-modal-info h2{font-size:23px}.catalog-cta-card{flex-direction:column;align-items:stretch}}
 @media (max-width:500px){.catalog-page .product-media{height:165px}.catalog-page .product-body{padding:12px}.catalog-page .product-body h3{font-size:14px}.catalog-page .product-desc{font-size:10.5px}.catalog-page-head p{font-size:12.5px}.catalog-page-hero{padding-top:24px}.product-zoom{width:34px;height:34px;border-radius:10px}.catalog-cta-card h2{font-size:19px}}
+
+/* ---------- VELOX v3 dark-neon identity polish ---------- */
+[data-theme="dark"] .hero-copy h1 span{background:linear-gradient(90deg,#A78BFA,#8B5CF6 45%,#F472B6);-webkit-background-clip:text;background-clip:text;color:transparent}
+[data-theme="dark"] .hero-pill{background:rgba(139,92,246,.14);color:#C4B5FD;box-shadow:var(--neon-glow)}
+[data-theme="dark"] .product-card{transition:transform .22s var(--ease-out),box-shadow .22s,border-color .22s}
+[data-theme="dark"] .product-card:hover{transform:translateY(-6px);border-color:rgba(139,92,246,.55);box-shadow:var(--neon-glow)}
+[data-theme="dark"] .add-btn{background:linear-gradient(135deg,#8B5CF6,#6D28D9);color:#fff;border:0;box-shadow:0 6px 18px rgba(139,92,246,.4)}
+[data-theme="dark"] .add-btn:hover{background:linear-gradient(135deg,#A78BFA,#7C3AED);color:#fff;transform:scale(1.06)}
+[data-theme="dark"] .category-card.is-active{border-color:rgba(139,92,246,.6);box-shadow:var(--neon-glow)}
+[data-theme="dark"] .category-card:hover{border-color:rgba(139,92,246,.4)}
+[data-theme="dark"] .btn-primary{background:linear-gradient(135deg,#8B5CF6,#6D28D9);box-shadow:0 12px 28px rgba(139,92,246,.35)}
+[data-theme="dark"] .filter-pill.is-active{background:#8B5CF6;border-color:#8B5CF6;color:#fff}
+[data-theme="dark"] .search-box:focus-within{border-color:rgba(139,92,246,.6);box-shadow:0 0 0 4px rgba(139,92,246,.12)}
+[data-theme="dark"] .account-btn.is-logged{border-color:rgba(139,92,246,.55);color:#C4B5FD}
+[data-theme="dark"] .product-badge{background:linear-gradient(135deg,#F472B6,#8B5CF6);color:#fff}
+[data-theme="dark"] .modal-card{border-color:rgba(139,92,246,.25)}
+[data-theme="dark"] .catalog-cta-card{background:linear-gradient(135deg,#1C1832,#2A2350);border-color:rgba(139,92,246,.3)}
