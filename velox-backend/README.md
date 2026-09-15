@@ -39,6 +39,7 @@ runs the API (`VeloxApplication`), not the console.
 | GET `/auth/profile?userId=` | Bearer (self) | profile + loyalty + offers |
 | PUT `/auth/profile` | Bearer (self) | update name/phone/governorate |
 | GET `/products` | no | catalog in storefront shape (incl. `image`, Arabic names) |
+| GET `/stores` | no | store directory with live ratings + product counts |
 | GET `/api/categories` … `/categories` | no | all/food/fashion/electronics with counts |
 | GET `/governorates`, `/{name}`, `/{name}/shipping` | no | 27 governorates, codes, prices |
 | GET `/orders/history?userId=&page=&size=` | Bearer (self) | paged history from MySQL |
