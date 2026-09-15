@@ -99,7 +99,7 @@ Requirements: **JDK 17+**, **MySQL 8** running, a browser, internet on first Mav
 
 ### 4.1 Database (once)
 1. Create empty database `velox_db`.
-2. Import `velox-backend/velox-db/VELOX_D2.SQL` first.
+2. Import the base dump `VELOX_D2.SQL` first (**not tracked in Git by design** — `*.SQL` is git-ignored because dumps may carry local data; get the file from the repo maintainer or your teammate's `velox-backend/velox-db/` copy).
 3. Apply `velox-backend/velox-db/migrations/` in numeric order (V2 → V6).
 4. Verify: `products ≈ 25` rows; tables `sessions`, `return_requests`, `user_notifications`, `otp_codes` exist.
 
