@@ -3,8 +3,8 @@
   const USERS_KEY = 'velox_mock_users';
   const seed = {
     id: 1,
-    full_name: 'Hoda Yasser',
-    email: 'hoda@example.com',
+    full_name: 'Demo User',
+    email: 'demo@example.com',
     phone_number: '01012345678',
     governorate: 'DAMIETTA',
     role: 'CUSTOMER',
