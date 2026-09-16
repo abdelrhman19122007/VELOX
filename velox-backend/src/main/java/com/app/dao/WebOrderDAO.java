@@ -136,6 +136,36 @@ public class WebOrderDAO {
         return out;
     }
 
+    /** Feature: coupons — applies discount (and optional free shipping) post-placement. */
+    public double[] applyPromo(int orderId, double discount, boolean freeShipping) {
+        double total = 0;
+        double fee = 0;
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement sel = conn.prepareStatement(
+                     "SELECT total_amount, delivery_fee FROM orders WHERE id = ?")) {
+            sel.setInt(1, orderId);
+            try (ResultSet rs = sel.executeQuery()) {
+                if (rs.next()) {
+                    total = rs.getDouble(1);
+                    fee = rs.getDouble(2);
+                }
+            }
+            double finalFee = freeShipping ? 0 : fee;
+            double finalAmount = Math.max(0, total - discount + finalFee);
+            try (PreparedStatement up = conn.prepareStatement(
+                    "UPDATE orders SET discount_amount = ?, delivery_fee = ?, final_amount = ? WHERE id = ?")) {
+                up.setDouble(1, discount);
+                up.setDouble(2, finalFee);
+                up.setDouble(3, finalAmount);
+                up.setInt(4, orderId);
+                up.executeUpdate();
+            }
+            return new double[]{discount, finalFee, finalAmount};
+        } catch (SQLException e) {
+            throw new IllegalStateException("Coupon apply failed: " + e.getMessage());
+        }
+    }
+
     /** Marks a return in MySQL and restores stock. Returns false when unknown. */
     public boolean markReturnedByCode(String orderCode) {
         if (orderCode == null || orderCode.isBlank()) {
