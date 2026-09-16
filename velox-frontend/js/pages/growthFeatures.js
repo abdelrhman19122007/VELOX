@@ -363,13 +363,18 @@
       + `<h2>${AR() ? 'الناس بتشتري إيه؟' : 'What people order'}</h2></div></div>`
       + `<div class="popular-rail">` + items.map((p) => {
         const nm = AR() ? (p.nameAr || p.nameEn) : (p.nameEn || p.nameAr);
-        return `<article class="product-card popular-card"><div class="product-media">`
+        return `<article class="product-card popular-card" data-pstore="${p.store_id || ''}"><div class="product-media">`
           + (p.image ? `<img class="product-image" src="${esc(p.image)}" alt="" loading="lazy" onerror="this.style.display='none'">` : `<span>🛍️</span>`)
           + `</div><div class="product-body"><h3>${esc(nm)}</h3>`
           + `<div class="product-bottom"><div class="price">${Number(p.price).toFixed(0)} <small>EGP</small></div>`
           + `<button type="button" class="add-btn" data-pop-add="${p.id}" aria-label="+">+</button></div></div></article>`;
       }).join('') + `</div></div>`;
     prodSection.before(sec);
+    sec.querySelectorAll('.popular-card').forEach((card) => card.addEventListener('click', (e) => {
+      if (e.target.closest('[data-pop-add]')) return;
+      const sid = card.dataset.pstore;
+      if (sid) window.location.href = `store.html?id=${encodeURIComponent(sid)}`;
+    }));
     sec.querySelectorAll('[data-pop-add]').forEach((b) => b.addEventListener('click', () => {
       let cart = [];
       try { cart = JSON.parse(localStorage.getItem('velox_cart') || '[]'); } catch (_) {}

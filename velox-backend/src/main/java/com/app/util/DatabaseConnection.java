@@ -51,6 +51,15 @@ public class DatabaseConnection {
         if (URL == null || URL.isEmpty()) {
             throw new SQLException("DB URL is not configured. Set VELOX_DB_URL or db.url");
         }
-        return DriverManager.getConnection(URL, USER, PASSWORD);
+        return DriverManager.getConnection(withUtf8(URL), USER, PASSWORD);
+    }
+
+    /** Forces UTF-8 on the wire so Arabic text survives the round-trip. */
+    static String withUtf8(String url) {
+        if (url.contains("characterEncoding=")) {
+            return url;
+        }
+        return url + (url.contains("?") ? "&" : "?")
+                + "useUnicode=true&characterEncoding=UTF-8&connectionCollation=utf8mb4_unicode_ci";
     }
 }
