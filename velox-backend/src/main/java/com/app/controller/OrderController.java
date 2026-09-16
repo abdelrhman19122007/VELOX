@@ -69,11 +69,14 @@ public class OrderController {
             Object gov = body.get("governorate");
             Object pay = body.get("paymentMethod") != null ? body.get("paymentMethod") : body.get("payment_method");
             Object scheduled = body.get("scheduled_for") != null ? body.get("scheduled_for") : body.get("scheduledFor");
+            Object promo = body.get("promo_code") != null ? body.get("promo_code")
+                    : (body.get("promoCode") != null ? body.get("promoCode") : body.get("coupon"));
             Map<String, Object> placed = webOrders.placeOrder(email,
                     (List<Map<String, Object>>) items,
                     gov == null ? null : String.valueOf(gov),
                     pay == null ? null : String.valueOf(pay),
-                    scheduled == null ? null : String.valueOf(scheduled));
+                    scheduled == null ? null : String.valueOf(scheduled),
+                    promo == null ? null : String.valueOf(promo));
             return ResponseEntity.ok(placed);
         } catch (IllegalArgumentException ex) {
             return ResponseEntity.badRequest().body(Map.of("message", ex.getMessage()));

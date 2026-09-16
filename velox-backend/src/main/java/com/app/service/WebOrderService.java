@@ -41,6 +41,15 @@ public class WebOrderService {
 
     public Map<String, Object> placeOrder(String email, List<Map<String, Object>> rawItems,
                                           String governorateRaw, String paymentMethod, String scheduledRaw) {
+        return placeOrder(email, rawItems, governorateRaw, paymentMethod, scheduledRaw, null);
+    }
+
+    /**
+     * Full checkout: adds optional coupon code (validated, usage counted).
+     */
+    public Map<String, Object> placeOrder(String email, List<Map<String, Object>> rawItems,
+                                          String governorateRaw, String paymentMethod,
+                                          String scheduledRaw, String promoRaw) {
         CustomerAccountService.Profile profile = CustomerAccountService.profileOf(email);
         if (profile == null) {
             throw new IllegalArgumentException("Account not found. Please register first.");
@@ -75,8 +84,27 @@ public class WebOrderService {
         boolean plusFreeDelivery = new PlusService().hasActiveSub(userId);
         double deliveryFee = plusFreeDelivery ? 0
                 : gov.getShippingPrice() + MultiStorePricing.extraFee(detailed.stores().size());
+        // Coupons: validate early so wallet debit and placement use final math.
+        PromoService.Coupon coupon = null;
+        double promoDiscount = 0;
+        boolean promoFreeShip = false;
+        if (promoRaw != null && !promoRaw.isBlank()) {
+            PromoService promos = new PromoService();
+            coupon = promos.find(promoRaw);
+            String problem = PromoService.rejectionReason(coupon, detailed.subtotal(),
+                    java.time.LocalDateTime.now()).orElse(null);
+            if (problem != null) {
+                throw new IllegalArgumentException(problem);
+            }
+            PromoService.Applied applied = PromoService.apply(coupon, detailed.subtotal());
+            promoDiscount = applied.discount();
+            promoFreeShip = applied.freeShipping();
+            if (promoFreeShip) {
+                deliveryFee = 0;
+            }
+        }
         if (wallet) {
-            walletCharged = detailed.subtotal() + deliveryFee;
+            walletCharged = Math.max(0, detailed.subtotal() - promoDiscount + deliveryFee);
             if (!users.debit(userId, walletCharged)) {
                 throw new IllegalArgumentException(
                         "Insufficient wallet balance (need " + String.format(java.util.Locale.US, "%.2f", walletCharged) + " EGP).");
@@ -94,6 +122,17 @@ public class WebOrderService {
         }
         if (scheduledFor != null) {
             dao.setScheduledFor(placed.orderId(), scheduledFor);
+        }
+        // Coupons: persist discount + count usage (validated above).
+        String promoCode = null;
+        double finalFee = deliveryFee;
+        double finalTotal = placed.total() - promoDiscount;
+        if (coupon != null) {
+            double[] adjusted = dao.applyPromo(placed.orderId(), promoDiscount, promoFreeShip);
+            finalFee = adjusted[1];
+            finalTotal = adjusted[2];
+            promoCode = coupon.code();
+            new PromoService().markUsed(promoCode);
         }
 
         // File-account copy (PENDING: counts toward loyalty once delivered/paid).
@@ -121,15 +160,19 @@ public class WebOrderService {
         out.put("orderId", placed.orderId());
         out.put("orderCode", placed.orderCode());
         out.put("subtotal", placed.subtotal());
-        out.put("deliveryFee", placed.deliveryFee());
+        out.put("deliveryFee", finalFee);
         out.put("extraStoreFee", Math.max(0, deliveryFee - gov.getShippingPrice()));
         out.put("plusFreeDelivery", plusFreeDelivery);
+        if (promoCode != null) {
+            out.put("promoCode", promoCode);
+            out.put("promoDiscount", promoDiscount);
+        }
         out.put("stores", detailed.stores().stream().map(s -> Map.of(
                 "storeId", s.storeId(),
                 "storeName", s.storeName(),
                 "subtotal", s.subtotal(),
                 "lines", s.lines())).toList());
-        out.put("total", placed.total());
+        out.put("total", finalTotal);
         out.put("status", placed.status());
         out.put("paymentMethod", wallet ? "WALLET" : "CASH_ON_DELIVERY");
         if (scheduledFor != null) {
