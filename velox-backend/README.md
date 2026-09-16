@@ -58,6 +58,8 @@ runs the API (`VeloxApplication`), not the console.
 | POST `/watches` | Bearer | `{product_id, target_price?}` (no target = any drop) |
 | DELETE `/watches/{productId}` | Bearer | remove a watch |
 | GET `/offers/personalized?userId=` | Bearer (self) | offers from purchase history |
+| GET `/coupons` | no | active coupon codes |
+| POST `/coupons/validate` | no | `{code, subtotal}` → `{valid, discount, freeShipping}` |
 | GET `/loyalty/status?userId=` | Bearer (self) | progress toward free delivery |
 | GET `/wallet/balance?userId=` | Bearer (self) | `remaining_budget` |
 | POST `/wallet/topup` | Bearer | `{amount}` |
