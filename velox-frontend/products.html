@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="VELOX — استكشف المنتجات حسب القسم وشاهد الصور والتفاصيل بوضوح.">
   <title>VELOX — المنتجات</title>
-  <script>(function(){var theme=localStorage.getItem('velox_theme')||'dark';document.documentElement.setAttribute('data-theme',theme);var lang=localStorage.getItem('velox_lang')||'ar';document.documentElement.setAttribute('lang',lang);document.documentElement.setAttribute('dir',lang==='ar'?'rtl':'ltr');})();</script>
+  <script>(function(){var theme=localStorage.getItem('velox_theme')||'light';document.documentElement.setAttribute('data-theme',theme);var lang=localStorage.getItem('velox_lang')||'ar';document.documentElement.setAttribute('lang',lang);document.documentElement.setAttribute('dir',lang==='ar'?'rtl':'ltr');})();</script>
   <link rel="stylesheet" href="css/tokens.css">
   <link rel="stylesheet" href="css/base.css">
   <link rel="stylesheet" href="css/components.css">
@@ -15,7 +15,7 @@
   <header class="site-header" id="top">
     <button type="button" class="menu-toggle" id="side-menu-toggle" aria-label="فتح القائمة"><span>☰</span></button>
     <div class="container header-inner">
-      <a class="brand-lockup" href="index.html" aria-label="VELOX"><img src="assets/images/velox-logo.jpeg" alt="VELOX" class="brand-logo"><span class="brand-copy"><strong>VELOX</strong><small data-i18n="app.tagline">كل شيء يوصلك في مكان واحد</small></span></a>
+      <a class="brand-lockup" href="index.html" aria-label="VELOX"><img src="assets/images/velox-logo.png" alt="VELOX" class="brand-logo"><span class="brand-copy"><strong>VELOX</strong><small data-i18n="app.tagline">كل شيء يوصلك في مكان واحد</small></span></a>
       <div class="header-search"><label class="search-box" for="product-search"><span class="search-icon" aria-hidden="true">⌕</span><input id="product-search" type="search" data-i18n-placeholder="home.searchPlaceholder" placeholder="ابحث عن منتج، مطعم، أو متجر..." autocomplete="off" aria-controls="product-grid"><button type="button" id="search-clear" class="search-clear" hidden aria-label="مسح البحث">×</button><kbd>⌘ K</kbd></label></div>
       <div class="header-actions"><button type="button" class="header-btn hide-mobile" id="theme-toggle" data-i18n-aria-label="nav.toggleTheme" aria-label="تبديل الوضع الليلي"><span aria-hidden="true">◐</span></button><button type="button" class="header-btn hide-mobile lang-btn" id="lang-toggle" data-i18n="nav.toggleLang">English</button><button type="button" class="header-btn account-btn" id="account-btn"><span class="account-icon" aria-hidden="true">◉</span><span id="account-label" data-i18n="home.login">تسجيل الدخول</span></button><a class="header-btn notification-btn" href="notifications.html" aria-label="الإشعارات" title="الإشعارات"><span aria-hidden="true">◌</span><b class="notification-count">3</b></a><button type="button" class="cart-btn" id="cart-toggle" aria-label="السلة" title="السلة"><span aria-hidden="true">🛒</span><b class="cart-count" id="cart-count">0</b></button></div>
     </div>
@@ -30,14 +30,14 @@
     <section class="catalog-page-hero"><div class="container"><a class="back-link" href="index.html">← <span data-i18n="catalog.backHome">العودة للرئيسية</span></a><div class="catalog-page-head"><div><span class="eyebrow" data-i18n="catalog.eyebrow">متجر VELOX</span><h1 id="catalog-title">كل منتجات VELOX</h1><p id="catalog-subtitle">اختار قسمًا أو ابحث عن منتج، ثم افتح الصورة لرؤية التفاصيل بوضوح.</p></div><div class="catalog-count"><strong id="catalog-count">22</strong><span data-i18n="catalog.items">منتج</span></div></div><div class="products-toolbar"><div class="filter-pills" id="filter-pills"></div><div class="search-meta" id="search-meta" hidden></div></div></div></section>
     <section class="products-section catalog-products"><div class="container section-shell"><div class="product-grid" id="product-grid"></div><div class="empty-products" id="empty-products" hidden><div class="empty-icon">⌕</div><h3 data-empty-title data-i18n="home.emptyTitle">مفيش نتائج بالشكل ده</h3><p data-empty-subtitle data-i18n="home.emptySubtitle">جرّب كلمة بحث تانية أو اختار فئة مختلفة.</p></div></div></section>
   </main>
-  <footer class="site-footer"><div class="container footer-inner"><div class="brand-lockup footer-brand"><img src="assets/images/velox-logo.jpeg" alt="VELOX" class="brand-logo"><span class="brand-copy"><strong>VELOX</strong><small data-i18n="app.tagline">كل شيء يوصلك في مكان واحد</small></span></div></div></footer>
+  <footer class="site-footer"><div class="container footer-inner"><div class="brand-lockup footer-brand"><img src="assets/images/velox-logo.png" alt="VELOX" class="brand-logo"><span class="brand-copy"><strong>VELOX</strong><small data-i18n="app.tagline">كل شيء يوصلك في مكان واحد</small></span></div></div></footer>
 
   <div class="modal-backdrop" id="product-modal" hidden><div class="modal-card product-modal-card" role="dialog" aria-modal="true" aria-labelledby="product-modal-title"><button class="modal-close" type="button" data-close-modal aria-label="إغلاق">×</button><div class="product-modal-layout"><div class="product-modal-visual"><span class="product-badge" id="product-modal-badge" hidden></span><img id="product-modal-image" src="" alt=""><div class="product-modal-thumbs" id="product-modal-thumbs" hidden></div></div><div class="product-modal-info"><span class="eyebrow" id="product-modal-store">VELOX</span><h2 id="product-modal-title">—</h2><p id="product-modal-desc">—</p><div class="product-modal-price"><strong id="product-modal-price">0 EGP</strong><span>EGP</span></div><button type="button" class="btn btn-primary btn-block" id="product-modal-add"><span data-i18n="catalog.addToCart">إضافة للسلة</span><span>←</span></button></div></div></div></div>
   <!-- Auth modal: optional on browsing, required only at checkout. -->
   <div class="modal-backdrop" id="auth-modal" hidden>
     <div class="modal-card auth-modal-card" role="dialog" aria-modal="true" aria-labelledby="auth-modal-title">
       <button class="modal-close" type="button" data-close-modal aria-label="إغلاق">×</button>
-      <div class="modal-logo"><img src="assets/images/velox-logo.jpeg" alt="VELOX"></div>
+      <div class="modal-logo"><img src="assets/images/velox-logo.png" alt="VELOX"></div>
       <div class="modal-intro"><span class="eyebrow" data-i18n="authModal.eyebrow">حساب VELOX</span><h2 id="auth-modal-title">تسجيل الدخول</h2><p id="auth-modal-subtitle">سجّل الدخول لإكمال طلبك بسرعة وأمان.</p></div>
       <div class="auth-tabs"><button class="auth-tab is-active" data-auth-tab="login" data-i18n="authModal.loginTab">تسجيل الدخول</button><button class="auth-tab" data-auth-tab="register" data-i18n="authModal.registerTab">حساب جديد</button></div>
 
@@ -60,6 +60,13 @@
         </div>
         <div id="modal-register-alert" aria-live="polite"></div>
         <button type="submit" class="btn btn-primary btn-block" id="modal-register-submit"><span class="spinner"></span><span class="btn-label" data-i18n="register.submit">إنشاء الحساب</span></button>
+      </form>
+
+      <form id="modal-otp-form" class="modal-form" hidden novalidate>
+        <p class="muted" data-i18n="otp.subtitle">أدخل كود التحقق المكون من 6 أرقام.</p>
+        <div class="field"><label for="modal-otp-code" data-i18n="otp.label">كود التحقق</label><input type="text" id="modal-otp-code" inputmode="numeric" maxlength="6" placeholder="••••••" autocomplete="one-time-code"><div class="field-hint"></div></div>
+        <div id="modal-otp-alert" aria-live="polite"></div>
+        <button type="submit" class="btn btn-primary btn-block" id="modal-otp-submit"><span class="spinner"></span><span class="btn-label" data-i18n="otp.submit">تأكيد الحساب</span></button>
       </form>
     </div>
   </div>

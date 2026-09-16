@@ -7,7 +7,7 @@
 
   <script>
     (function () {
-      var theme = localStorage.getItem('velox_theme') || 'dark';
+      var theme = localStorage.getItem('velox_theme') || 'light';
       document.documentElement.setAttribute('data-theme', theme);
       var lang = localStorage.getItem('velox_lang') || 'ar';
       document.documentElement.setAttribute('lang', lang);
@@ -26,7 +26,7 @@
     <aside class="auth-brand">
       <div class="auth-brand-top">
         <div class="auth-logo">
-          <img src="assets/images/velox-logo.jpeg" alt="VELOX">
+          <img src="assets/images/velox-logo.png" alt="VELOX">
           <div>
             <div class="auth-logo-name">VELOX</div>
             <div class="auth-logo-tagline" data-i18n="app.tagline">كل شيء يوصلك في مكان واحد</div>
@@ -139,6 +139,20 @@
           <button type="submit" id="register-submit" class="btn btn-primary btn-block">
             <span class="spinner"></span>
             <span class="btn-label" data-i18n="register.submit">إنشاء الحساب</span>
+          </button>
+        </form>
+
+        <form id="otp-form" hidden novalidate>
+          <p class="muted" data-i18n="otp.subtitle">أدخل كود التحقق المكون من 6 أرقام.</p>
+          <div class="field">
+            <label for="otp-code" data-i18n="otp.label">كود التحقق</label>
+            <input type="text" id="otp-code" inputmode="numeric" maxlength="6" placeholder="••••••" autocomplete="one-time-code">
+            <div class="field-hint"></div>
+          </div>
+          <div id="otp-alert" aria-live="polite"></div>
+          <button type="submit" id="otp-submit" class="btn btn-primary btn-block">
+            <span class="spinner"></span>
+            <span class="btn-label" data-i18n="otp.submit">تأكيد الحساب</span>
           </button>
         </form>
 

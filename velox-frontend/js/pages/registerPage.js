@@ -91,13 +91,22 @@
 
       setButtonLoading(submitBtn, true);
       try {
-        await window.VeloxAuthService.register({
+        const res = await window.VeloxAuthService.register({
           full_name: nameInput.value.trim(),
           email: emailInput.value.trim(),
           password: passwordInput.value,
           phone_number: phoneInput.value.trim(),
           governorate: govSelect.value,
         });
+        if (res && res.pending) {
+          pendingOtpEmail = res.email || emailInput.value.trim();
+          form.hidden = true;
+          const otpForm = qs('#otp-form');
+          if (otpForm) otpForm.hidden = false;
+          showAlert(qs('#otp-alert'), 'success', t('otp.sent'));
+          if (res.otp) showAlert(qs('#otp-alert'), 'success', t('otp.sent') + ' (' + t('otp.demoCode') + res.otp + ')');
+          return;
+        }
         showAlert(alertBox, 'success', t('register.success'));
         setTimeout(() => {
           window.location.href = 'login.html?registered=1';
@@ -105,6 +114,24 @@
       } catch (err) {
         setButtonLoading(submitBtn, false);
         showAlert(alertBox, 'error', t(err.i18nKey || 'register.error.generic'));
+      }
+    });
+
+    let pendingOtpEmail = '';
+    const otpForm = qs('#otp-form');
+    if (otpForm) otpForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const code = (qs('#otp-code') || {}).value || '';
+      if (code.trim().length !== 6) {
+        showAlert(qs('#otp-alert'), 'error', t('otp.error.invalid'));
+        return;
+      }
+      try {
+        await window.VeloxAuthService.verifyOtp({ email: pendingOtpEmail, code: code.trim() });
+        showAlert(qs('#otp-alert'), 'success', t('otp.success'));
+        setTimeout(() => { window.location.href = 'index.html'; }, 800);
+      } catch (err) {
+        showAlert(qs('#otp-alert'), 'error', t(err.i18nKey || 'otp.error.invalid'));
       }
     });
   });

@@ -56,6 +56,10 @@
     const cfg = window.VELOX_CONFIG;
     if (!cfg.USE_MOCK_API) {
       const data = await window.VeloxApiClient.request(cfg.ENDPOINTS.register, { method: 'POST', body: payload });
+      // New accounts stay inactive until OTP verification: pass pending through.
+      if (data && data.pending) {
+        return { pending: true, email: data.email, otp: data.otp || null };
+      }
       if (!data?.token || !data?.user) throw new Error('Invalid register response');
       saveSession(data.token, data.user);
       return data.user;
@@ -82,5 +86,32 @@
     return user;
   }
 
-  window.VeloxAuthService = { login, register, logout, getSession };
+  window.VeloxAuthService = { login, register, verifyOtp, resendOtp, logout, getSession };
+
+  async function verifyOtp({ email, code }) {
+    const cfg = window.VELOX_CONFIG;
+    if (!cfg.USE_MOCK_API) {
+      const data = await window.VeloxApiClient.request('/auth/verify-otp', {
+        method: 'POST', body: { email, code },
+      });
+      if (!data?.token || !data?.user) {
+        const error = new Error('Invalid OTP');
+        error.i18nKey = 'otp.error.invalid';
+        throw error;
+      }
+      saveSession(data.token, data.user);
+      return data.user;
+    }
+    await delay(cfg.MOCK_LATENCY_MS);
+    const user = readUsers().find((u) => u.email.toLowerCase() === String(email).trim().toLowerCase());
+    if (!user) throw new Error('Account not found');
+    saveSession('mock-token-' + user.id, user);
+    return user;
+  }
+
+  async function resendOtp(email) {
+    const cfg = window.VELOX_CONFIG;
+    if (cfg.USE_MOCK_API) return { email, otp: null };
+    return window.VeloxApiClient.request('/auth/resend-otp', { method: 'POST', body: { email } });
+  }
 })();

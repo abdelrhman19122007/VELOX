@@ -68,8 +68,11 @@
           window.location.href = `index.html?welcome=${encodeURIComponent(user.full_name)}`;
         }, 700);
       } catch (err) {
+        const msg = /verif/i.test(err.message || '')
+          ? t('login.error.unverified')
+          : t(err.i18nKey || 'login.error.generic');
         setButtonLoading(submitBtn, false);
-        showAlert(alertBox, 'error', t(err.i18nKey || 'login.error.generic'));
+        showAlert(alertBox, 'error', msg);
       }
     });
   });
