@@ -11,8 +11,7 @@
   function getTheme() {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) return stored;
-    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) return 'light';
-    return 'dark';
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   }
 
   function applyTheme(theme) {

@@ -235,7 +235,9 @@
       const flow = ['PENDING', 'PROCESSING', 'IN_TRANSIT', 'SHIPPED', 'ARRIVED', 'DELIVERED'];
       const idx = Math.max(0, flow.indexOf(active.status));
       const pct = Math.round(((idx + 1) / flow.length) * 100);
-      $('#ex-track-label').textContent = `طلب جاري: #${active.orderId} · ${active.status}`;
+      const steps = flow.map((s, k) => (k <= idx ? '●' : '○') + ' ' + s).join(' → ');
+      $('#ex-track-label').textContent = `طلب #${active.orderId} · ${active.status}`;
+      $('#ex-track-label').title = steps;
       $('#ex-track-fill').style.width = pct + '%';
       $('#ex-track-pct').textContent = pct + '%';
       $('#ex-tracker').hidden = false;

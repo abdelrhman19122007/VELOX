@@ -8,12 +8,12 @@
   --velox-orange: #FFB84D;
   --velox-purple: #8E6CFF;
   --velox-ink: #0B1020;
-  --color-primary: var(--velox-blue);
-  --color-primary-hover: var(--velox-blue-strong);
-  --color-accent: var(--velox-cyan);
-  --color-background: #F7F9FF;
+  --color-primary: #500088;
+  --color-primary-hover: #6b21a8;
+  --color-accent: #7d2dce;
+  --color-background: #faf8ff;
   --color-surface: #FFFFFF;
-  --color-surface-alt: #EEF2FF;
+  --color-surface-alt: #f2f3ff;
   --color-text: #11182B;
   --color-text-muted: #69738A;
   --color-text-on-primary: #FFFFFF;
