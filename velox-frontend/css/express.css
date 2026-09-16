@@ -77,11 +77,11 @@ body{font-family:'Cairo','Plus Jakarta Sans',Tahoma,sans-serif;background:var(--
 .ex-sec-head .eyebrow{color:var(--ex-violet);font-size:12px;font-weight:800;display:block;margin-bottom:2px}
 /* categories */
 .ex-cats{display:grid;grid-auto-flow:column;grid-auto-columns:110px;gap:12px;overflow-x:auto;padding-bottom:6px}
-.ex-cat{border:1px solid var(--ex-line);background:#fff;border-radius:16px;padding:14px 8px;display:flex;flex-direction:column;align-items:center;gap:7px;cursor:pointer;font-size:12px;font-weight:800;color:var(--ex-ink)}
+.ex-cat{border:1px solid var(--ex-line);background:#fff;border-radius:16px;padding:14px 8px;display:flex;flex-direction:column;align-items:center;gap:7px;cursor:pointer;font-size:14px;font-weight:800;color:var(--ex-ink)}
 .ex-cat i{width:52px;height:52px;border-radius:15px;background:var(--ex-low);display:grid;place-items:center;font-size:25px;font-style:normal}
 .ex-cat.is-active{background:var(--ex-primary2);color:#fff;border-color:var(--ex-primary2)}
 .ex-cat.is-active small{color:var(--ex-lav)}
-.ex-cat small{color:var(--ex-muted);font-weight:400;font-size:10px}
+.ex-cat small{color:var(--ex-muted);font-weight:700;font-size:12px}
 /* coupons */
 .ex-coupons{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
 .ex-coupon{border-radius:18px;padding:20px;color:#fff;position:relative;overflow:hidden;min-height:190px;display:flex;flex-direction:column;justify-content:space-between}

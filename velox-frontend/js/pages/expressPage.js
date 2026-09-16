@@ -11,14 +11,14 @@
   const session = () => { try { return window.VeloxAuthService.getSession(); } catch (_) { return null; } };
 
   const CATS = [
-    { icon: '🍔', ar: 'برجر ومشويات', q: 'برجر', n: 42 },
-    { icon: '🍕', ar: 'بيتزا وباستا', q: 'بيتزا', n: 38 },
-    { icon: '🌯', ar: 'شاورما وسندوتش', q: 'شاورما', n: 29 },
-    { icon: '🍲', ar: 'مأكولات شرقية', q: 'كشري', n: 51 },
-    { icon: '🍰', ar: 'حلويات ومخبوزات', q: 'بان كيك', n: 23 },
-    { icon: '🥗', ar: 'أكل صحي ودايت', q: 'سلطة', n: 15 },
-    { icon: '☕', ar: 'قهوة ومشروبات', q: 'عصير', n: 19 },
-    { icon: '🍗', ar: 'فرايد تشيكن', q: 'ستربس', n: 34 },
+    { icon: '🍔', ar: 'برجر ومشويات', q: 'برجر' },
+    { icon: '🍕', ar: 'بيتزا وباستا', q: 'بيتزا' },
+    { icon: '🌯', ar: 'شاورما وسندوتش', q: 'شاورما' },
+    { icon: '🍲', ar: 'مأكولات شرقية', q: 'كشري' },
+    { icon: '🍰', ar: 'حلويات ومخبوزات', q: 'كيك' },
+    { icon: '🥗', ar: 'أكل صحي ودايت', q: 'سلطة' },
+    { icon: '🍗', ar: 'فرايد تشيكن', q: 'ستربس' },
+    { icon: '🍣', ar: 'سوشي وسي فود', q: 'سوشي' },
   ];
 
   function etaFor(s) {
@@ -100,10 +100,15 @@
     } catch (_) {}
   }
 
-  function bootCats() {
-    $('#ex-cats').innerHTML = CATS.map((c, i) =>
-      `<button type="button" class="ex-cat${i === 1 ? ' is-active' : ''}" data-q="${esc(c.q)}"><i>${c.icon}</i>${esc(c.ar)}<small>${c.n} مطعم</small></button>`
-    ).join('');
+  async function bootCats() {
+    let products = [];
+    try { products = await api('/products'); } catch (_) {}
+    const countFor = (q) => products.filter((p) =>
+      String(p.nameAr || '').includes(q) || String(p.nameEn || '').toLowerCase().includes(q)).length;
+    $('#ex-cats').innerHTML = CATS.map((c, i) => {
+      const n = countFor(c.q);
+      return `<button type="button" class="ex-cat${i === 1 ? ' is-active' : ''}" data-q="${esc(c.q)}"><i>${c.icon}</i>${esc(c.ar)}<small>${n} صنف</small></button>`;
+    }).join('');
     $$('#ex-cats .ex-cat').forEach((b) => b.addEventListener('click', () => {
       window.location.href = 'products.html?q=' + encodeURIComponent(b.dataset.q);
     }));
@@ -212,12 +217,17 @@
     let items = [];
     try { items = await api('/products/popular?limit=4'); } catch (_) {}
     $('#ex-dishes').innerHTML = items.map((p) => `
-      <article class="ex-dish"><div class="im">
+      <article class="ex-dish" data-store="${p.store_id || ''}"><div class="im">
         ${p.image ? `<img src="${esc(p.image)}" alt="" loading="lazy" onerror="this.remove()">` : ''}
       </div><div class="tx"><span style="font-size:10px;font-weight:800;color:var(--ex-violet)">الأكثر مبيعاً ★</span>
       <h3>${esc(p.nameAr || p.nameEn)}</h3><p>${esc((p.descAr || '').slice(0, 70))}</p>
       <div class="buy"><strong>${Number(p.price).toFixed(0)} ج.م</strong>
       <button class="ex-mini-btn" data-add="${p.id}">+ أضف للسلة</button></div></div></article>`).join('');
+    $$('#ex-dishes .ex-dish').forEach((card) => card.addEventListener('click', (e) => {
+      if (e.target.closest('[data-add]')) return;
+      const sid = card.dataset.store;
+      if (sid) window.location.href = `store.html?id=${encodeURIComponent(sid)}`;
+    }));
     $$('#ex-dishes [data-add]').forEach((b) => b.addEventListener('click', () => {
       addToCart(b.dataset.add, 1);
       b.textContent = '✓ اتضاف';
