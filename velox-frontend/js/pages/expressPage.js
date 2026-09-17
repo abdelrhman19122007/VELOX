@@ -255,6 +255,12 @@
   }
 
   function boot() {
+    const themeBtn = $('#ex-theme');
+    if (themeBtn) themeBtn.addEventListener('click', () => {
+      const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      try { localStorage.setItem('velox_theme', next); } catch (_) {}
+      document.documentElement.setAttribute('data-theme', next);
+    });
     bootHeader(); bootShowcase(); bootCats(); bootCoupons(); bootRests(); bootDishes(); bootTracker();
   }
 

@@ -120,6 +120,24 @@ public class UserDAO {
         return -1;
     }
 
+    /** Creates an already-verified federated account. Google supplies no phone/address. */
+    public int createGoogleUser(String fullName, String email, String subject) {
+        String sql = "INSERT INTO users (full_name,email,password_hash,phone_number,governorate,is_active,is_verified) VALUES (?,?,?,?,?,1,1)";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql, java.sql.Statement.RETURN_GENERATED_KEYS)) {
+            stmt.setString(1, fullName);
+            stmt.setString(2, email.trim().toLowerCase());
+            stmt.setString(3, "GOOGLE:" + subject);
+            stmt.setString(4, "G" + subject.substring(Math.max(0, subject.length() - 18)));
+            stmt.setString(5, "CAIRO");
+            stmt.executeUpdate();
+            try (ResultSet keys = stmt.getGeneratedKeys()) { return keys.next() ? keys.getInt(1) : -1; }
+        } catch (SQLException e) {
+            System.err.println("[UserDAO] Google user create failed: " + e.getMessage());
+            return -1;
+        }
+    }
+
     /** Email owning a phone number (exact or digits-only match), or null. */
     public String findEmailByPhone(String phone) {
         if (phone == null || phone.isBlank()) {

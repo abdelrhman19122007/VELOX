@@ -134,3 +134,47 @@ body{font-family:'Cairo','Plus Jakarta Sans',Tahoma,sans-serif;background:var(--
 .ex-foot-grid a{display:block;color:var(--ex-muted);font-size:12px;text-decoration:none;margin-bottom:7px}
 @media (max-width:1000px){.ex-hero-grid{grid-template-columns:1fr}.ex-rests,.ex-dishes,.ex-coupons{grid-template-columns:repeat(2,1fr)}.ex-foot-grid{grid-template-columns:1fr 1fr}}
 @media (max-width:600px){.ex-rests,.ex-dishes{grid-template-columns:1fr 1fr}.ex-feats{grid-template-columns:1fr}.ex-nav{display:none}}
+
+/* ---------- Dark mode: same global velox_theme switch, neon accents ---------- */
+[data-theme="dark"] body{background:#12101D;color:#F4F2FF}
+[data-theme="dark"] .ex-header{background:rgba(18,16,29,.9);border-bottom-color:#2D2850}
+[data-theme="dark"] .ex-search,[data-theme="dark"] .ex-loc{background:#1C1832;color:#F4F2FF}
+[data-theme="dark"] .ex-search input{color:#F4F2FF}
+[data-theme="dark"] .ex-nav a{color:#A7A3C7}
+[data-theme="dark"] .ex-icon-btn{background:#1C1832;border-color:#2D2850;color:#F4F2FF}
+[data-theme="dark"] .ex-hero{background:linear-gradient(180deg,#241d4e 0%,#12101D 100%)}
+[data-theme="dark"] .ex-console,[data-theme="dark"] .ex-show,[data-theme="dark"] .ex-feat,[data-theme="dark"] .ex-cat,[data-theme="dark"] .ex-rest,[data-theme="dark"] .ex-dish,[data-theme="dark"] footer.ex-footer,[data-theme="dark"] #ex-tracker{background:#1C1832;border-color:#2D2850;color:#F4F2FF}
+[data-theme="dark"] .ex-cat small,[data-theme="dark"] .ex-rest .tx small,[data-theme="dark"] .ex-dish .tx p,[data-theme="dark"] .ex-foot-grid a{color:#A7A3C7}
+[data-theme="dark"] .ex-chip{background:#242041;color:#A7A3C7;border-color:#2D2850}
+[data-theme="dark"] .ex-coupon.c2{background:linear-gradient(135deg,#242041,#2A2350);color:#F4F2FF;border-color:#443D75}
+[data-theme="dark"] .ex-rest:hover{border-color:rgba(139,92,246,.55);box-shadow:0 0 0 1px rgba(139,92,246,.35),0 12px 30px rgba(139,92,246,.25)}
+/* RTL input fields fix */
+input[type="text"], input[type="email"], input[type="password"], input[type="tel"], input[type="search"], textarea, select {
+  direction: rtl;
+  text-align: right;
+}
+input[type="password"] {
+  font-family: monospace;
+  direction: ltr;
+  text-align: left;
+}
+input[type="search"] {
+  direction: rtl;
+  text-align: right;
+}
+[data-theme="dark"] input,
+[data-theme="dark"] textarea,
+[data-theme="dark"] select {
+  background: #1C1832;
+  color: #F4F2FF;
+  border-color: #2D2850;
+}
+/* Discount badge improvements */
+.ex-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:999px;font-size:10px;font-weight:800;background:linear-gradient(135deg,#8B5CF6,#A855F7);color:#fff;box-shadow:0 2px 8px rgba(139,92,246,.3)}
+.ex-badge.percent{background:linear-gradient(135deg,#F97316,#EA580C)}
+.ex-badge.free{background:linear-gradient(135deg,#10B981,#059669)}
+.ex-badge span{white-space:nowrap}
+
+/* Hover state fix for product cards */
+.ex-rest:hover .ex-badge,
+.ex-dish:hover .ex-badge{transform:scale(1.05);transition:transform .2s}

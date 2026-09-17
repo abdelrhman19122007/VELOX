@@ -6,7 +6,10 @@
   const params = new URLSearchParams(window.location.search);
   let activeCategory = params.get('category') || 'all';
   let activeStore = params.get('store') || '';
+  let activeMerchant = params.get('merchant') || '';
   let searchTerm = params.get('q') || '';
+  let currentPage = Math.max(1, Number(params.get('page')) || 1);
+  const pageSize = 12;
   let cart = readCart();
 
   const $ = (sel, root = document) => root.querySelector(sel);
@@ -34,25 +37,23 @@
       .replace(/ؤ/g, 'و').replace(/ئ/g, 'ي').replace(/ـ/g, '').replace(/[^\p{L}\p{N}\s]/gu, ' ')
       .replace(/\s+/g, ' ').trim();
   }
-  function levenshtein(a, b) {
-    if (a === b) return 0; if (!a) return b.length; if (!b) return a.length;
-    if (Math.abs(a.length - b.length) > 2) return 99;
-    const prev = Array.from({ length: b.length + 1 }, (_, i) => i);
-    for (let i=1;i<=a.length;i++) { const cur=[i]; for(let j=1;j<=b.length;j++) cur[j]=Math.min(cur[j-1]+1,prev[j]+1,prev[j-1]+(a[i-1]===b[j-1]?0:1)); for(let j=0;j<cur.length;j++) prev[j]=cur[j]; }
-    return prev[b.length];
-  }
   function searchScore(product, query) {
-    const q=normalize(query); if(!q) return 1;
-    const hay=normalize([product.nameAr,product.nameEn,product.storeAr,product.storeEn,product.descAr,product.descEn,product.category].join(' '));
-    if(hay.includes(q)) return 100;
-    const tokens=q.split(' ').filter(Boolean), words=hay.split(' '); let matched=0;
-    for(const token of tokens){ if(words.some(w=>w===token)) matched+=3; else if(words.some(w=>w.startsWith(token))) matched+=2; else if(words.some(w=>w.includes(token))) matched+=1; else if(token.length>=4 && words.some(w=>levenshtein(token,w)<=2)) matched+=1; }
-    return matched >= Math.max(1,Math.ceil(tokens.length/2)) ? matched : 0;
+    // Strict matching only: every query token must appear as a substring
+    // in the product name, category, description or store. No fuzzy
+    // guessing, so unrelated items never show up.
+    const q = normalize(query);
+    if (!q) return 1;
+    const hay = normalize([product.nameAr, product.nameEn, product.category,
+      product.descAr, product.descEn, product.storeAr, product.storeEn].join(' '));
+    const tokens = q.split(' ').filter(Boolean);
+    if (!tokens.length) return 1;
+    return tokens.every((token) => hay.includes(token)) ? 100 : 0;
   }
 
   function categoryUrl(category) {
     let url = `products.html?category=${encodeURIComponent(category || 'all')}`;
     if (activeStore) url += `&store=${encodeURIComponent(activeStore)}`;
+    if (activeMerchant) url += `&merchant=${encodeURIComponent(activeMerchant)}`;
     return url;
   }
   function navigateToCategory(category) {
@@ -75,27 +76,31 @@
     const wrap=$('#filter-pills'); if(!wrap) return;
     wrap.innerHTML=window.VeloxCatalogService.getCategories().map(c=>`<button type="button" class="filter-pill ${activeCategory===c.id?'is-active':''}" data-category="${escapeHtml(c.id)}">${escapeHtml(t(c.titleKey))}</button>`).join('');
     $$('#filter-pills [data-category]').forEach(btn=>btn.addEventListener('click',()=>{
-      activeCategory=btn.dataset.category;
-      if(isCatalogPage) { const u=new URL(window.location.href); u.searchParams.set('category',activeCategory); if(searchTerm) u.searchParams.set('q',searchTerm); else u.searchParams.delete('q'); history.replaceState({},'',u); }
+      activeCategory=btn.dataset.category;currentPage=1;
+      if(isCatalogPage) { const u=new URL(window.location.href); u.searchParams.set('category',activeCategory);u.searchParams.delete('page'); if(searchTerm) u.searchParams.set('q',searchTerm); else u.searchParams.delete('q'); history.replaceState({},'',u); }
       renderFilters(); renderProducts(); renderCatalogHeading();
     }));
   }
 
-  function getVisibleProducts() {
+function getVisibleProducts() {
     const q=searchTerm.trim();
     return allProducts.filter(p=>(activeCategory==='all'||p.category===activeCategory)
-      &&(!activeStore||Number(p.store_id)===Number(activeStore)))
-      .map(p=>({product:p,score:q?searchScore(p,q):1})).filter(x=>x.score>0).sort((a,b)=>b.score-a.score).map(x=>x.product);
+      &&(!activeStore||Number(p.store_id)===Number(activeStore))
+      &&(!activeMerchant||normalize(p.storeEn)===normalize(activeMerchant)||normalize(p.storeAr)===normalize(activeMerchant)))
+      .map(p=>({product:p,score:q?searchScore(p,q):1}))
+      .filter(x=>x.score>0).sort((a,b)=>b.score-a.score).map(x=>x.product);
   }
 
   function renderCatalogHeading() {
     if(!isCatalogPage) return;
     const title=$('#catalog-title'), subtitle=$('#catalog-subtitle'), count=$('#catalog-count');
     // Store view (?store=id): heading shows the store with its rating.
-    if (activeStore) {
+    if (activeStore||activeMerchant) {
       const meta = window.VeloxStoreMeta && window.VeloxStoreMeta.get
         ? window.VeloxStoreMeta.get(activeStore) : null;
-      const sample = allProducts.find((p) => Number(p.store_id) === Number(activeStore));
+      const sample = activeMerchant
+        ? allProducts.find((p)=>normalize(p.storeEn)===normalize(activeMerchant)||normalize(p.storeAr)===normalize(activeMerchant))
+        : allProducts.find((p) => Number(p.store_id) === Number(activeStore));
       const name = (meta && (lang()==='ar' ? meta.nameAr : meta.name))
         || (sample && (lang()==='ar' ? sample.storeAr : sample.storeEn)) || '';
       if (title) title.textContent = name;
@@ -119,9 +124,27 @@
     meta.innerHTML=lang()==='ar'?`<strong>${count}</strong> نتيجة للبحث عن <span>“${escapeHtml(searchTerm.trim())}”</span>`:`<strong>${count}</strong> result${count===1?'':'s'} for <span>“${escapeHtml(searchTerm.trim())}”</span>`;
   }
 
+  function updateLiveStats(){
+    $$('[data-live-products]').forEach((el)=>{el.textContent=String(allProducts.length)+'+';});
+    const stores=new Set(allProducts.map((p)=>p.storeEn||p.storeAr).filter(Boolean));
+    $$('[data-live-stores]').forEach((el)=>{el.textContent=String(stores.size);});
+  }
+
   function renderProducts() {
     const grid=$('#product-grid'); if(!grid) return;
-    const products=getVisibleProducts();
+    const visibleProducts=getVisibleProducts();
+    const totalPages=isCatalogPage?Math.max(1,Math.ceil(visibleProducts.length/pageSize)):1;
+    currentPage=Math.min(currentPage,totalPages);
+    // Keep the landing page compact. Search results remain complete; browsing the
+    // full catalogue uses normal pagination.
+    const products=isCatalogPage
+      ? visibleProducts.slice((currentPage-1)*pageSize,currentPage*pageSize)
+      : (searchTerm.trim()?visibleProducts:visibleProducts.slice(0,8));
+    if(!visibleProducts.length && !searchTerm.trim()){
+      grid.innerHTML=Array(8).fill('<div class="product-card skeleton skeleton-card"></div>').join('');
+      setTimeout(()=>renderProducts(),100);
+      return;
+    }
     grid.innerHTML=products.map(p=>{
       const name=lang()==='ar'?p.nameAr:p.nameEn, store=lang()==='ar'?p.storeAr:p.storeEn, desc=lang()==='ar'?p.descAr:p.descEn;
       const badge=p.badge?`<span class="product-badge">${escapeHtml(p.badge)}</span>`:'';
@@ -131,16 +154,32 @@
           <span class="product-fallback" aria-hidden="true" hidden>🛍️</span>
         </div>
         <div class="product-body"><div class="product-store">${escapeHtml(store)}</div><h3>${escapeHtml(name)}</h3><p class="product-desc">${escapeHtml(desc)}</p>
-          <div class="product-bottom"><div class="price">${money(p.price)} <small>EGP</small></div><button type="button" class="add-btn" data-add-product="${p.id}" aria-label="${escapeHtml(t('product.addButton'))}">+</button></div>
+          <div class="product-bottom"><div class="price">${money(p.price)}</div><button type="button" class="add-btn" data-add-product="${p.id}" aria-label="${escapeHtml(t('product.addButton'))}">+</button></div>
         </div>
       </article>`;
     }).join('');
     const empty=$('#empty-products'), hasSearch=!!searchTerm.trim();
-    if(empty){empty.hidden=products.length!==0; const title=$('[data-empty-title]',empty),sub=$('[data-empty-subtitle]',empty); if(title) title.textContent=hasSearch?t('home.emptySearchTitle'):t('home.emptyTitle'); if(sub) sub.textContent=hasSearch?t('home.emptySearchSubtitle'):t('home.emptySubtitle');}
-    grid.hidden=products.length===0; renderSearchMeta(products.length); renderCatalogHeading();
+    if(empty){empty.hidden=visibleProducts.length!==0; const title=$('[data-empty-title]',empty),sub=$('[data-empty-subtitle]',empty); if(title) title.textContent=hasSearch?t('home.emptySearchTitle'):t('home.emptyTitle'); if(sub) sub.textContent=hasSearch?t('home.emptySearchSubtitle'):t('home.emptySubtitle');}
+    grid.hidden=visibleProducts.length===0; renderSearchMeta(visibleProducts.length); renderPagination(totalPages,visibleProducts.length); renderCatalogHeading();
     $$('#product-grid [data-add-product]').forEach(btn=>btn.addEventListener('click',e=>{e.stopPropagation();addToCart(Number(btn.dataset.addProduct));}));
     $$('#product-grid [data-fav]').forEach(btn=>btn.addEventListener('click',e=>{e.stopPropagation();toggleFav(Number(btn.dataset.fav));}));
     $$('#product-grid [data-product-view]').forEach(el=>el.addEventListener('click',()=>openProduct(Number(el.dataset.productView))));
+  }
+
+  function renderPagination(totalPages,totalItems){
+    if(!isCatalogPage)return;
+    let pager=$('#catalog-pagination');
+    if(!pager){pager=document.createElement('nav');pager.id='catalog-pagination';pager.className='catalog-pagination';pager.setAttribute('aria-label',lang()==='ar'?'صفحات المنتجات':'Product pages');$('#product-grid')?.after(pager);}
+    if(totalPages<=1){pager.hidden=true;pager.innerHTML='';return;}
+    pager.hidden=false;
+    const start=Math.max(1,Math.min(currentPage-2,totalPages-4)),end=Math.min(totalPages,start+4),pages=[];
+    for(let p=start;p<=end;p++)pages.push(p);
+    pager.innerHTML=`<button type="button" data-page="${currentPage-1}" ${currentPage===1?'disabled':''}>${lang()==='ar'?'→':'←'}</button>`+
+      (start>1?`<button type="button" data-page="1">1</button><span>…</span>`:'')+
+      pages.map((p)=>`<button type="button" data-page="${p}" class="${p===currentPage?'is-active':''}" aria-current="${p===currentPage?'page':'false'}">${p}</button>`).join('')+
+      (end<totalPages?`<span>…</span><button type="button" data-page="${totalPages}">${totalPages}</button>`:'')+
+      `<button type="button" data-page="${currentPage+1}" ${currentPage===totalPages?'disabled':''}>${lang()==='ar'?'←':'→'}</button><small>${lang()==='ar'?`${totalItems} منتج · صفحة ${currentPage} من ${totalPages}`:`${totalItems} items · Page ${currentPage} of ${totalPages}`}</small>`;
+    $$('#catalog-pagination [data-page]').forEach((button)=>button.addEventListener('click',()=>{const next=Number(button.dataset.page);if(next<1||next>totalPages||next===currentPage)return;currentPage=next;const u=new URL(window.location.href);u.searchParams.set('page',String(currentPage));history.replaceState({},'',u);renderProducts();window.scrollTo({top:document.querySelector('.catalog-products')?.offsetTop||0,behavior:'smooth'});}));
   }
 
   function openProduct(id){
@@ -165,9 +204,10 @@
 
   function setSearch(value, syncUrl=true){
     searchTerm=value;
+    currentPage=1;
     const input=$('#product-search'); if(input) input.value=value;
     const clear=$('#search-clear'); if(clear) clear.hidden=!value;
-    if(isCatalogPage && syncUrl){const u=new URL(window.location.href); if(value) u.searchParams.set('q',value); else u.searchParams.delete('q'); history.replaceState({},'',u);}
+    if(isCatalogPage && syncUrl){const u=new URL(window.location.href);u.searchParams.delete('page'); if(value) u.searchParams.set('q',value); else u.searchParams.delete('q'); history.replaceState({},'',u);}
     renderProducts();
   }
 
@@ -175,6 +215,11 @@
     if(!productById(id)) return; const existing=cart.find(i=>Number(i.id)===Number(id));
     if(existing) existing.qty+=1; else cart.push({id,qty:1});
     saveCart(); renderCart(); openCart(); showToast(t('product.added'),'success');
+    // animate the add button that was clicked
+    const btn=document.querySelector(`[data-add-product="${id}"]`);
+    if(btn){btn.classList.add('pop');setTimeout(()=>btn.classList.remove('pop'),400);}
+    // bounce the cart icon
+    const cartBtn=$('#cart-toggle');if(cartBtn){cartBtn.classList.add('bounce');setTimeout(()=>cartBtn.classList.remove('bounce'),400);}
   }
   function changeQty(id,delta){const item=cart.find(i=>Number(i.id)===Number(id)); if(!item)return; item.qty+=delta; if(item.qty<=0) cart=cart.filter(i=>Number(i.id)!==Number(id)); saveCart(); renderCart();}
   function cartTotal(){return cart.reduce((sum,i)=>{const p=productById(i.id);return sum+(p?Number(p.price)*Number(i.qty):0);},0);}
@@ -192,14 +237,14 @@
   function openModal(id){const m=$(id);if(!m)return;m.hidden=false;document.body.classList.add('modal-open');}
   function closeModal(modal){if(!modal)return;modal.hidden=true;if(!$('.modal-backdrop:not([hidden])'))document.body.classList.remove('modal-open');}
 
-  function openAuth(){if(window.VeloxAuthService.getSession()) return placeDemoOrder(); switchAuthTab('login');clearAuthAlerts();openModal('#auth-modal');}
+  function openAuth(){if(window.VeloxAuthService.getSession()) return window.location.href='checkout.html'; switchAuthTab('login');clearAuthAlerts();openModal('#auth-modal');}
   function switchAuthTab(tab){$$('.auth-tab').forEach(b=>b.classList.toggle('is-active',b.dataset.authTab===tab)); if($('#modal-login-form'))$('#modal-login-form').hidden=tab!=='login'; if($('#modal-register-form'))$('#modal-register-form').hidden=tab!=='register'; const otp=$('#modal-otp-form'); if(otp)otp.hidden=tab!=='otp'; if($('#auth-modal-title'))$('#auth-modal-title').textContent=tab==='otp'?t('otp.title'):(tab==='login'?t('authModal.loginTitle'):t('authModal.registerTitle')); if($('#auth-modal-subtitle'))$('#auth-modal-subtitle').textContent=tab==='otp'?t('otp.subtitle'):(tab==='login'?t('authModal.loginSubtitle'):t('authModal.registerSubtitle'));}
   function clearAuthAlerts(){if($('#modal-login-alert'))$('#modal-login-alert').innerHTML='';if($('#modal-register-alert'))$('#modal-register-alert').innerHTML='';}
   function updateAccountUI(){const session=window.VeloxAuthService.getSession(),label=$('#account-label'); if(!label)return; if(session?.user){const first=String(session.user.full_name||'').trim().split(/\s+/)[0]||'VELOX';label.textContent=lang()==='ar'?`أهلاً ${first}`:`Hi ${first}`;$('#account-btn').dataset.action='logout';$('#account-btn').classList.add('is-logged');} else {label.textContent=t('home.login');$('#account-btn').dataset.action='login';$('#account-btn').classList.remove('is-logged');}}
-  async function loginFromModal(event){event.preventDefault();const form=event.currentTarget,email=form.email.value.trim(),password=form.password.value,alert=$('#modal-login-alert');if(!window.VeloxValidation.isValidEmail(email)||!password){window.VeloxDom.showAlert(alert,'error',t('login.error.invalid'));return;}const submit=$('#modal-login-submit');window.VeloxDom.setButtonLoading(submit,true);try{await window.VeloxAuthService.login({email,password});window.VeloxDom.showAlert(alert,'success',t('login.successSimple'));updateAccountUI();setTimeout(()=>{closeModal($('#auth-modal'));if(cart.length)placeDemoOrder();},550);}catch(err){const msg=/verif/i.test(err.message||'')?t('login.error.unverified'):t(err.i18nKey||'login.error.generic');window.VeloxDom.showAlert(alert,'error',msg);}finally{window.VeloxDom.setButtonLoading(submit,false);}}
+  async function loginFromModal(event){event.preventDefault();const form=event.currentTarget,email=form.email.value.trim(),password=form.password.value,alert=$('#modal-login-alert');if(!window.VeloxValidation.isValidEmail(email)||!password){window.VeloxDom.showAlert(alert,'error',t('login.error.invalid'));return;}const submit=$('#modal-login-submit');window.VeloxDom.setButtonLoading(submit,true);try{await window.VeloxAuthService.login({email,password});window.VeloxDom.showAlert(alert,'success',t('login.successSimple'));updateAccountUI();setTimeout(()=>{closeModal($('#auth-modal'));if(cart.length)window.location.href='checkout.html';},550);}catch(err){if(err.code==='ACCOUNT_NOT_VERIFIED'||/not verified|غير مفعل/i.test(err.message||'')){pendingOtpEmail=email;try{const res=await window.VeloxAuthService.resendOtp(email);switchAuthTab('otp');const hint=$('#modal-otp-alert');const message=lang()==='ar'?'الحساب محتاج تفعيل. اكتب الكود التالي: ':'Your account needs verification. Enter this code: ';window.VeloxDom.showAlert(hint,'success',message+(res?.otp||''));$('#modal-otp-code')?.focus();}catch(resendError){window.VeloxDom.showAlert(alert,'error',resendError.message||t('login.error.unverified'));}}else{window.VeloxDom.showAlert(alert,'error',err.status===401?t('login.error.invalid'):t(err.i18nKey||'login.error.generic'));}}finally{window.VeloxDom.setButtonLoading(submit,false);}}
   let pendingOtpEmail='';
-  async function registerFromModal(event){event.preventDefault();const form=event.currentTarget,data={full_name:form.full_name.value.trim(),email:form.email.value.trim(),phone_number:form.phone_number.value.trim(),governorate:form.governorate.value,password:form.password.value},alert=$('#modal-register-alert');const valid=data.full_name.length>=2&&window.VeloxValidation.isValidEmail(data.email)&&window.VeloxValidation.isValidEgyptPhone(data.phone_number)&&data.governorate&&window.VeloxValidation.hasMinLength(data.password,8);if(!valid){window.VeloxDom.showAlert(alert,'error',lang()==='ar'?'راجع البيانات المطلوبة قبل المتابعة.':'Please check the required fields before continuing.');return;}const submit=$('#modal-register-submit');window.VeloxDom.setButtonLoading(submit,true);try{const res=await window.VeloxAuthService.register(data);if(res&&res.pending){pendingOtpEmail=res.email||data.email;switchAuthTab('otp');const hint=$('#modal-otp-alert');if(hint&&res.otp)window.VeloxDom.showAlert(hint,'success',(lang()==='ar'?'كود التجربة: ':'Demo code: ')+res.otp);return;}window.VeloxDom.showAlert(alert,'success',t('register.successSimple'));updateAccountUI();setTimeout(()=>{closeModal($('#auth-modal'));if(cart.length)placeDemoOrder();},700);}catch(err){window.VeloxDom.showAlert(alert,'error',t(err.i18nKey||'register.error.generic'));}finally{window.VeloxDom.setButtonLoading(submit,false);}}
-  async function verifyOtpFromModal(event){event.preventDefault();const code=($('#modal-otp-code')||{}).value||'',alert=$('#modal-otp-alert');if(code.trim().length!==6){window.VeloxDom.showAlert(alert,'error',t('otp.error.invalid'));return;}const submit=$('#modal-otp-submit');window.VeloxDom.setButtonLoading(submit,true);try{await window.VeloxAuthService.verifyOtp({email:pendingOtpEmail,code:code.trim()});window.VeloxDom.showAlert(alert,'success',t('otp.success'));updateAccountUI();setTimeout(()=>{closeModal($('#auth-modal'));if(cart.length)placeDemoOrder();},700);}catch(err){window.VeloxDom.showAlert(alert,'error',t(err.i18nKey||'otp.error.invalid'));}finally{window.VeloxDom.setButtonLoading(submit,false);}}
+  async function registerFromModal(event){event.preventDefault();const form=event.currentTarget,data={full_name:form.full_name.value.trim(),email:form.email.value.trim(),phone_number:form.phone_number.value.trim(),governorate:form.governorate.value,password:form.password.value},alert=$('#modal-register-alert');const valid=data.full_name.length>=2&&window.VeloxValidation.isValidEmail(data.email)&&window.VeloxValidation.isValidEgyptPhone(data.phone_number)&&data.governorate&&window.VeloxValidation.hasMinLength(data.password,8);if(!valid){window.VeloxDom.showAlert(alert,'error',lang()==='ar'?'راجع البيانات المطلوبة قبل المتابعة.':'Please check the required fields before continuing.');return;}const submit=$('#modal-register-submit');window.VeloxDom.setButtonLoading(submit,true);try{const res=await window.VeloxAuthService.register(data);if(res&&res.pending){pendingOtpEmail=res.email||data.email;switchAuthTab('otp');const hint=$('#modal-otp-alert');if(hint&&res.otp)window.VeloxDom.showAlert(hint,'success',(lang()==='ar'?'كود التجربة: ':'Demo code: ')+res.otp);return;}window.VeloxDom.showAlert(alert,'success',t('register.successSimple'));updateAccountUI();setTimeout(()=>{closeModal($('#auth-modal'));if(cart.length)window.location.href='checkout.html';},700);}catch(err){let msg=err.message||t('register.error.generic');if(err.code==='EMAIL_ALREADY_REGISTERED')msg=lang()==='ar'?'البريد مسجل بالفعل. اختار «تسجيل الدخول».':'Email already registered. Choose “Log in”.';if(err.code==='PHONE_ALREADY_REGISTERED')msg=lang()==='ar'?'رقم الهاتف مسجل في حساب موجود. سجّل الدخول بدل إنشاء حساب جديد.':'Phone number already belongs to an account. Log in instead.';if(err.code==='WEAK_PASSWORD')msg=lang()==='ar'?'كلمة المرور لازم تحتوي على حرف كبير وصغير ورقم.':'Password needs uppercase, lowercase, and a number.';window.VeloxDom.showAlert(alert,'error',msg);}finally{window.VeloxDom.setButtonLoading(submit,false);}}
+  async function verifyOtpFromModal(event){event.preventDefault();const code=($('#modal-otp-code')||{}).value||'',alert=$('#modal-otp-alert');if(code.trim().length!==6){window.VeloxDom.showAlert(alert,'error',t('otp.error.invalid'));return;}const submit=$('#modal-otp-submit');window.VeloxDom.setButtonLoading(submit,true);try{await window.VeloxAuthService.verifyOtp({email:pendingOtpEmail,code:code.trim()});window.VeloxDom.showAlert(alert,'success',t('otp.success'));updateAccountUI();setTimeout(()=>{closeModal($('#auth-modal'));if(cart.length)window.location.href='checkout.html';},700);}catch(err){window.VeloxDom.showAlert(alert,'error',t(err.i18nKey||'otp.error.invalid'));}finally{window.VeloxDom.setButtonLoading(submit,false);}}
   function getFavs(){try{const f=JSON.parse(localStorage.getItem('velox_favs')||'[]');return Array.isArray(f)?f:[];}catch(_){return[];}}
   function isFav(id){return getFavs().some(f=>Number(f)===Number(id));}
   function toggleFav(id){let f=getFavs();const i=f.findIndex(x=>Number(x)===Number(id));if(i>=0)f.splice(i,1);else f.push(Number(id));localStorage.setItem('velox_favs',JSON.stringify(f));renderProducts();}
@@ -207,8 +252,28 @@
   function showToast(message,type='success',duration=2800){let toast=$('#velox-toast');if(!toast){toast=document.createElement('div');toast.id='velox-toast';toast.className='velox-toast';document.body.appendChild(toast);}toast.className=`velox-toast is-${type} is-visible`;toast.textContent=message;clearTimeout(showToast.timer);showToast.timer=setTimeout(()=>toast.classList.remove('is-visible'),duration);}
 
   function bindEvents(){
+    const governorates=[
+      ['CAIRO','القاهرة','Cairo'],['GIZA','الجيزة','Giza'],['ALEXANDRIA','الإسكندرية','Alexandria'],['DAKAHLIA','الدقهلية','Dakahlia'],['RED_SEA','البحر الأحمر','Red Sea'],['BEHEIRA','البحيرة','Beheira'],['FAYOUM','الفيوم','Fayoum'],['GHARBIA','الغربية','Gharbia'],['ISMAILIA','الإسماعيلية','Ismailia'],['MENOFIA','المنوفية','Menofia'],['MINYA','المنيا','Minya'],['QALYUBIA','القليوبية','Qalyubia'],['NEW_VALLEY','الوادي الجديد','New Valley'],['SUEZ','السويس','Suez'],['ASWAN','أسوان','Aswan'],['ASYUT','أسيوط','Asyut'],['BENI_SUEF','بني سويف','Beni Suef'],['PORT_SAID','بورسعيد','Port Said'],['DAMIETTA','دمياط','Damietta'],['SHARKIA','الشرقية','Sharkia'],['SOUTH_SINAI','جنوب سيناء','South Sinai'],['KAFR_EL_SHEIKH','كفر الشيخ','Kafr El Sheikh'],['MATROUH','مطروح','Matrouh'],['LUXOR','الأقصر','Luxor'],['QENA','قنا','Qena'],['NORTH_SINAI','شمال سيناء','North Sinai'],['SOHAG','سوهاج','Sohag']
+    ];
+    const registerGov=$('#modal-register-governorate');
+    if(registerGov)registerGov.innerHTML=`<option value="">${lang()==='ar'?'اختر المحافظة':'Select governorate'}</option>`+governorates.map(g=>`<option value="${g[0]}">${lang()==='ar'?g[1]:g[2]}</option>`).join('');
+
+    const locationButtons=$$('#location-grid [data-location]');
+    let locationPage=0;
+    const locationPageSize=9;
+    function renderLocationPage(){
+      const total=Math.max(1,Math.ceil(locationButtons.length/locationPageSize));
+      locationPage=Math.max(0,Math.min(locationPage,total-1));
+      locationButtons.forEach((button,index)=>button.hidden=index<locationPage*locationPageSize||index>=(locationPage+1)*locationPageSize);
+      if($('#loc-page-info'))$('#loc-page-info').textContent=`${locationPage+1} / ${total}`;
+      if($('#loc-prev'))$('#loc-prev').disabled=locationPage===0;
+      if($('#loc-next'))$('#loc-next').disabled=locationPage===total-1;
+    }
+    $('#loc-prev')?.addEventListener('click',()=>{locationPage--;renderLocationPage();});
+    $('#loc-next')?.addEventListener('click',()=>{locationPage++;renderLocationPage();});
+    renderLocationPage();
     const search=$('#product-search');
-    if(search){let timer;search.addEventListener('input',e=>{clearTimeout(timer);timer=setTimeout(()=>setSearch(e.target.value),100);});search.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();if(isCatalogPage)renderProducts();else window.location.href=`products.html?category=all&q=${encodeURIComponent(search.value.trim())}`;}if(e.key==='Escape')setSearch('');});}
+    if(search){let timer;const runSearch=()=>{clearTimeout(timer);timer=setTimeout(()=>setSearch(search.value),40);};search.addEventListener('input',runSearch);search.addEventListener('search',runSearch);search.addEventListener('change',runSearch);search.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();const q=search.value.trim();if(isCatalogPage){setSearch(q);document.querySelector('.catalog-products')?.scrollIntoView({behavior:'smooth',block:'start'});}else window.location.href=`products.html?category=all&q=${encodeURIComponent(q)}`;}if(e.key==='Escape')setSearch('');});}
     $('#search-clear')?.addEventListener('click',()=>setSearch(''));
     $('#cart-close')?.addEventListener('click',closeCart);$('#drawer-backdrop')?.addEventListener('click',closeCart);
     $('#checkout-btn')?.addEventListener('click',()=>{if(!cart.length)return;closeCart();openAuth();});
@@ -222,11 +287,11 @@
     $$('[data-toggle-password]').forEach(btn=>btn.addEventListener('click',()=>{const input=$('#'+btn.dataset.togglePassword);if(input)input.type=input.type==='password'?'text':'password';}));
     $('#product-modal-add')?.addEventListener('click',()=>{const id=Number($('#product-modal-add').dataset.productId);closeModal($('#product-modal'));addToCart(id);});
     window.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();search?.focus();}if(e.key==='Escape'){closeCart();closeModal($('#auth-modal'));closeModal($('#location-modal'));closeModal($('#product-modal'));}});
-    document.addEventListener('velox:langchange',()=>{renderCategories();renderFilters();renderProducts();renderCart();updateAccountUI();switchAuthTab($('.auth-tab.is-active')?.dataset.authTab||'login');renderCatalogHeading();});
+    document.addEventListener('velox:langchange',()=>{renderCategories();renderFilters();renderProducts();renderCart();updateAccountUI();switchAuthTab($('.auth-tab.is-active')?.dataset.authTab||'login');renderCatalogHeading();if(registerGov){const selected=registerGov.value;registerGov.innerHTML=`<option value="">${lang()==='ar'?'اختر المحافظة':'Select governorate'}</option>`+governorates.map(g=>`<option value="${g[0]}">${lang()==='ar'?g[1]:g[2]}</option>`).join('');registerGov.value=selected;}});
   }
 
   let isRefreshingCatalog=false;
-  async function refreshCatalog(){if(isRefreshingCatalog)return;isRefreshingCatalog=true;try{const catalog=await window.VeloxCatalogService.loadCatalog();if(Array.isArray(catalog.products)&&catalog.products.length)allProducts=catalog.products;if(Array.isArray(catalog.categories)&&catalog.categories.length)window.VeloxCatalogService.replaceCategories?.(catalog.categories);}catch(_){if(!allProducts.length)allProducts=window.VeloxCatalogService.getProducts();}finally{if(!allProducts.length)allProducts=window.VeloxCatalogService.getProducts();if(!window.VeloxCatalogService.getCategories().some(c=>c.id===activeCategory))activeCategory='all';renderCategories();renderFilters();renderProducts();renderCart();updateAccountUI();renderCatalogHeading();if($('#product-search')&&searchTerm)$('#product-search').value=searchTerm;if($('#search-clear'))$('#search-clear').hidden=!searchTerm;isRefreshingCatalog=false;}}
+  async function refreshCatalog(){if(isRefreshingCatalog)return;isRefreshingCatalog=true;try{const catalog=await window.VeloxCatalogService.loadCatalog();if(Array.isArray(catalog.products)&&catalog.products.length)allProducts=catalog.products;if(Array.isArray(catalog.categories)&&catalog.categories.length)window.VeloxCatalogService.replaceCategories?.(catalog.categories);}catch(_){if(!allProducts.length)allProducts=window.VeloxCatalogService.getProducts();}finally{if(!allProducts.length)allProducts=window.VeloxCatalogService.getProducts();if(!window.VeloxCatalogService.getCategories().some(c=>c.id===activeCategory))activeCategory='all';renderCategories();renderFilters();renderProducts();renderCart();updateAccountUI();updateLiveStats();renderCatalogHeading();if($('#product-search')&&searchTerm)$('#product-search').value=searchTerm;if($('#search-clear'))$('#search-clear').hidden=!searchTerm;isRefreshingCatalog=false;}}
 
   document.addEventListener('DOMContentLoaded',async()=>{bindEvents();switchAuthTab('login');await refreshCatalog();startNotifPoll();});
   window.addEventListener('pageshow',e=>{if(e.persisted)refreshCatalog();});
@@ -239,8 +304,9 @@
   }
   async function pollNotifications(){
     try{
-      if(window.VELOX_CONFIG.USE_MOCK_API)return;
-      const s=window.VeloxAuthService.getSession(); if(!s?.user)return;
+      const s=window.VeloxAuthService.getSession();
+      if(!s?.user){paintNotifBadge(0);return;}
+      if(window.VELOX_CONFIG.USE_MOCK_API){paintNotifBadge(0);return;}
       const c=await window.VeloxApiClient.request('/notifications/unread-count?userId='+encodeURIComponent(s.user.email));
       paintNotifBadge(Number(c.unread||0));
       const list=await window.VeloxApiClient.request('/notifications?userId='+encodeURIComponent(s.user.email)+'&limit=5');

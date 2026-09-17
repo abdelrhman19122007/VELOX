@@ -23,11 +23,9 @@
 hs_err_pid*
 replay_pid*
 
-# Spring Boot
+# Spring Boot build output. Maven Wrapper is intentionally committed so a
+# contributor does not need Maven installed globally.
 target/
-.mvn/
-mvnw
-mvnw.cmd
 
 # IDE specific files
 .idea/

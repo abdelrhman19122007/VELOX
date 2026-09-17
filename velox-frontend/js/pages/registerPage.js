@@ -26,6 +26,20 @@
     const submitBtn = qs('#register-submit');
     const alertBox = qs('#register-alert');
 
+    function registrationErrorMessage(err) {
+      const ar = window.VeloxI18n.getLang() === 'ar';
+      if (err.code === 'EMAIL_ALREADY_REGISTERED') {
+        return ar ? 'البريد الإلكتروني مسجل بالفعل. اضغط «تسجيل الدخول» بالأسفل.' : 'This email is already registered. Use “Log in” below.';
+      }
+      if (err.code === 'PHONE_ALREADY_REGISTERED') {
+        return ar ? 'رقم الهاتف مسجل في حساب موجود بالفعل. استخدم تسجيل الدخول بدل إنشاء حساب جديد.' : 'This phone number belongs to an existing account. Log in instead of creating another account.';
+      }
+      if (err.code === 'WEAK_PASSWORD') {
+        return ar ? 'كلمة المرور لازم تكون 8 أحرف على الأقل وتحتوي على حرف كبير وصغير ورقم.' : 'Use at least 8 characters with uppercase, lowercase, and a number.';
+      }
+      return err.message || t('register.error.generic');
+    }
+
     setupPasswordToggle(passwordInput, passwordToggleBtn);
 
     passwordInput.addEventListener('input', () => {
@@ -113,7 +127,7 @@
         }, 900);
       } catch (err) {
         setButtonLoading(submitBtn, false);
-        showAlert(alertBox, 'error', t(err.i18nKey || 'register.error.generic'));
+        showAlert(alertBox, 'error', registrationErrorMessage(err));
       }
     });
 

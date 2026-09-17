@@ -44,6 +44,9 @@
                             <artifactId>lombok</artifactId>
                         </exclude>
                     </excludes>
+                    <jvmArguments>
+                        -Dfile.encoding=UTF-8
+                    </jvmArguments>
                 </configuration>
             </plugin>
             <plugin>
@@ -86,6 +89,11 @@
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-crypto</artifactId>
         </dependency>
+<dependency>
+            <groupId>com.google.api-client</groupId>
+            <artifactId>google-api-client</artifactId>
+            <version>2.7.2</version>
+        </dependency>
 
         <!-- Arabic-capable PDF generation -->
         <dependency>
@@ -108,10 +116,17 @@
             <scope>test</scope>
         </dependency>
     
-    <dependency>
-    <groupId>com.mysql</groupId>
-    <artifactId>mysql-connector-j</artifactId>
-   </dependency>
+        <dependency>
+            <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
+        </dependency>
+
+        <!-- Local persistent fallback so account registration works without a MySQL installation. -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>runtime</scope>
+        </dependency>
    </dependencies>
 
     <name>Velox</name>

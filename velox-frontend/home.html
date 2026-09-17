@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="VELOX — منصة طلب وتوصيل سريعة للأكل والمنتجات اليومية.">
   <title>VELOX — الصفحة الرئيسية</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
   <script>
     (function () {
       var theme = localStorage.getItem('velox_theme') || 'light';
@@ -17,7 +18,7 @@
   <link rel="stylesheet" href="css/tokens.css">
   <link rel="stylesheet" href="css/base.css">
   <link rel="stylesheet" href="css/components.css">
-  <link rel="stylesheet" href="css/home.css">
+  <link rel="stylesheet" href="css/home.css?v=17">
 </head>
 <body class="storefront-page">
   <header class="site-header" id="top">
@@ -70,8 +71,8 @@
             <button type="button" class="btn btn-ghost" id="location-btn" data-i18n="home.locationBtn">📍 اختر منطقتك</button>
           </div>
           <div class="hero-trust">
-            <div><strong>25+</strong><span data-i18n="home.trustProducts">منتج متاح</span></div>
-            <div><strong>7</strong><span data-i18n="home.trustStores">متاجر شريكة</span></div>
+            <div><strong data-live-products>137+</strong><span data-i18n="home.trustProducts">منتج متاح</span></div>
+            <div><strong data-live-stores>20</strong><span data-i18n="home.trustStores">متاجر شريكة</span></div>
             <div><strong>30–45</strong><span data-i18n="home.trustMinutes">دقيقة توصيل</span></div>
           </div>
         </div>
@@ -128,7 +129,12 @@
         <img src="assets/images/velox-logo.jpeg" alt="VELOX" class="brand-logo">
         <span class="brand-copy"><strong>VELOX</strong><small data-i18n="app.tagline">كل شيء يوصلك في مكان واحد</small></span>
       </div>
-      
+      <div class="footer-links">
+        <a href="legal.html#about" data-i18n="footer.about">من نحن</a>
+        <a href="legal.html#terms" data-i18n="footer.terms">الشروط والأحكام</a>
+        <a href="legal.html#privacy" data-i18n="footer.privacy">سياسة الخصوصية</a>
+        <a href="support.html" data-i18n="footer.contact">تواصل معنا</a><a href="faq.html">الأسئلة الشائعة</a><a href="delivery-areas.html">مناطق التوصيل</a><a href="offers.html">العروض</a><a href="partners.html">للشركاء</a><a href="business.html">للشركات</a><a href="careers.html">الوظائف</a>
+      </div>
     </div>
   </footer>
 
@@ -178,7 +184,38 @@
       <h2 id="location-title" data-i18n="locationModal.title">اختار المحافظة</h2>
       <p data-i18n="locationModal.subtitle">هنستخدم اختيارك لتصفية المتاجر والمنتجات المناسبة لاحقًا.</p>
       <div class="location-grid" id="location-grid">
-        <button type="button" data-location="CAIRO">القاهرة</button><button type="button" data-location="GIZA">الجيزة</button><button type="button" data-location="ALEXANDRIA">الإسكندرية</button><button type="button" data-location="DAMIETTA">دمياط</button>
+        <button type="button" data-location="CAIRO">القاهرة</button>
+        <button type="button" data-location="GIZA">الجيزة</button>
+        <button type="button" data-location="ALEXANDRIA">الإسكندرية</button>
+        <button type="button" data-location="DAKAHLIA">الدقهلية</button>
+        <button type="button" data-location="RED_SEA">البحر الأحمر</button>
+        <button type="button" data-location="BEHEIRA">البحيرة</button>
+        <button type="button" data-location="FAYOUM">الفيوم</button>
+        <button type="button" data-location="GHARBIA">الغربية</button>
+        <button type="button" data-location="ISMAILIA">الإسماعيلية</button>
+        <button type="button" data-location="MENOFIA">المنوفية</button>
+        <button type="button" data-location="MINYA">المنيا</button>
+        <button type="button" data-location="QALYUBIA">القليوبية</button>
+        <button type="button" data-location="NEW_VALLEY">الوادي الجديد</button>
+        <button type="button" data-location="SUEZ">السويس</button>
+        <button type="button" data-location="ASWAN">أسوان</button>
+        <button type="button" data-location="ASYUT">أسيوط</button>
+        <button type="button" data-location="BENI_SUEF">بني سويف</button>
+        <button type="button" data-location="PORT_SAID">بورسعيد</button>
+        <button type="button" data-location="DAMIETTA">دمياط</button>
+        <button type="button" data-location="SHARKIA">الشرقية</button>
+        <button type="button" data-location="SOUTH_SINAI">جنوب سيناء</button>
+        <button type="button" data-location="KAFR_EL_SHEIKH">كفر الشيخ</button>
+        <button type="button" data-location="MATROUH">مطروح</button>
+        <button type="button" data-location="LUXOR">الأقصر</button>
+        <button type="button" data-location="QENA">قنا</button>
+        <button type="button" data-location="NORTH_SINAI">شمال سيناء</button>
+        <button type="button" data-location="SOHAG">سوهاج</button>
+      </div>
+      <div class="location-pager" id="location-pager">
+        <button type="button" class="loc-page-btn" id="loc-prev" disabled>→</button>
+        <span class="loc-page-info" id="loc-page-info">1 / 3</span>
+        <button type="button" class="loc-page-btn" id="loc-next">←</button>
       </div>
     </div>
   </div>
@@ -191,12 +228,12 @@
   <script src="js/navControls.js"></script>
   <script src="js/utils/validation.js"></script>
   <script src="js/utils/domUtils.js"></script>
-  <script src="js/services/apiClient.js"></script>
-  <script src="js/services/authService.js"></script>
-  <script src="js/services/catalogService.js"></script>
+  <script src="js/services/apiClient.js?v=19"></script>
+  <script src="js/services/authService.js?v=19"></script>
+  <script src="js/services/catalogService.js?v=16"></script>
   <script src="js/services/orderService.js"></script>
-  <script src="js/pages/storefrontPage.js"></script>
-<script src="js/pages/growthFeatures.js"></script>
+  <script src="js/pages/storefrontPage.js?v=21"></script>
+<script src="js/pages/growthFeatures.js?v=21"></script><script src="js/googleAuth.js?v=22"></script>
 <aside class="cart-drawer fixed top-0 bottom-0 h-full" id="cart-drawer" aria-label="سلة التسوق" aria-hidden="true" hidden>
     <div class="cart-drawer-header"><div><span class="eyebrow" data-i18n="cart.eyebrow">سلتك</span><h2 data-i18n="cart.title">مراجعة الطلب</h2></div><button class="modal-close" type="button" id="cart-close" aria-label="إغلاق">×</button></div>
     <div class="cart-items" id="cart-items"></div>

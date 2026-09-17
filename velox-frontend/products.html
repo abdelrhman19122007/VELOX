@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="VELOX — استكشف المنتجات حسب القسم وشاهد الصور والتفاصيل بوضوح.">
@@ -9,7 +10,7 @@
   <link rel="stylesheet" href="css/tokens.css">
   <link rel="stylesheet" href="css/base.css">
   <link rel="stylesheet" href="css/components.css">
-  <link rel="stylesheet" href="css/home.css">
+  <link rel="stylesheet" href="css/home.css?v=17">
 </head>
 <body class="storefront-page catalog-page">
   <header class="site-header" id="top">
@@ -22,17 +23,17 @@
   </header>
   <aside class="side-nav" id="side-nav" aria-label="التنقل الرئيسي" aria-hidden="true">
     <div class="side-nav-head"><div class="side-brand"><span class="side-brand-dot">V</span><div><strong>VELOX</strong><small data-i18n="sidebar.quick">اختصارات سريعة</small></div></div><button type="button" class="side-close" id="side-nav-close" aria-label="إغلاق">×</button></div>
-    <div class="side-nav-section-label" data-i18n="sidebar.nav">التنقل</div><nav class="side-nav-links"><a href="index.html"><span>⌂</span><span data-i18n="sidebar.home">الرئيسية</span></a><a href="index.html#categories"><span>◫</span><span data-i18n="sidebar.categories">الأقسام</span></a><a href="products.html?category=all"><span>▦</span><span data-i18n="sidebar.products">المنتجات</span><b id="side-product-count">22</b></a><button type="button" id="side-cart-link"><span>🛒</span><span data-i18n="sidebar.cart">السلة</span><b id="side-cart-count">0</b></button><a href="orders.html"><span>◴</span><span data-i18n="sidebar.orders">طلباتي</span></a><a href="favorites.html"><span>♡</span><span data-i18n="sidebar.favorites">المفضلة</span></a></nav>
-    <div class="side-nav-section-label" data-i18n="sidebar.yourAccount">حسابك</div><nav class="side-nav-links side-nav-links-secondary"><a href="account.html"><span>◉</span><span data-i18n="sidebar.profile">الحساب الشخصي</span></a><a href="notifications.html"><span>◌</span><span data-i18n="sidebar.notifications">الإشعارات</span><b class="notification-badge">3</b></a><a href="settings.html"><span>⚙</span><span data-i18n="sidebar.settings">الضبط</span></a><a href="support.html"><span>?</span><span data-i18n="sidebar.support">المساعدة والتواصل</span></a><a href="feedback.html"><span>✎</span><span data-i18n="sidebar.feedback">الشكاوى والاقتراحات</span></a><a href="rating.html"><span>★</span><span data-i18n="sidebar.rating">تقييم التطبيق</span></a></nav>
+    <div class="side-nav-section-label" data-i18n="sidebar.nav">التنقل</div><nav class="side-nav-links"><a href="index.html"><span>⌂</span><span data-i18n="sidebar.home">الرئيسية</span></a><a href="index.html#categories"><span>◫</span><span data-i18n="sidebar.categories">الأقسام</span></a><a href="products.html?category=all"><span>▦</span><span data-i18n="sidebar.products">المنتجات</span><b id="side-product-count">22</b></a><button type="button" id="side-cart-link"><span>🛒</span><span data-i18n="sidebar.cart">السلة</span><b id="side-cart-count">0</b></button><a href="orders.html"><span>◴</span><span data-i18n="sidebar.orders">طلباتي</span></a><a href="favorites.html"><span>♡</span><span data-i18n="sidebar.favorites">المفضلة</span></a><a href="offers.html"><span>٪</span><span>العروض</span></a><a href="rewards.html"><span>★</span><span>المكافآت</span></a><a href="delivery-areas.html"><span>⌖</span><span>مناطق التوصيل</span></a></nav>
+    <div class="side-nav-section-label">اكتشف</div><nav class="side-nav-links"><a href="offers.html"><span>٪</span><span>العروض والكوبونات</span></a><a href="plus.html"><span>♛</span><span>VELOX Plus</span></a><a href="partners.html"><span>♙</span><span>انضم كشريك</span></a></nav><div class="side-nav-section-label" data-i18n="sidebar.yourAccount">حسابك</div><nav class="side-nav-links side-nav-links-secondary"><a href="account.html"><span>◉</span><span data-i18n="sidebar.profile">الحساب الشخصي</span></a><a href="notifications.html"><span>◌</span><span data-i18n="sidebar.notifications">الإشعارات</span><b class="notification-badge">3</b></a><a href="settings.html"><span>⚙</span><span data-i18n="sidebar.settings">الضبط</span></a><a href="support.html"><span>?</span><span data-i18n="sidebar.support">المساعدة والتواصل</span></a><a href="feedback.html"><span>✎</span><span data-i18n="sidebar.feedback">الشكاوى والاقتراحات</span></a><a href="rating.html"><span>★</span><span data-i18n="sidebar.rating">تقييم التطبيق</span></a></nav>
     <div class="side-nav-bottom"><button type="button" id="side-theme-link"><span>◐</span><span data-i18n="sidebar.theme">الوضع الليلي</span></button><button type="button" id="side-lang-link"><span>文</span><span data-i18n="sidebar.language">English</span></button></div>
   </aside><div class="side-nav-backdrop" id="side-nav-backdrop" hidden></div>
   <main>
     <section class="catalog-page-hero"><div class="container"><a class="back-link" href="index.html">← <span data-i18n="catalog.backHome">العودة للرئيسية</span></a><div class="catalog-page-head"><div><span class="eyebrow" data-i18n="catalog.eyebrow">متجر VELOX</span><h1 id="catalog-title">كل منتجات VELOX</h1><p id="catalog-subtitle">اختار قسمًا أو ابحث عن منتج، ثم افتح الصورة لرؤية التفاصيل بوضوح.</p></div><div class="catalog-count"><strong id="catalog-count">22</strong><span data-i18n="catalog.items">منتج</span></div></div><div class="products-toolbar"><div class="filter-pills" id="filter-pills"></div><div class="search-meta" id="search-meta" hidden></div></div></div></section>
     <section class="products-section catalog-products"><div class="container section-shell"><div class="product-grid" id="product-grid"></div><div class="empty-products" id="empty-products" hidden><div class="empty-icon">⌕</div><h3 data-empty-title data-i18n="home.emptyTitle">مفيش نتائج بالشكل ده</h3><p data-empty-subtitle data-i18n="home.emptySubtitle">جرّب كلمة بحث تانية أو اختار فئة مختلفة.</p></div></div></section>
   </main>
-  <footer class="site-footer"><div class="container footer-inner"><div class="brand-lockup footer-brand"><img src="assets/images/velox-logo.jpeg" alt="VELOX" class="brand-logo"><span class="brand-copy"><strong>VELOX</strong><small data-i18n="app.tagline">كل شيء يوصلك في مكان واحد</small></span></div></div></footer>
+  <footer class="site-footer"><div class="container footer-inner"><div class="brand-lockup footer-brand"><img src="assets/images/velox-logo.jpeg" alt="VELOX" class="brand-logo"><span class="brand-copy"><strong>VELOX</strong><small data-i18n="app.tagline">كل شيء يوصلك في مكان واحد</small></span></div><div class="footer-links"><a href="legal.html#about" data-i18n="footer.about">من نحن</a><a href="legal.html#terms" data-i18n="footer.terms">الشروط والأحكام</a><a href="legal.html#privacy" data-i18n="footer.privacy">سياسة الخصوصية</a><a href="support.html" data-i18n="footer.contact">تواصل معنا</a><a href="faq.html">الأسئلة الشائعة</a><a href="delivery-areas.html">مناطق التوصيل</a><a href="offers.html">العروض</a><a href="partners.html">للشركاء</a><a href="business.html">للشركات</a><a href="careers.html">الوظائف</a></div></div></footer>
 
-  <div class="modal-backdrop" id="product-modal" hidden><div class="modal-card product-modal-card" role="dialog" aria-modal="true" aria-labelledby="product-modal-title"><button class="modal-close" type="button" data-close-modal aria-label="إغلاق">×</button><div class="product-modal-layout"><div class="product-modal-visual"><span class="product-badge" id="product-modal-badge" hidden></span><img id="product-modal-image" src="" alt=""><div class="product-modal-thumbs" id="product-modal-thumbs" hidden></div></div><div class="product-modal-info"><span class="eyebrow" id="product-modal-store">VELOX</span><h2 id="product-modal-title">—</h2><p id="product-modal-desc">—</p><div class="product-modal-price"><strong id="product-modal-price">0 EGP</strong><span>EGP</span></div><button type="button" class="btn btn-primary btn-block" id="product-modal-add"><span data-i18n="catalog.addToCart">إضافة للسلة</span><span>←</span></button></div></div></div></div>
+  <div class="modal-backdrop" id="product-modal" hidden><div class="modal-card product-modal-card" role="dialog" aria-modal="true" aria-labelledby="product-modal-title"><button class="modal-close" type="button" data-close-modal aria-label="إغلاق">×</button><div class="product-modal-layout"><div class="product-modal-visual"><span class="product-badge" id="product-modal-badge" hidden></span><img id="product-modal-image" src="" alt=""><div class="product-modal-thumbs" id="product-modal-thumbs" hidden></div></div><div class="product-modal-info"><span class="eyebrow" id="product-modal-store">VELOX</span><h2 id="product-modal-title">—</h2><p id="product-modal-desc">—</p><div class="product-modal-price"><strong id="product-modal-price">0 EGP</strong></div><button type="button" class="btn btn-primary btn-block" id="product-modal-add"><span data-i18n="catalog.addToCart">إضافة للسلة</span><span>←</span></button></div></div></div></div>
   <!-- Auth modal: optional on browsing, required only at checkout. -->
   <div class="modal-backdrop" id="auth-modal" hidden>
     <div class="modal-card auth-modal-card" role="dialog" aria-modal="true" aria-labelledby="auth-modal-title">
@@ -90,12 +91,12 @@
   <script src="js/navControls.js"></script>
   <script src="js/utils/validation.js"></script>
   <script src="js/utils/domUtils.js"></script>
-  <script src="js/services/apiClient.js"></script>
-  <script src="js/services/authService.js"></script>
-  <script src="js/services/catalogService.js"></script>
+  <script src="js/services/apiClient.js?v=19"></script>
+  <script src="js/services/authService.js?v=19"></script>
+  <script src="js/services/catalogService.js?v=16"></script>
   <script src="js/services/orderService.js"></script>
-  <script src="js/pages/storefrontPage.js"></script>
-<script src="js/pages/growthFeatures.js"></script>
+  <script src="js/pages/storefrontPage.js?v=21"></script>
+<script src="js/pages/growthFeatures.js?v=21"></script><script src="js/googleAuth.js?v=22"></script>
 <aside class="cart-drawer fixed top-0 bottom-0 h-full" id="cart-drawer" aria-label="سلة التسوق" aria-hidden="true" hidden>
     <div class="cart-drawer-header"><div><span class="eyebrow" data-i18n="cart.eyebrow">سلتك</span><h2 data-i18n="cart.title">مراجعة الطلب</h2></div><button class="modal-close" type="button" id="cart-close" aria-label="إغلاق">×</button></div>
     <div class="cart-items" id="cart-items"></div>

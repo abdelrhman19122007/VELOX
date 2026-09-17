@@ -65,6 +65,9 @@ public class OrderController {
             return ResponseEntity.status(401).body(Map.of("message", "Login required."));
         }
         try {
+            if (com.app.util.DatabaseConnection.isLocalFallback()) {
+                return ResponseEntity.ok(createLocalOrder(email, body));
+            }
             Object items = body.get("items");
             Object gov = body.get("governorate");
             Object pay = body.get("paymentMethod") != null ? body.get("paymentMethod") : body.get("payment_method");
@@ -82,6 +85,46 @@ public class OrderController {
             return ResponseEntity.badRequest().body(Map.of("message", ex.getMessage()));
         } catch (IllegalStateException ex) {
             return ResponseEntity.status(500).body(Map.of("message", ex.getMessage()));
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> createLocalOrder(String email, Map<String, Object> body) {
+        Object rawItems = body.get("items");
+        if (!(rawItems instanceof List<?> items) || items.isEmpty()) {
+            throw new IllegalArgumentException("Cart is empty.");
+        }
+        double total = 0;
+        Object rawTotal = body.get("total_amount") != null ? body.get("total_amount") : body.get("totalAmount");
+        if (rawTotal instanceof Number n) total = Math.max(0, n.doubleValue());
+        else if (rawTotal != null) {
+            try { total = Math.max(0, Double.parseDouble(String.valueOf(rawTotal))); }
+            catch (NumberFormatException ignored) { }
+        }
+        String governorate = String.valueOf(body.getOrDefault("governorate", "CAIRO"));
+        String payment = String.valueOf(body.getOrDefault("paymentMethod", "CASH_ON_DELIVERY"));
+        String sql = "INSERT INTO local_orders (email,total_amount,governorate,payment_method) VALUES (?,?,?,?)";
+        try (var conn = com.app.util.DatabaseConnection.getConnection();
+             var insert = conn.prepareStatement(sql, java.sql.Statement.RETURN_GENERATED_KEYS)) {
+            insert.setString(1, email);
+            insert.setDouble(2, total);
+            insert.setString(3, governorate);
+            insert.setString(4, payment);
+            insert.executeUpdate();
+            try (var keys = insert.getGeneratedKeys()) {
+                if (!keys.next()) throw new IllegalStateException("Could not create order.");
+                long id = keys.getLong(1);
+                String code = "ORD-L" + id;
+                try (var update = conn.prepareStatement("UPDATE local_orders SET order_code=? WHERE id=?")) {
+                    update.setString(1, code);
+                    update.setLong(2, id);
+                    update.executeUpdate();
+                }
+                return Map.of("success", true, "orderId", id, "orderCode", code,
+                        "total", total, "status", "PENDING", "paymentMethod", payment);
+            }
+        } catch (java.sql.SQLException e) {
+            throw new IllegalStateException("Checkout failed: " + e.getMessage());
         }
     }
 

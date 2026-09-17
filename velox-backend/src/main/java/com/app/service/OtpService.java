@@ -41,10 +41,12 @@ public final class OtpService {
                 s.executeUpdate();
             }
             try (PreparedStatement s = conn.prepareStatement(
-                    "INSERT INTO otp_codes (email, code_hash, expires_at) VALUES (?, ?, NOW() + INTERVAL 10 MINUTE)",
+                    "INSERT INTO otp_codes (email, code_hash, expires_at) VALUES (?, ?, ?)",
                     Statement.RETURN_GENERATED_KEYS)) {
                 s.setString(1, clean);
                 s.setString(2, PasswordUtil.sha256(code));
+                s.setTimestamp(3, java.sql.Timestamp.valueOf(
+                        java.time.LocalDateTime.now().plusMinutes(TTL_MINUTES)));
                 s.executeUpdate();
             }
             return code;

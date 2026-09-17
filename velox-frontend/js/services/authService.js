@@ -86,7 +86,14 @@
     return user;
   }
 
-  window.VeloxAuthService = { login, register, verifyOtp, resendOtp, logout, getSession };
+  async function googleLogin(credential) {
+    const data = await window.VeloxApiClient.request('/auth/google', { method: 'POST', body: { credential } });
+    if (!data?.token || !data?.user) throw new Error('Invalid Google login response');
+    saveSession(data.token, data.user);
+    return data.user;
+  }
+
+  window.VeloxAuthService = { login, googleLogin, register, verifyOtp, resendOtp, logout, getSession };
 
   async function verifyOtp({ email, code }) {
     const cfg = window.VELOX_CONFIG;

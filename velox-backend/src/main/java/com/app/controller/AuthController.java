@@ -6,6 +6,7 @@ import com.app.service.CustomerAccountService;
 import com.app.service.LoyaltyService;
 import com.app.service.OfferService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -15,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.LinkedHashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,6 +37,43 @@ import java.util.Map;
 public class AuthController {
 
     private final WebOrderDAO users = new WebOrderDAO();
+    @Value("${velox.google.client-id:}")
+    private String googleClientId;
+
+    @GetMapping("/google-config")
+    public Map<String, Object> googleConfig() {
+        return Map.of("clientId", googleClientId == null ? "" : googleClientId,
+                "enabled", googleClientId != null && !googleClientId.isBlank());
+    }
+
+    @PostMapping("/google")
+    public ResponseEntity<?> googleLogin(@RequestBody Map<String, String> body) {
+        if (googleClientId == null || googleClientId.isBlank()) {
+            return ResponseEntity.status(503).body(Map.of("code", "GOOGLE_NOT_CONFIGURED", "message", "Google login is not configured."));
+        }
+        try {
+            var verifier = new com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier.Builder(
+                    com.google.api.client.googleapis.javanet.GoogleNetHttpTransport.newTrustedTransport(),
+                    com.google.api.client.json.gson.GsonFactory.getDefaultInstance())
+                    .setAudience(java.util.List.of(googleClientId)).build();
+            var token = verifier.verify(body.get("credential"));
+            if (token == null || !Boolean.TRUE.equals(token.getPayload().getEmailVerified())) {
+                return ResponseEntity.status(401).body(Map.of("code", "INVALID_GOOGLE_TOKEN", "message", "Google identity could not be verified."));
+            }
+            String email = token.getPayload().getEmail().trim().toLowerCase();
+            String name = String.valueOf(token.getPayload().get("name"));
+            var dao = new com.app.dao.UserDAO();
+            if (dao.findFullByEmail(email) == null && dao.createGoogleUser(name, email, token.getPayload().getSubject()) <= 0) {
+                return ResponseEntity.status(500).body(Map.of("message", "Could not create Google account."));
+            }
+            var row = dao.findFullByEmail(email);
+            Object id = row.get("id");
+            if (id instanceof Number n) dao.setActive(n.intValue(), true);
+            return ResponseEntity.ok(sessionView(CustomerAccountService.profileOf(email)));
+        } catch (Exception ex) {
+            return ResponseEntity.status(401).body(Map.of("code", "INVALID_GOOGLE_TOKEN", "message", "Google sign-in failed."));
+        }
+    }
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody Map<String, String> body) {
@@ -55,7 +92,16 @@ public class AuthController {
             out.put("message", "Enter the verification code to activate your account.");
             return ResponseEntity.ok(out);
         } catch (IllegalArgumentException | IllegalStateException ex) {
-            return ResponseEntity.badRequest().body(Map.of("message", ex.getMessage()));
+            String message = ex.getMessage() == null ? "Could not create account." : ex.getMessage();
+            String code = "REGISTRATION_FAILED";
+            if (message.startsWith("This email is already registered")) {
+                code = "EMAIL_ALREADY_REGISTERED";
+            } else if (message.startsWith("This phone is already registered")) {
+                code = "PHONE_ALREADY_REGISTERED";
+            } else if (message.toLowerCase().contains("password")) {
+                code = "WEAK_PASSWORD";
+            }
+            return ResponseEntity.badRequest().body(Map.of("code", code, "message", message));
         }
     }
 
@@ -104,6 +150,11 @@ public class AuthController {
                     body.get("email"), body.get("password"));
             return ResponseEntity.ok(sessionView(p));
         } catch (IllegalArgumentException ex) {
+            if (ex.getMessage() != null && ex.getMessage().startsWith("Account not verified")) {
+                return ResponseEntity.status(403).body(Map.of(
+                        "code", "ACCOUNT_NOT_VERIFIED",
+                        "message", ex.getMessage()));
+            }
             return ResponseEntity.status(401).body(Map.of("message", ex.getMessage()));
         }
     }

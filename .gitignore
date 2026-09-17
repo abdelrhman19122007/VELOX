@@ -22,5 +22,14 @@ application-local.properties
 .env
 Velox.jar
 
+# Accidental nested copy of the repository (the real app is at this root)
+/VELOX-main/
+
+# Local helper/download folder used while preparing the project
+/target/
+
+# Duplicate standalone page; the maintained page lives under velox-frontend/
+/partners.html
+
 # Local DB credentials template override (use *.example as template)
 velox-backend/src/main/resources/application.properties

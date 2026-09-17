@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>إتمام الطلب | VELOX</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <script>(function(){var t=localStorage.getItem('velox_theme')||'light';document.documentElement.setAttribute('data-theme',t);})();</script>
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/app-pages.css">
+  <link rel="stylesheet" href="css/checkout.css">
+</head>
+<body class="page-app">
+  <header class="app-topbar">
+    <div class="app-topbar-inner">
+      <a class="back-btn" href="home.html">← الرئيسية</a>
+      <div class="brand-mini">
+        <img src="assets/images/velox-logo.jpeg" alt="VELOX">
+        <div><strong>VELOX</strong><small data-i18n="app.tagline">كل شيء يوصلك في مكان واحد</small></div>
+      </div>
+      <button class="top-action" id="page-theme" type="button">◐</button>
+    </div>
+  </header>
+
+  <main class="app-main">
+    <!-- Stepper -->
+    <div class="checkout-stepper" id="checkout-stepper">
+      <div class="step is-active" data-step="1">
+        <div class="step-num">1</div>
+        <span data-i18n="checkout.step1">مراجعة السلة</span>
+      </div>
+      <div class="step-line"></div>
+      <div class="step" data-step="2">
+        <div class="step-num">2</div>
+        <span data-i18n="checkout.step2">عنوان التوصيل</span>
+      </div>
+      <div class="step-line"></div>
+      <div class="step" data-step="3">
+        <div class="step-num">3</div>
+        <span data-i18n="checkout.step3">طريقة الدفع</span>
+      </div>
+      <div class="step-line"></div>
+      <div class="step" data-step="4">
+        <div class="step-num">4</div>
+        <span data-i18n="checkout.step4">تأكيد الطلب</span>
+      </div>
+    </div>
+
+    <!-- Step 1: Cart Review -->
+    <section class="checkout-panel" id="step-1">
+      <h2 data-i18n="checkout.reviewCart">مراجعة السلة</h2>
+      <div id="checkout-items"></div>
+      <div id="checkout-empty" class="checkout-empty" hidden>
+        <div class="empty-icon">🛒</div>
+        <h3 data-i18n="cart.emptyTitle">السلة فاضية</h3>
+        <p data-i18n="cart.emptySubtitle">أضف منتجات من الصفحة الرئيسية وهتظهر هنا.</p>
+        <a href="home.html" class="btn-app" data-i18n="home.browseProducts">تصفح المنتجات</a>
+      </div>
+      <div class="checkout-next">
+        <button type="button" class="btn-app" id="step1-next" data-i18n="checkout.next">التالي: العنوان</button>
+      </div>
+    </section>
+
+    <!-- Step 2: Delivery Address -->
+    <section class="checkout-panel" id="step-2" hidden>
+      <h2 data-i18n="checkout.deliveryAddress">عنوان التوصيل</h2>
+      <div class="checkout-form">
+        <div class="field-app">
+          <label data-i18n="checkout.fullName">الاسم الكامل</label>
+          <input type="text" id="checkout-name" placeholder="اكتب اسمك الكامل" required>
+          <small class="field-error" id="checkout-name-error" hidden data-i18n="checkout.errorName">الاسم مطلوب</small>
+        </div>
+        <div class="field-app">
+          <label data-i18n="checkout.phone">رقم التليفون</label>
+          <input type="tel" id="checkout-phone" placeholder="01xxxxxxxxx" required>
+          <small class="field-error" id="checkout-phone-error" hidden data-i18n="checkout.errorPhone">رقم التليفون مطلوب</small>
+        </div>
+        <div class="field-app">
+          <label data-i18n="checkout.governorate">المحافظة</label>
+          <select id="checkout-governorate" required>
+            <option value="" data-i18n="checkout.selectGov">اختر المحافظة</option>
+          </select>
+          <small class="field-error" id="checkout-gov-error" hidden data-i18n="checkout.errorGov">المحافظة مطلوبة</small>
+        </div>
+        <div class="field-app">
+          <label data-i18n="checkout.address">العنوان التفصيلي</label>
+          <textarea id="checkout-address" rows="2" placeholder="الشارع، العلامة المميزة، الدور..." required></textarea>
+          <small class="field-error" id="checkout-addr-error" hidden data-i18n="checkout.errorAddr">العنوان مطلوب</small>
+        </div>
+        <div class="field-app">
+          <label data-i18n="checkout.notes">ملاحظات الطلب (اختياري)</label>
+          <textarea id="checkout-notes" rows="2" placeholder="مثلاً: من غير بصل، إيصال عند الباب..."></textarea>
+        </div>
+      </div>
+      <div class="checkout-nav">
+        <button type="button" class="btn-app secondary" id="step2-back" data-i18n="checkout.back">السابق</button>
+        <button type="button" class="btn-app" id="step2-next" data-i18n="checkout.nextPayment">التالي: الدفع</button>
+      </div>
+    </section>
+
+    <!-- Step 3: Payment Method -->
+    <section class="checkout-panel" id="step-3" hidden>
+      <h2 data-i18n="checkout.paymentMethod">طريقة الدفع</h2>
+      <div class="payment-options">
+        <label class="payment-option is-selected" data-method="CASH_ON_DELIVERY">
+          <input type="radio" name="payment" value="CASH_ON_DELIVERY" checked>
+          <div class="payment-card">
+            <span class="payment-icon">💵</span>
+            <div>
+              <strong data-i18n="cart.payCash">كاش عند الاستلام</strong>
+              <small data-i18n="checkout.payCashDesc">ادفع كاش للمندوب عند التوصيل</small>
+            </div>
+          </div>
+        </label>
+        <label class="payment-option" data-method="WALLET">
+          <input type="radio" name="payment" value="WALLET">
+          <div class="payment-card">
+            <span class="payment-icon">💳</span>
+            <div>
+              <strong data-i18n="cart.payWallet">المحفظة</strong>
+              <small data-i18n="checkout.payWalletDesc">ادفع من رصيد محفظتك</small>
+            </div>
+          </div>
+        </label>
+        <label class="payment-option" data-method="VISA">
+          <input type="radio" name="payment" value="VISA">
+          <div class="payment-card">
+            <span class="payment-icon">🏦</span>
+            <div>
+              <strong data-i18n="checkout.visa">فيزا / ماستركارد</strong>
+              <small data-i18n="checkout.visaDesc">ادفع ببطاقتك الائتمانية</small>
+            </div>
+          </div>
+        </label>
+      </div>
+      <div class="payment-details" id="wallet-details" hidden>
+        <div class="field-app"><label for="wallet-phone">رقم المحفظة</label><input id="wallet-phone" type="tel" inputmode="numeric" placeholder="01xxxxxxxxx" maxlength="11"><small>سيتم تأكيد العملية من مزود المحفظة عند تفعيل بوابة الدفع.</small></div>
+      </div>
+      <div class="payment-details" id="card-details" hidden>
+        <div class="field-app"><label for="card-holder">الاسم على البطاقة</label><input id="card-holder" autocomplete="cc-name" placeholder="CARD HOLDER"></div>
+        <div class="field-app full"><label for="card-number">رقم البطاقة</label><input id="card-number" inputmode="numeric" autocomplete="cc-number" maxlength="19" placeholder="0000 0000 0000 0000"></div>
+        <div class="payment-detail-grid"><div class="field-app"><label for="card-expiry">تاريخ الانتهاء</label><input id="card-expiry" inputmode="numeric" autocomplete="cc-exp" maxlength="5" placeholder="MM/YY"></div><div class="field-app"><label for="card-cvv">CVV</label><input id="card-cvv" type="password" inputmode="numeric" autocomplete="cc-csc" maxlength="4" placeholder="•••"></div></div>
+        <small class="payment-security">🔒 لا يتم حفظ بيانات البطاقة داخل VELOX.</small>
+      </div>
+      <small class="field-error" id="checkout-pay-error" hidden data-i18n="checkout.errorPay">اختر طريقة الدفع</small>
+      <div class="checkout-nav">
+        <button type="button" class="btn-app secondary" id="step3-back" data-i18n="checkout.back">السابق</button>
+        <button type="button" class="btn-app" id="step3-next" data-i18n="checkout.nextConfirm">التالي: التأكيد</button>
+      </div>
+    </section>
+
+    <!-- Step 4: Confirmation -->
+    <section class="checkout-panel" id="step-4" hidden>
+      <h2 data-i18n="checkout.confirmOrder">تأكيد الطلب</h2>
+      <div class="order-summary" id="order-summary">
+        <div class="summary-section">
+          <h3 data-i18n="checkout.itemsSummary">المنتجات</h3>
+          <div id="summary-items"></div>
+        </div>
+        <div class="summary-section">
+          <h3 data-i18n="checkout.addressSummary">عنوان التوصيل</h3>
+          <p id="summary-address"></p>
+        </div>
+        <div class="summary-section">
+          <h3 data-i18n="checkout.paymentSummary">طريقة الدفع</h3>
+          <p id="summary-payment"></p>
+        </div>
+        <div class="summary-section summary-totals">
+          <div class="summary-line">
+            <span data-i18n="checkout.subtotal">المجموع الفرعي</span>
+            <strong id="summary-subtotal">0 EGP</strong>
+          </div>
+          <div class="summary-line">
+            <span data-i18n="checkout.shipping">رسوم التوصيل</span>
+            <strong id="summary-shipping">0 EGP</strong>
+          </div>
+          <div class="summary-line" id="summary-discount-line" hidden>
+            <span data-i18n="checkout.discount">الخصم</span>
+            <strong id="summary-discount" class="text-success">-0 EGP</strong>
+          </div>
+          <div class="summary-line summary-total">
+            <span data-i18n="cart.total">الإجمالي</span>
+            <strong id="summary-total">0 EGP</strong>
+          </div>
+        </div>
+      </div>
+      <div class="checkout-nav">
+        <button type="button" class="btn-app secondary" id="step4-back" data-i18n="checkout.back">السابق</button>
+        <button type="button" class="btn-app btn-confirm" id="confirm-order" data-i18n="checkout.confirmBtn">تأكيد الطلب</button>
+      </div>
+    </section>
+
+    <!-- Order Confirmation Screen -->
+    <section class="checkout-panel confirmation-screen" id="confirmation-screen" hidden>
+      <div class="confirm-icon">✓</div>
+      <h2 data-i18n="checkout.orderSuccess">تم تأكيد طلبك!</h2>
+      <p class="confirm-sub" data-i18n="checkout.orderSuccessSub">طلبك قيد التجهيز وسيتم توصيله قريباً</p>
+      <div class="confirm-details">
+        <div class="confirm-row">
+          <span data-i18n="checkout.orderNumber">رقم الطلب</span>
+          <strong id="confirm-order-id">#VELOX-0000</strong>
+        </div>
+        <div class="confirm-row">
+          <span data-i18n="checkout.estimatedDelivery">الوقت المتوقع</span>
+          <strong id="confirm-eta">30-45 دقيقة</strong>
+        </div>
+        <div class="confirm-row">
+          <span data-i18n="checkout.totalPaid">المبلغ المدفوع</span>
+          <strong id="confirm-total">0 EGP</strong>
+        </div>
+      </div>
+      <div class="confirm-actions">
+        <a href="home.html" class="btn-app" data-i18n="checkout.backToHome">العودة للرئيسية</a>
+        <button type="button" class="btn-app secondary" id="track-order-btn" data-i18n="checkout.trackOrder">تتبع الطلب</button>
+      </div>
+    </section>
+  </main>
+
+  <div class="modal-backdrop" id="checkout-auth-modal" hidden>
+    <div class="modal-card auth-modal-card" role="dialog" aria-modal="true" aria-labelledby="checkout-auth-title">
+      <button class="modal-close" type="button" id="checkout-auth-close" aria-label="إغلاق">×</button>
+      <div class="modal-logo"><img src="assets/images/velox-logo.jpeg" alt="VELOX"></div>
+      <div class="modal-intro">
+        <span class="eyebrow">حساب VELOX</span>
+        <h2 id="checkout-auth-title">سجّل الدخول لتأكيد الطلب</h2>
+        <p>سلتك وبيانات التوصيل محفوظة. بعد تسجيل الدخول هتكمل من نفس الخطوة.</p>
+      </div>
+      <form id="checkout-login-form" class="modal-form" novalidate>
+        <div class="field"><label for="checkout-login-email">البريد الإلكتروني</label><input type="email" id="checkout-login-email" autocomplete="email" placeholder="name@example.com"><div class="field-hint"></div></div>
+        <div class="field"><label for="checkout-login-password">كلمة المرور</label><input type="password" id="checkout-login-password" autocomplete="current-password" placeholder="••••••••"><div class="field-hint"></div></div>
+        <div id="checkout-login-alert" class="checkout-auth-alert" aria-live="polite"></div>
+        <button type="submit" class="btn-app btn-confirm" id="checkout-login-submit">تسجيل الدخول وإكمال الطلب</button>
+        <a class="checkout-create-account" href="register.html?return=checkout.html">مستخدم جديد؟ أنشئ حسابًا</a>
+      </form>
+    </div>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/i18n.js"></script>
+  <script src="js/theme.js"></script>
+  <script src="js/services/apiClient.js"></script>
+  <script src="js/services/authService.js"></script>
+  <script src="js/services/catalogService.js?v=16"></script>
+  <script src="js/services/orderService.js"></script>
+  <script src="js/pages/checkoutPage.js?v=16"></script>
+</body>
+</html>

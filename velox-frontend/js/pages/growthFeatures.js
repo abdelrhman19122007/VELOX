@@ -233,9 +233,31 @@
   async function loadStores() {
     if (storeCache) return storeCache;
     try {
-      const r = await fetch(apiBase() + '/stores');
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 1200);
+      const r = await fetch(apiBase() + '/stores', { signal: controller.signal });
+      clearTimeout(timer);
       storeCache = await r.json();
     } catch (_) { storeCache = []; }
+    if (!Array.isArray(storeCache) || !storeCache.length) {
+      const products = window.VeloxCatalogService ? window.VeloxCatalogService.getProducts() : [];
+      const byName = new Map();
+      products.forEach((p) => {
+        const key = p.storeEn || p.storeAr;
+        if (!key) return;
+        if (byName.has(key)) { byName.get(key).productsCount += 1; return; }
+        byName.set(key, {
+          id: 'merchant:' + key,
+          name: p.storeEn || p.storeAr,
+          nameAr: p.storeAr || p.storeEn,
+          type: p.category === 'food' ? 'RESTAURANT' : 'STORE',
+          cover: p.image || '',
+          rating: null,
+          productsCount: 1,
+        });
+      });
+      storeCache = Array.from(byName.values());
+    }
     return storeCache;
   }
   window.VeloxStoreMeta = {
@@ -276,7 +298,9 @@
 
   function etaFor(store) {
     if ((store.type || '').toUpperCase() === 'RESTAURANT') {
-      const base = 20 + (Number(store.id) * 3) % 12;
+      const numericId = Number(store.id);
+      const seed = Number.isFinite(numericId) ? numericId : String(store.name || store.nameAr || '').length;
+      const base = 20 + (seed * 3) % 12;
       return AR() ? `${base}–${base + 10} دقيقة` : `${base}-${base + 10} min`;
     }
     return AR() ? 'خلال 1–2 يوم' : 'In 1-2 days';
@@ -287,7 +311,7 @@
     return `<button type="button" class="store-card" data-store="${s.id}">`
       + `<span class="store-cover">${s.cover ? `<img src="${esc(s.cover)}" alt="" loading="lazy" onerror="this.remove()">` : '🏪'}</span>`
       + `<span class="store-body"><strong>${esc(name)}</strong>`
-      + `<small>${esc(s.type || '')}</small>`
+      + `<small>${esc(s.cuisine || (AR() ? (s.type==='RESTAURANT'?'مطعم':'متجر') : (s.type || 'Store')))} · ${Number(s.productsCount||0)} ${AR()?'منتج':'items'}</small>`
       + `<span class="store-meta-row">${stars(s.rating)}<span class="store-eta">⏱ ${esc(etaFor(s))}</span></span>`
       + `<span class="store-meta-row"><span class="store-fee">🚚 ${Number(fee).toFixed(0)} EGP</span>`
       + (plus ? `<span class="plus-badge">👑 ${AR() ? 'مجاني مع Plus' : 'Free with Plus'}</span>` : '')
@@ -297,7 +321,12 @@
   async function renderStoresSection() {
     const catSection = document.querySelector('section.category-section');
     if (!catSection || $('#stores-section')) return;
-    const [stores, fee, plus] = await Promise.all([loadStores(), deliveryFee(), plusActive()]);
+    const fallbackAfter = (ms, value) => new Promise((resolve) => setTimeout(() => resolve(value), ms));
+    const [stores, fee, plus] = await Promise.all([
+      loadStores(),
+      Promise.race([deliveryFee(), fallbackAfter(1200, 20)]),
+      Promise.race([plusActive(), fallbackAfter(1200, false)]),
+    ]);
     if (!stores.length) return;
     const rest = stores.filter((s) => (s.type || '').toUpperCase() === 'RESTAURANT');
     const general = stores.filter((s) => (s.type || '').toUpperCase() !== 'RESTAURANT');
@@ -313,9 +342,19 @@
       + (general.length ? `<div class="section-heading" style="margin-top:26px"><div><h2>${AR() ? 'توصيل عام: أزياء وإلكترونيات' : 'General delivery: fashion & tech'}</h2></div></div>` : '')
       + group('', general)
       + `</div>`;
-    catSection.after(sec);
+    catSection.before(sec);
     sec.querySelectorAll('[data-store]').forEach((btn) => btn.addEventListener('click', () => {
-      window.location.href = `store.html?id=${encodeURIComponent(btn.dataset.store)}`;
+      const sid = btn.dataset.store;
+      const u = new URL('products.html', window.location.href);
+      u.searchParams.set('category', 'all');
+      if (sid.startsWith('merchant:')) {
+        u.searchParams.delete('store');
+        u.searchParams.set('merchant', sid.slice(9));
+      } else {
+        u.searchParams.delete('merchant');
+        u.searchParams.set('store', sid);
+      }
+      window.location.href = u.toString();
     }));
   }
 
@@ -343,6 +382,9 @@
     }, 4000);
     document.addEventListener('velox:langchange', () => {
       strip.querySelectorAll('.promo-slide p').forEach((el, k) => { el.textContent = AR() ? PROMOS[k].ar : PROMOS[k].en; });
+      const storesSection = $('#stores-section');
+      if (storesSection) storesSection.remove();
+      renderStoresSection();
     });
   }
 
@@ -350,9 +392,11 @@
   async function renderPopularSection() {
     const prodSection = document.querySelector('section.products-section');
     if (!prodSection || $('#popular-section')) return;
+    const query = new URLSearchParams(window.location.search);
+    if (query.has('store') || query.has('merchant')) return;
     let items = [];
     try {
-      const r = await fetch(apiBase() + '/products/popular?limit=8');
+      const r = await fetch(apiBase() + '/products/popular?limit=4');
       items = await r.json();
     } catch (_) {}
     if (!items.length) return;
@@ -466,6 +510,59 @@
     move();
   }
 
+  /* ---------- selected-store filter banner ---------- */
+  async function renderStoreBanner() {
+    if (document.body.classList.contains('catalog-page')) return;
+    const storeId = new URLSearchParams(window.location.search).get('store');
+    const merchant = new URLSearchParams(window.location.search).get('merchant');
+    const prodSection = document.querySelector('section.products-section');
+    if (!prodSection || (!storeId && !merchant) || document.getElementById('store-filter-banner')) return;
+    let storeName = merchant || '';
+    if (storeId) {
+      try {
+        const stores = await api('/stores');
+        const s = stores.find((x) => String(x.id) === String(storeId));
+        storeName = s ? (AR() ? (s.nameAr || s.name) : (s.name || s.nameAr)) : '';
+      } catch (_) {}
+    }
+    const banner = document.createElement('div');
+    banner.id = 'store-filter-banner';
+    banner.className = 'store-filter-banner';
+    banner.innerHTML = `<span class="sfb-icon">🏪</span><span class="sfb-text">${AR() ? 'بيتعرض منتجات' : 'Showing products from'} <strong>${esc(storeName || '#' + storeId)}</strong></span><button type="button" class="sfb-clear" id="store-clear-btn">${AR() ? 'عرض الكل ✕' : 'Show all ✕'}</button>`;
+    prodSection.before(banner);
+    document.getElementById('store-clear-btn').addEventListener('click', () => {
+      const u = new URL(window.location.href);
+      u.searchParams.delete('store');
+      u.searchParams.delete('merchant');
+      window.location.href = u.toString();
+    });
+  }
+
+  /* ---------- location modal pagination ---------- */
+  function renderLocationPager() {
+    const grid = $('#location-grid'); if (!grid) return;
+    const pages = 3;
+    const perPage = 9;
+    const totalGovs = grid.children.length;
+    let currentPage = 1;
+    const prev = $('#loc-prev'); const next = $('#loc-next'); const info = $('#loc-page-info');
+    if (!prev || !next || !info) return;
+    function showPage(page) {
+      currentPage = page;
+      const start = (page - 1) * perPage;
+      const end = start + perPage;
+      $$(grid.querySelectorAll('button')).forEach((btn, i) => {
+        btn.style.display = (i >= start && i < end) ? 'inline-block' : 'none';
+      });
+      prev.disabled = page === 1;
+      next.disabled = page === pages;
+      info.textContent = `${page} / ${pages}`;
+    }
+    showPage(1);
+    prev.addEventListener('click', () => showPage(currentPage - 1));
+    next.addEventListener('click', () => showPage(currentPage + 1));
+  }
+
   /* ---------- boot ---------- */
   function boot() {
     wrapOrderCreate();
@@ -475,6 +572,7 @@
       bindWatchButton();
       renderPromoStrip();
       renderStoresSection();
+      renderStoreBanner();
       renderPopularSection();
       window.VeloxStoreMeta.ready().then(() => {
         if (new URLSearchParams(window.location.search).get('store')) {

@@ -7,9 +7,11 @@
  */
 (function () {
   class ApiError extends Error {
-    constructor(message, status) {
+    constructor(message, status, code, details) {
       super(message);
       this.status = status;
+      this.code = code || null;
+      this.details = details || null;
     }
   }
 
@@ -41,7 +43,12 @@
       try { data = await response.json(); } catch (_) { /* empty body */ }
 
       if (!response.ok) {
-        throw new ApiError((data && data.message) || `Request failed (${response.status})`, response.status);
+        throw new ApiError(
+          (data && data.message) || `Request failed (${response.status})`,
+          response.status,
+          data && data.code,
+          data
+        );
       }
       return data;
     } catch (err) {

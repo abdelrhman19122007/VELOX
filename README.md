@@ -1,5 +1,27 @@
 # VELOX — All-in-One Express Delivery
 
+## Quick start — Windows (no MySQL or global Maven required)
+
+Requirements: Java 17+ and Python 3.
+
+Double-click `start-velox.cmd`, or run it from a terminal. It starts:
+
+- Backend API: `http://localhost:8080/api`
+- Frontend: `http://localhost:63342/login.html`
+
+The backend first tries the configured MySQL database. If MySQL is unavailable,
+it automatically creates a persistent local H2 database under
+`velox-backend/data/` for accounts, OTP sessions, and local checkout orders.
+That directory is ignored by Git, so personal accounts and runtime data are
+never uploaded.
+
+Google login is optional. Set `VELOX_GOOGLE_CLIENT_ID` before starting the
+backend, and register `http://localhost:63342` as an Authorized JavaScript
+origin in Google Cloud. Normal email/password accounts work without Google.
+
+For the complete production-style MySQL feature set, follow the database setup
+later in this README and apply every migration in numeric order.
+
 English technical documentation for the VELOX monorepo: Spring Boot REST API + console app + web storefront + MySQL, all running on **one database** as the single source of truth.
 
 > Task coverage: **KAN-130** (documentation) and **KAN-126** (backend unit tests + Postman suite).

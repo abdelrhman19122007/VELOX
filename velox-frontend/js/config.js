@@ -1,3 +1,10 @@
+// Google OAuth is registered for IntelliJ's local origin. Keep every local
+// entry point on that single canonical origin to prevent origin_mismatch.
+if ((location.hostname === 'localhost' || location.hostname === '127.0.0.1') &&
+    (location.port === '5500' || location.hostname === '127.0.0.1')) {
+  location.replace(`http://localhost:63342${location.pathname}${location.search}${location.hash}`);
+}
+
 window.VELOX_CONFIG={
   USE_MOCK_API:false,
   API_BASE_URL:'http://localhost:8080/api',

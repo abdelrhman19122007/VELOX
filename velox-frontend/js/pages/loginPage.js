@@ -16,6 +16,7 @@
     const passwordToggleBtn = qs('#password-toggle');
     const submitBtn = qs('#login-submit');
     const alertBox = qs('#login-alert');
+    let verifyingOtp = false;
 
     setupPasswordToggle(passwordInput, passwordToggleBtn);
 
@@ -55,6 +56,26 @@
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
       clearAlert(alertBox);
+      if (verifyingOtp) {
+        const codeInput = qs('#login-otp-code');
+        if (!/^\d{6}$/.test((codeInput?.value || '').trim())) {
+          showAlert(alertBox, 'error', t('otp.error.invalid'));
+          return;
+        }
+        setButtonLoading(submitBtn, true);
+        try {
+          const user = await window.VeloxAuthService.verifyOtp({
+            email: emailInput.value.trim(),
+            code: codeInput.value.trim(),
+          });
+          showAlert(alertBox, 'success', t('otp.success'));
+          setTimeout(() => { window.location.href = `index.html?welcome=${encodeURIComponent(user.full_name)}`; }, 700);
+        } catch (err) {
+          showAlert(alertBox, 'error', t('otp.error.invalid'));
+          setButtonLoading(submitBtn, false);
+        }
+        return;
+      }
       if (!validate()) return;
 
       setButtonLoading(submitBtn, true);
@@ -68,9 +89,28 @@
           window.location.href = `index.html?welcome=${encodeURIComponent(user.full_name)}`;
         }, 700);
       } catch (err) {
-        const msg = /verif/i.test(err.message || '')
-          ? t('login.error.unverified')
-          : t(err.i18nKey || 'login.error.generic');
+        if (err.code === 'ACCOUNT_NOT_VERIFIED' || /not verified|غير مفعل/i.test(err.message || '')) {
+          try {
+            const result = await window.VeloxAuthService.resendOtp(emailInput.value.trim());
+            verifyingOtp = true;
+            passwordField.hidden = true;
+            emailInput.readOnly = true;
+            const otpField = document.createElement('div');
+            otpField.className = 'field';
+            otpField.id = 'field-login-otp';
+            otpField.innerHTML = `<label for="login-otp-code">${t('otp.label')}</label><input type="text" id="login-otp-code" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="••••••"><div class="field-hint"></div>`;
+            passwordField.after(otpField);
+            submitBtn.querySelector('.btn-label').textContent = t('otp.submit');
+            const prefix = window.VeloxI18n.getLang() === 'ar' ? 'الحساب محتاج تفعيل. اكتب الكود التالي: ' : 'Your account needs verification. Enter this code: ';
+            showAlert(alertBox, 'success', prefix + (result.otp || ''));
+            qs('#login-otp-code').focus();
+          } catch (resendError) {
+            showAlert(alertBox, 'error', resendError.message || t('login.error.unverified'));
+          }
+          setButtonLoading(submitBtn, false);
+          return;
+        }
+        const msg = err.status === 401 ? t('login.error.invalid') : t(err.i18nKey || 'login.error.generic');
         setButtonLoading(submitBtn, false);
         showAlert(alertBox, 'error', msg);
       }
