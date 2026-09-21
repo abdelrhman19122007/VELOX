@@ -17,6 +17,7 @@
   document.addEventListener('DOMContentLoaded', () => {
     if (NEED_LOGIN.includes(page) && !session()) { window.location.href = 'login.html'; return; }
     if (page === 'account.html') initAccount();
+    if (page === 'settings.html') initSettings();
     if (page === 'orders.html') initOrders();
     if (page === 'favorites.html') initFavs();
     if (page === 'rating.html') initRating();
@@ -64,6 +65,47 @@
     });
     refreshWallet(); refreshLoyalty();
     renderCards(((s.user) || {}).cards || []);
+    const out = $('#logout-btn');
+    if (out) out.addEventListener('click', doLogout);
+  }
+
+  async function doLogout() {
+    try { await api('/auth/logout', { method: 'POST' }); } catch (_) {}
+    try { window.VeloxAuthService.logout(); } catch (_) {}
+    window.location.href = 'login.html';
+  }
+
+  /* ---------------- settings phone (shared profile API) ---------------- */
+  async function initSettings() {
+    const input = $('#set-phone'), save = $('#save-phone'), msg = $('#phone-msg');
+    if (!input || !save) return;
+    const s = session();
+    if (!s || !s.token) {
+      save.disabled = true;
+      if (msg) msg.textContent = t('pg.settings.loginRequired');
+      return;
+    }
+    const u = s.user || {};
+    input.value = u.phone_number || u.phone || '';
+    try {
+      const p = await api('/auth/profile?userId=' + encodeURIComponent(u.email));
+      if (p && (p.phone_number || p.phone)) input.value = p.phone_number || p.phone;
+    } catch (_) {}
+    save.addEventListener('click', async () => {
+      const v = (input.value || '').trim();
+      if (!/^01\d{9}$/.test(v)) {
+        if (msg) msg.textContent = t('pg.settings.phoneInvalid');
+        return;
+      }
+      try {
+        const p = await api('/auth/profile', { method: 'PUT', body: { phone_number: v } });
+        Object.assign(s.user, p); saveSessionObj(s);
+        if (msg) msg.textContent = t('pg.settings.phoneSaved');
+        toast(t('pg.settings.phoneSaved'));
+      } catch (_) {
+        if (msg) msg.textContent = t('pg.settings.phoneFail');
+      }
+    });
   }
 
   function renderCards(cards) {

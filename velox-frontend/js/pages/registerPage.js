@@ -143,7 +143,7 @@
       try {
         await window.VeloxAuthService.verifyOtp({ email: pendingOtpEmail, code: code.trim() });
         showAlert(qs('#otp-alert'), 'success', t('otp.success'));
-        setTimeout(() => { window.location.href = 'index.html'; }, 800);
+        setTimeout(() => { window.location.href = 'home.html'; }, 800);
       } catch (err) {
         showAlert(qs('#otp-alert'), 'error', t(err.i18nKey || 'otp.error.invalid'));
       }

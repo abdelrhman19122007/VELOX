@@ -277,7 +277,7 @@ function getVisibleProducts() {
     $('#search-clear')?.addEventListener('click',()=>setSearch(''));
     $('#cart-close')?.addEventListener('click',closeCart);$('#drawer-backdrop')?.addEventListener('click',closeCart);
     $('#checkout-btn')?.addEventListener('click',()=>{if(!cart.length)return;closeCart();openAuth();});
-    $('#account-btn')?.addEventListener('click',async()=>{if(window.VeloxAuthService.getSession()){try{await window.VeloxApiClient.request('/auth/logout',{method:'POST'});}catch(_){}window.VeloxAuthService.logout();updateAccountUI();showToast(lang()==='ar'?'تم تسجيل الخروج.':'You have been logged out.');}else openAuth();});
+    $('#account-btn')?.addEventListener('click',async()=>{if(window.VeloxAuthService.getSession()){try{await window.VeloxApiClient.request('/auth/logout',{method:'POST'});}catch(_){}window.VeloxAuthService.logout();updateAccountUI();showToast(lang()==='ar'?'تم تسجيل الخروج.':'You have been logged out.');setTimeout(()=>{window.location.href='login.html';},600);}else openAuth();});
     $('#location-btn')?.addEventListener('click',()=>openModal('#location-modal'));
     $$('#location-grid [data-location]').forEach(btn=>btn.addEventListener('click',()=>{localStorage.setItem(locationKey,btn.dataset.location);closeModal($('#location-modal'));showToast(t('location.saved').replace('{{name}}',btn.textContent.trim()));}));
     $$('[data-close-modal]').forEach(btn=>btn.addEventListener('click',()=>closeModal(btn.closest('.modal-backdrop'))));
