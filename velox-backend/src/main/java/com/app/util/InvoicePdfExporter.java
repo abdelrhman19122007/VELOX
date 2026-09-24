@@ -79,6 +79,14 @@ public final class InvoicePdfExporter {
                 + "  |  " + header.getOrDefault("email", "")
                 + "  |  " + header.getOrDefault("phone", ""), head);
         addLine(doc, "Shipping: " + header.getOrDefault("shipping", ""), head);
+        // Approximate delivery time: dynamic ETA when provided, safe fallback otherwise.
+        Object etaObj = header.get("etaHours");
+        if (etaObj != null) {
+            addLine(doc, "Order arrives within " + etaObj + " minutes (based on your location)", head);
+        } else {
+            addLine(doc, "Order arrives within 30-90 minutes depending on your location", head);
+        }
+        addLine(doc, "يصل الطلب خلال 30 إلى 90 دقيقة حسب موقعك", head);
         addLine(doc, " ", head);
 
         PdfPTable table = new PdfPTable(new float[]{4, 1, 2, 2});

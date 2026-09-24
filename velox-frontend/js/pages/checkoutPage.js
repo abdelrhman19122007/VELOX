@@ -41,6 +41,96 @@
     NORTH_SINAI:5,SOUTH_SINAI:4,FAYOUM:2,BENI_SUEF:2,MINYA:3,ASYUT:3,SOHAG:3,
     QENA:4,LUXOR:4,ASWAN:4,NEW_VALLEY:5,MATROUH:4,RED_SEA:4
   };
+  // Food ETA in minutes by governorate (non-food orders use GOV_DAYS).
+  const GOV_HOURS={
+    CAIRO:45,GIZA:50,QALYUBIA:55,MENOFIA:70,GHARBIA:75,BEHEIRA:80,DAKAHLIA:80,
+    SHARKIA:80,ALEXANDRIA:90,KAFR_EL_SHEIKH:90,DAMIETTA:100,MINYA:100,
+    PORT_SAID:100,ISMAILIA:95,SUEZ:95,FAYOUM:75,BENI_SUEF:85,ASYUT:110,
+    SOHAG:115,QENA:120,LUXOR:120,RED_SEA:110,MATROUH:120,ASWAN:130,
+    SOUTH_SINAI:130,NORTH_SINAI:140,NEW_VALLEY:150
+  };
+
+  // Prefill customer name/phone from the logged-in account (stays editable).
+  function prefillCustomer(){
+    try{
+      const s=window.VeloxAuthService.getSession();const u=s&&s.user;if(!u)return;
+      const name=u.full_name||u.fullName||u.name||'';
+      const nameEl=$('#checkout-name');
+      if(nameEl&&!(nameEl.value||'').trim()&&name){nameEl.value=name;nameEl.readOnly=false;}
+      const phone=u.phone_number||u.phone||'';
+      const phoneEl=$('#checkout-phone');
+      if(phoneEl&&!(phoneEl.value||'').trim()&&phone){phoneEl.value=phone;}
+    }catch(_){}
+  }
+
+  // Map a reverse-geocoded city/region name to a governorate key.
+  const CITY_TO_GOV=[
+    ['القاهرة|cairo','CAIRO'],['الجيزة|giza','GIZA'],
+    ['الإسكندرية|الاسكندرية|alexandria','ALEXANDRIA'],
+    ['دمياط|damietta','DAMIETTA'],['البحيرة|beheira|دمنهور|damanhur','BEHEIRA'],
+    ['كفر الشيخ|kafr','KAFR_EL_SHEIKH'],['الغربية|gharbia|طنطا|tanta','GHARBIA'],
+    ['المنوفية|menofia|menoufia|شبين|shebin','MENOFIA'],
+    ['القليوبية|qalyubia|بنها|banha|qalubia','QALYUBIA'],
+    ['الشرقية|sharkia|sharqia|الزقازيق|zagazig','SHARKIA'],
+    ['الدقهلية|dakahlia|المنصورة|mansoura','DAKAHLIA'],
+    ['بورسعيد|port said|portsaid','PORT_SAID'],
+    ['الإسماعيلية|الاسماعيلية|ismailia','ISMAILIA'],['السويس|suez','SUEZ'],
+    ['شمال سيناء|north sinai|العريش|arish|arich','NORTH_SINAI'],
+    ['جنوب سيناء|south sinai|شرم الشيخ|sharm','SOUTH_SINAI'],
+    ['الفيوم|fayoum|faiyum','FAYOUM'],['بني سويف|beni suef|banisuif','BENI_SUEF'],
+    ['المنيا|minya|minia','MINYA'],['أسيوط|اسيوط|asyut|assiut','ASYUT'],
+    ['سوهاج|sohag|suhag','SOHAG'],['قنا|qena|qina','QENA'],
+    ['الأقصر|الاقصر|luxor|luqsor','LUXOR'],['أسوان|اسوان|aswan','ASWAN'],
+    ['الوادي الجديد|new valley|الخارجة|kharga','NEW_VALLEY'],
+    ['مطروح|matrouh|matruh|مرسى مطروح|marsa','MATROUH'],
+    ['البحر الأحمر|red sea|الغردقة|hurghada','RED_SEA']
+  ];
+  function mapCityToGov(cityText){
+    const hay=' '+(String(cityText||'').toLowerCase())+' ';
+    for(const [keys,gov]of CITY_TO_GOV){
+      for(const k of keys.split('|')){
+        if(k&&hay.indexOf(k.toLowerCase())>=0)return gov;
+      }
+    }
+    return null;
+  }
+  // Auto-detect governorate from device location; manual select stays on failure.
+  async function detectLocationAndFill(){
+    const sel=$('#checkout-governorate');
+    if(!sel||!navigator.geolocation)return;
+    navigator.geolocation.getCurrentPosition(async(pos)=>{
+      try{
+        const r=await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&format=json&accept-language=ar`,{headers:{'Accept':'application/json'}});
+        const j=await r.json();const a=j.address||{};
+        const cityText=[a.city,a.town,a.village,a.hamlet,a.state,a.county,a.display_name].filter(Boolean).join(' ');
+        const govKey=mapCityToGov(cityText)||mapCityToGov(j.display_name||'');
+        if(govKey&&GOV_AR[govKey]){
+          sel.value=govKey;sel.disabled=true;selectedGov=govKey;
+          shippingFee=GOV_SHIPPING[govKey]||20;
+          showToast(AR()?`تم تحديد محافظتك تلقائيًا: ${GOV_AR[govKey]}`:`Governorate auto-detected: ${govKey}`);
+          const addrEl=$('#checkout-address');
+          if(addrEl&&!(addrEl.value||'').trim()){
+            const line=[a.road,a.suburb,a.neighbourhood,a.city,a.state].filter(Boolean).join('، ');
+            addrEl.value=line||(`${pos.coords.latitude.toFixed(5)}, ${pos.coords.longitude.toFixed(5)}`);
+          }
+          if(currentStep===4)renderConfirmation();
+        }
+      }catch(_){/* keep manual selection */}
+    },()=>{/* denied: keep manual selection */},{timeout:8000});
+  }
+
+  function cartHasNonFood(){
+    return cart.some(i=>{const p=productById(i.id);return !p||!p.category||p.category!=='food';});
+  }
+  // Food -> minutes by location; fashion/electronics -> days by location.
+  function formatDeliveryEta(govKey){
+    if(!cartHasNonFood()){
+      const m=GOV_HOURS[govKey]||60;
+      return AR()?`يصل الطلب خلال ${m} دقيقة`:`Order arrives within ${m} minutes`;
+    }
+    const d=GOV_DAYS[govKey]||1;
+    return AR()?`يصل الطلب خلال ${d} ${d===1?'يوم':'أيام'}`:`Order arrives within ${d} day${d>1?'s':''}`;
+  }
 
   function populateGovernorates(){
     const sel=$('#checkout-governorate');
@@ -187,8 +277,7 @@
         notes:notes||undefined
       });
       const code=orderResult?.orderCode||orderResult?.orderId||('VELOX-'+Date.now());
-      const eta=GOV_DAYS[govKey]||1;
-      const etaText=AR()?`${eta} ${eta===1?'يوم':'أيام'}`:`${eta} day${eta>1?'s':''}`;
+      const etaText=formatDeliveryEta(govKey||selectedGov||'CAIRO');
       // Show confirmation
       $$('.checkout-panel').forEach(p=>p.hidden=true);
       $('#confirmation-screen').hidden=false;
@@ -236,6 +325,7 @@
     try{
       await window.VeloxAuthService.login({email,password});
       alert.classList.add('is-success');alert.textContent=AR()?'تم تسجيل الدخول بنجاح.':'Signed in successfully.';
+      prefillCustomer();
       setTimeout(()=>{closeAuthModal();if(resumeOrderAfterLogin){resumeOrderAfterLogin=false;placeOrder();}},350);
     }catch(err){
       alert.classList.remove('is-success');alert.textContent=err.message||(AR()?'تعذر تسجيل الدخول.':'Could not sign in.');
@@ -247,6 +337,8 @@
   document.addEventListener('DOMContentLoaded',()=>{
     cart=readCart();
     populateGovernorates();
+    prefillCustomer();
+    detectLocationAndFill();
     renderCheckoutItems();
     goToStep(1);
 

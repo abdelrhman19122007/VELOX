@@ -44,12 +44,19 @@ public class WebOrderService {
         return placeOrder(email, rawItems, governorateRaw, paymentMethod, scheduledRaw, null);
     }
 
-    /**
-     * Full checkout: adds optional coupon code (validated, usage counted).
-     */
     public Map<String, Object> placeOrder(String email, List<Map<String, Object>> rawItems,
                                           String governorateRaw, String paymentMethod,
                                           String scheduledRaw, String promoRaw) {
+        return placeOrder(email, rawItems, governorateRaw, paymentMethod, scheduledRaw, promoRaw, null);
+    }
+
+    /**
+     * Full checkout: adds optional coupon code (validated, usage counted)
+     * plus an optional detailed street address from the storefront.
+     */
+    public Map<String, Object> placeOrder(String email, List<Map<String, Object>> rawItems,
+                                          String governorateRaw, String paymentMethod,
+                                          String scheduledRaw, String promoRaw, String addressRaw) {
         CustomerAccountService.Profile profile = CustomerAccountService.profileOf(email);
         if (profile == null) {
             throw new IllegalArgumentException("Account not found. Please register first.");
@@ -74,7 +81,11 @@ public class WebOrderService {
         int userId = dao.ensureUser(email, profile.name,
                 CustomerAccountService.passwordHashOf(CustomerAccountService.keyForEmail(email)),
                 profile.phone, gov.name());
-        String shippingAddress = gov.name() + ", " + profile.phone;
+        String addressDetail = (addressRaw != null && !addressRaw.isBlank())
+                ? addressRaw.trim() : "";
+        String shippingAddress = addressDetail.isEmpty()
+                ? gov.name() + ", " + (profile.phone != null ? profile.phone : "")
+                : gov.name() + " - " + addressDetail;
         boolean wallet = paymentMethod != null && paymentMethod.trim().equalsIgnoreCase("WALLET");
         double walletCharged = 0;
         // Feature 1: one cart may span many stores; fee = governorate base
