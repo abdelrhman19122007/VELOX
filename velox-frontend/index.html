@@ -1,244 +1,236 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="VELOX — منصة طلب وتوصيل سريعة للأكل والمنتجات اليومية.">
-  <title>VELOX — اطلبها. توصلك.</title>
-  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-  <script>
-    (function () {
-      var theme = localStorage.getItem('velox_theme') || 'light';
-      document.documentElement.setAttribute('data-theme', theme);
-      var lang = localStorage.getItem('velox_lang') || 'ar';
-      document.documentElement.setAttribute('lang', lang);
-      document.documentElement.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
-    })();
-  </script>
-  <link rel="stylesheet" href="css/tokens.css">
-  <link rel="stylesheet" href="css/base.css">
-  <link rel="stylesheet" href="css/components.css">
-  <link rel="stylesheet" href="css/home.css?v=17">
-</head>
-<body class="storefront-page">
-  <header class="site-header" id="top">
-    <button type="button" class="menu-toggle" id="side-menu-toggle" aria-label="فتح القائمة"><span>☰</span></button>
-    <div class="container header-inner">
-      <a class="brand-lockup" href="#top" aria-label="VELOX">
-        <img src="assets/images/velox-logo.jpeg" alt="VELOX" class="brand-logo">
-        <span class="brand-copy">
-          <strong>VELOX</strong>
-          <small data-i18n="app.tagline">كل شيء يوصلك في مكان واحد</small>
-        </span>
-      </a>
+<html class="dark" dir="rtl" lang="ar"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><meta content="web_standard" name="shell-type"><link href="https://fonts.googleapis.com" rel="preconnect"><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=Space+Grotesk:wght@600;700&amp;family=Noto+Kufi+Arabic:wght@400;600;700&amp;family=Noto+Sans+Arabic:wght@400;600;700&amp;display=swap" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"><style>@layer base{html,body{margin:0;padding:0;font-family:'Noto Sans Arabic','Inter',sans-serif;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><link rel="stylesheet" href="css/reference-1.css"><title>VELOX — تسوّق احتياجاتك في مكان واحد</title><meta name="robots" content="noindex"><link rel="icon" href="assets/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="css/live-storefront.css?v=1"></head><body class="bg-surface text-on-surface antialiased selection:bg-primary-container selection:text-on-primary-container"><header class="fixed top-0 inset-x-0 z-50 bg-surface/90 backdrop-blur-xl shadow-[0_4px_24px_rgba(0,0,0,0.4)]"><div class="h-20 w-full max-w-[1440px] mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop flex items-center justify-between gap-gutter"><div class="flex items-center gap-space-md shrink-0"><div class="flex items-center gap-space-sm"><img alt="VELOX Delivery Logo" class="h-8 w-auto object-contain" src="assets/images/stitch/original-1.jpg"><span class="font-headline-md text-headline-md font-bold tracking-tight text-primary-container uppercase hidden sm:inline-block">VELOX</span></div><button class="flex items-center gap-space-xs px-space-sm py-space-xs rounded-lg bg-surface-container-low hover:bg-surface-container-high transition-colors text-right" type="button" data-href="addresses.html"><span class="material-symbols-outlined text-primary text-[20px]">location_on</span><div class="flex flex-col text-right"><span class="font-label-sm text-label-sm text-on-surface-variant">توصيل إلى</span><span class="font-body-sm text-body-sm font-semibold text-on-surface truncate max-w-[140px] lg:max-w-[170px]">اختر منطقة التوصيل</span></div><span class="material-symbols-outlined text-on-surface-variant text-[16px]">expand_more</span></button></div><div class="flex-1 max-w-xl hidden xl:block"><div class="relative flex items-center w-full rounded-lg bg-surface-container-low focus-within:ring-2 focus-within:ring-secondary-container transition-all"><span class="material-symbols-outlined absolute right-space-md text-on-surface-variant pointer-events-none text-[20px]">search</span><input class="w-full bg-transparent py-space-sm pr-12 pl-space-md font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none" placeholder="ابحث عن مطعم، ماركة أزياء، أو منتج تقني..." type="search"><button class="absolute left-space-xs px-space-sm py-1 bg-surface-container rounded font-label-sm text-label-sm text-secondary-fixed-dim hover:bg-surface-container-high transition-colors" type="button">بحث</button></div></div><nav class="hidden lg:flex items-center gap-space-xs xl:gap-space-sm" data-active-classes="bg-primary-container text-on-primary-container font-semibold rounded-lg"><a aria-current="page" class="px-space-sm py-space-xs transition-colors bg-primary-container text-on-primary-container font-semibold rounded-lg" data-path="home" href="index.html">الرئيسية</a><a class="px-space-sm py-space-xs rounded-lg font-body-md text-body-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="restaurants-and-dining" href="index.html?category=food#products">المطاعم والأطعمة</a><a class="px-space-sm py-space-xs rounded-lg font-body-md text-body-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="fashion-and-luxury" href="index.html?category=fashion#products">الأزياء والموضة</a><a class="px-space-sm py-space-xs rounded-lg font-body-md text-body-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="electronics-and-tech" href="index.html?category=electronics#products">الإلكترونيات والتقنية</a><a class="px-space-sm py-space-xs rounded-lg font-body-md text-body-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="exclusive-deals" href="index.html#products">عروض حصرية</a></nav><div class="flex items-center gap-space-sm shrink-0"><button aria-label="تغيير اللغة" class="px-space-sm py-space-xs rounded-lg bg-surface-container-low hover:bg-surface-container-high font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors" type="button" data-href="favorites.html">المفضلة</button><button aria-label="الإشعارات" class="relative p-space-sm rounded-lg bg-surface-container-low hover:bg-surface-container-high transition-colors" type="button" data-href="notifications.html"><span class="material-symbols-outlined text-on-surface-variant hover:text-on-surface text-[22px]">notifications</span><span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-secondary-container shadow-[0_0_8px_rgba(0,227,253,0.8)]"></span></button><a class="flex items-center gap-space-xs px-space-md py-space-xs rounded-lg bg-surface-container-high hover:bg-surface-container-highest transition-colors" data-path="cart-and-checkout" href="checkout.html" id="live-cart"><span class="material-symbols-outlined">shopping_bag</span><span>السلة <b id="live-cart-count">0</b></span></a><div class="flex items-center gap-space-xs pr-space-xs"><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div><span class="font-label-md text-label-md text-on-surface hidden md:inline-block font-semibold">حسابي</span></div></div></div></header><main class="w-full pt-20 bg-surface min-h-[calc(100vh-20rem)]"><div class="flex flex-col w-full">
+<!-- Dynamic Hero Stage -->
+<section class="relative w-full overflow-hidden bg-surface-container-lowest">
+<!-- Atmospheric Ambient Glows -->
+<div class="absolute -top-32 right-1/4 w-96 h-96 bg-primary-container/10 rounded-full blur-[120px] pointer-events-none"></div>
+<div class="absolute -bottom-24 left-1/6 w-80 h-80 bg-secondary-container/10 rounded-full blur-[100px] pointer-events-none"></div>
+<div class="max-w-[1440px] mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop py-space-xl relative z-10">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter-desktop items-stretch">
+<!-- Left: Core Kinetic Value Proposition -->
+<div class="lg:col-span-7 flex flex-col justify-between bg-surface-container p-space-xl rounded-xl shadow-xl">
+<div class="flex flex-col gap-space-md">
+<!-- Velocity Status Pill -->
+<div class="flex items-center gap-space-sm w-fit px-space-md py-space-xs rounded-full bg-surface-container-low shadow-sm">
+<span class="relative flex h-2.5 w-2.5">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary-container opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-secondary-container"></span>
+</span>
+<span class="font-label-md text-label-md text-secondary-fixed-dim">راجع تفاصيل التوصيل عند الطلب</span>
+</div>
+<!-- Kinetic Statement -->
+<h1 class="font-display-hero text-display-hero text-on-surface leading-tight tracking-tight">كل ما تحتاجه،<br><span class="text-primary-container">في مكان واحد.</span></h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-xl">اكتشف وجبات متنوعة، وأزياء يومية، وأجهزة إلكترونية. تصفّح الصور والتفاصيل، وقارن المنتجات، واجمع اختياراتك في سلة واحدة.</p>
+</div>
+<!-- Hero Search & Real-Time Action Desk -->
+<div class="flex flex-col gap-space-md mt-space-xl">
+<div class="p-space-sm bg-surface-container-low rounded-xl shadow-md flex flex-col sm:flex-row items-center gap-space-sm">
+<div class="flex items-center gap-space-xs px-space-sm py-space-xs w-full sm:w-auto bg-surface-container-high rounded-lg shrink-0">
+<span class="material-symbols-outlined text-primary-container text-[20px]">near_me</span>
+<span class="font-label-md text-label-md text-on-surface font-semibold truncate max-w-[130px]">الرياض - الملقا</span>
+<span class="material-symbols-outlined text-on-surface-variant text-[16px]">expand_more</span>
+</div>
+<div class="relative flex-1 w-full flex items-center">
+<span class="material-symbols-outlined absolute right-space-sm text-outline text-[20px] pointer-events-none">search</span>
+<input class="w-full bg-transparent py-space-sm pr-11 pl-space-sm font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none" id="hero-quick-search" placeholder="ابحث عن وجبة، منتج إلكتروني، أو قطعة أزياء..." type="text">
+</div>
+<button class="w-full sm:w-auto px-space-xl py-space-sm bg-primary-container text-on-primary-container font-label-lg text-label-lg rounded-lg shadow-md hover:bg-primary hover:text-on-primary transition-all flex items-center justify-center gap-space-xs shrink-0" type="button">
+<span class="">انطلق</span>
+<span class="material-symbols-outlined text-[18px]">bolt</span>
+</button>
+</div>
+<!-- Instant Telemetry Badges -->
+<div class="flex items-center gap-space-lg flex-wrap pt-space-xs text-on-surface-variant">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-secondary-fixed-dim text-[18px]">check_circle</span>
+<span class="font-label-sm text-label-sm">راجع تفاصيل التوصيل عند الطلب</span>
+</div>
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-secondary-fixed-dim text-[18px]">verified_user</span>
+<span class="font-label-sm text-label-sm">ضمان استرجاع بدون أسئلة</span>
+</div>
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-secondary-fixed-dim text-[18px]">timer</span>
+<span class="font-label-sm text-label-sm">راجع تفاصيل التوصيل عند الطلب</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Right: Exclusive Promo Pass -->
+<div class="lg:col-span-5 relative flex flex-col justify-between bg-surface-container-high rounded-xl p-space-xl shadow-xl overflow-hidden min-h-[440px]">
+<!-- Visual Background Accent -->
+<div class="absolute inset-0 bg-gradient-to-tr from-surface-container-lowest via-surface-container-high/40 to-primary-container/20 pointer-events-none"></div>
+<div class="relative z-10 flex items-start justify-between">
+<span class="px-space-md py-space-xs bg-tertiary-container text-on-tertiary font-label-md text-label-md rounded-full font-bold shadow-sm">اكتشف جديد الكتالوج</span>
+<div class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center text-primary-container shadow-md">
+<span class="material-symbols-outlined text-[26px]">percent</span>
+</div>
+</div>
+<div class="relative z-10 my-space-lg">
+<div class="font-headline-xl text-headline-xl font-bold text-on-surface">
+              خصم <span class="text-primary-container">اختيارات لكل يوم</span> على طلبك الأول
+            </div>
+<p class="font-body-md text-body-md text-on-surface-variant mt-space-xs max-w-sm">اختيارات متنوعة من الأكل والأزياء والتقنية. تصفّح الكتالوج وابحث عن المنتج المناسب لك.</p>
+</div>
+<!-- Promo Code Interactive Box -->
+<div class="relative z-10 p-space-md bg-surface-container-lowest rounded-xl shadow-md flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant">رمز القسيمة الترويجي</span>
+<span class="font-headline-md text-headline-md tracking-wider text-secondary-fixed-dim font-bold" id="promo-code-text">اكتشف المنتجات</span>
+</div>
+<button class="px-space-md py-space-xs bg-surface-container-highest text-on-surface hover:text-secondary-fixed-dim rounded-lg font-label-md text-label-md transition-all shadow-sm flex items-center gap-space-xs" onclick="navigator.clipboard.writeText('VELOX30'); this.innerHTML='&lt;span class=\'material-symbols-outlined text-[18px]\'&gt;done&lt;/span&gt; منسوخ';" type="button">
+<span class="material-symbols-outlined text-[18px]">content_copy</span>
+              نسخ الكود
+            </button>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- The 3 Pillars Category Grid -->
+<section class="w-full max-w-[1440px] mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop py-space-xl">
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-space-md mb-space-lg">
+<div class="flex flex-col gap-space-xs">
+<span class="font-label-md text-label-md text-primary-container font-bold uppercase tracking-wider">اكتشف الأقسام</span>
+<h2 class="font-headline-lg text-headline-lg text-on-surface">مطاعم وأزياء وإلكترونيات، بخيارات تناسبك</h2>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-md">تصفّح الأقسام واعثر على ما تحتاجه، مع صور وتفاصيل واضحة لكل منتج.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-gutter-desktop">
+<!-- Pillar 1: Food & Dining -->
+<a class="group flex flex-col justify-between p-space-lg bg-surface-container rounded-xl shadow-lg hover:shadow-2xl hover:bg-surface-container-high transition-all duration-300" data-path="restaurants-and-dining" href="index.html?category=food#products">
+<div class="flex items-center justify-between mb-space-md">
+<div class="w-12 h-12 rounded-xl bg-surface-container-high group-hover:bg-primary-container group-hover:text-on-primary-container text-primary flex items-center justify-center transition-colors">
+<span class="material-symbols-outlined text-[28px]">restaurant</span>
+</div>
+<span class="font-label-sm text-label-sm px-space-sm py-1 bg-surface-container-highest rounded-full text-secondary-fixed-dim">وجبات ومشروبات</span>
+</div>
+<div class="relative w-full h-44 rounded-lg overflow-hidden mb-space-md">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Gourmet premium artisan beef burger served on dark slate with moody warm backlighting, high-end culinary photography for an upscale delivery service, crisp dark atmosphere, hyper-realistic, neon orange and amber rim light." src="assets/images/stitch/original-2.jpg">
+</div>
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-center justify-between">
+<h3 class="font-title-lg text-title-lg text-on-surface group-hover:text-primary transition-colors">المطاعم والوجبات السريعة</h3>
+<span class="material-symbols-outlined text-outline group-hover:text-primary-container transition-colors transform group-hover:-translate-x-1">arrow_forward</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">وجبات ومشروبات متنوعة. راجع معلومات المنتج والتوصيل قبل الطلب.</p>
+</div>
+</a>
+<!-- Pillar 2: Fashion & Streetwear -->
+<a class="group flex flex-col justify-between p-space-lg bg-surface-container rounded-xl shadow-lg hover:shadow-2xl hover:bg-surface-container-high transition-all duration-300" data-path="fashion-and-luxury" href="index.html?category=fashion#products">
+<div class="flex items-center justify-between mb-space-md">
+<div class="w-12 h-12 rounded-xl bg-surface-container-high group-hover:bg-primary-container group-hover:text-on-primary-container text-primary flex items-center justify-center transition-colors">
+<span class="material-symbols-outlined text-[28px]">checkroom</span>
+</div>
+<span class="font-label-sm text-label-sm px-space-sm py-1 bg-surface-container-highest rounded-full text-secondary-fixed-dim">ملابس وإكسسوارات</span>
+</div>
+<div class="relative w-full h-44 rounded-lg overflow-hidden mb-space-md">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Futuristic cyber streetwear high-fashion jacket and sneakers displayed on a minimalist obsidian glass pedestal, deep dark studio with subtle electric cyan highlights and sharp volumetric rim lighting." src="assets/images/stitch/original-3.jpg">
+</div>
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-center justify-between">
+<h3 class="font-title-lg text-title-lg text-on-surface group-hover:text-primary transition-colors">الأزياء والموضة</h3>
+<span class="material-symbols-outlined text-outline group-hover:text-primary-container transition-colors transform group-hover:-translate-x-1">arrow_forward</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">ملابس وأحذية وإكسسوارات؛ تعرّف على تفاصيل كل قطعة قبل إضافتها إلى السلة.</p>
+</div>
+</a>
+<!-- Pillar 3: Electronics & Gadgets -->
+<a class="group flex flex-col justify-between p-space-lg bg-surface-container rounded-xl shadow-lg hover:shadow-2xl hover:bg-surface-container-high transition-all duration-300" data-path="electronics-and-tech" href="index.html?category=electronics#products">
+<div class="flex items-center justify-between mb-space-md">
+<div class="w-12 h-12 rounded-xl bg-surface-container-high group-hover:bg-primary-container group-hover:text-on-primary-container text-primary flex items-center justify-center transition-colors">
+<span class="material-symbols-outlined text-[28px]">headphones</span>
+</div>
+<span class="font-label-sm text-label-sm px-space-sm py-1 bg-surface-container-highest rounded-full text-secondary-fixed-dim">
+            ضمان معتمد 24 شهر
+          </span>
+</div>
+<div class="relative w-full h-44 rounded-lg overflow-hidden mb-space-md">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Sleek premium noise-canceling headphones and smart device hardware resting on a dark titanium brushed surface with soft orange and cyan cyber ambient reflections." src="assets/images/stitch/original-4.jpg">
+</div>
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-center justify-between">
+<h3 class="font-title-lg text-title-lg text-on-surface group-hover:text-primary transition-colors">الإلكترونيات والتقنية</h3>
+<span class="material-symbols-outlined text-outline group-hover:text-primary-container transition-colors transform group-hover:-translate-x-1">arrow_forward</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">هواتف وسماعات وإكسسوارات تقنية؛ قارن المواصفات والأسعار المعروضة.</p>
+</div>
+</a>
+</div>
+</section>
+<!-- Filter Bar & Real-Time Discovery -->
+<section class="w-full max-w-[1440px] mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop py-space-sm" id="products"><div class="live-heading"><div><span>كتالوج VELOX</span><h2>اختيارات أكثر، لكل ما تحتاجه</h2></div><p id="live-catalog-status" role="status">جاري تحميل المنتجات…</p></div><div class="live-toolbar"><div id="live-filters" aria-label="فئات المنتجات"></div><label>ترتيب حسب <select id="live-sort"><option value="default">الترتيب الافتراضي</option><option value="low">السعر: الأقل أولًا</option><option value="high">السعر: الأعلى أولًا</option><option value="name">اسم المنتج</option></select></label></div><label class="live-search">ابحث عن منتج<input type="search" id="live-search" placeholder="مثال: برجر، سماعات، تيشيرت"></label><div id="live-grid" class="live-grid"></div><p id="live-empty" hidden="">لا توجد منتجات مطابقة. جرّب كلمة أخرى أو قسمًا مختلفًا.</p><div class="live-more"><button id="live-more" type="button">عرض المزيد من المنتجات</button><span id="live-count"></span></div></section>
+<!-- Grid of Top Trending Stores & Brands -->
+<section class="w-full max-w-[1440px] mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop py-space-md"><div class="flex items-center justify-between mb-space-md"><div class="flex items-center gap-space-sm"><div class="w-3 h-3 rounded-full bg-primary-container animate-pulse"></div><h3 class="font-headline-md text-headline-md text-on-surface font-bold">أشهر المطابخ والمطاعم المختارة فائقة السرعة</h3></div><span class="font-label-sm text-label-sm text-secondary-fixed-dim bg-surface-container-low px-space-sm py-1 rounded-full">متوسط التوصيل أقل من 25 دقيقة</span></div><div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-gutter-desktop"><!-- Restaurant 1: CyberBites Wagyu Burger --><div class="group flex flex-col bg-surface-container rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300"><div class="relative w-full h-48 overflow-hidden"><img alt="برجر واغيو فاخر" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="assets/images/stitch/original-5.jpg"><div class="absolute top-space-sm right-space-sm px-space-sm py-1 bg-surface-container-lowest/90 backdrop-blur-md rounded-lg flex items-center gap-1 shadow-sm"><span class="material-symbols-outlined text-[16px] text-primary-container">timer</span><span class="font-label-sm text-label-sm text-on-surface font-bold">18 دقيقة</span></div><button aria-label="أضف للمفضلة" class="absolute top-space-sm left-space-sm w-8 h-8 rounded-lg bg-surface-container-lowest/80 backdrop-blur-md flex items-center justify-center text-on-surface-variant hover:text-error transition-colors" type="button"><span class="material-symbols-outlined text-[18px]">favorite</span></button><div class="absolute bottom-space-xs right-space-sm px-space-xs py-0.5 bg-primary-container text-on-primary-container rounded font-label-sm text-label-sm font-bold">خصم 20%</div></div><div class="p-space-md flex flex-col gap-space-xs flex-1 justify-between"><div><div class="flex items-center justify-between"><h4 class="font-title-md text-title-md text-on-surface font-bold group-hover:text-primary transition-colors">سايبر بايتس برجر</h4><div class="flex items-center gap-1 text-secondary-fixed-dim"><span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span><span class="font-label-sm text-label-sm font-bold">4.9</span></div></div><p class="font-body-sm text-body-sm text-on-surface-variant mt-1">برجر واغيو مدخن • أضلاع باربكيو • كرانشي فرايز</p></div><div class="pt-space-sm flex items-center justify-between"><div class="flex flex-col"><span class="font-label-sm text-label-sm text-outline">رسوم التوصيل</span><span class="font-label-md text-label-md text-secondary-fixed-dim font-bold">مجاني فوق 60 ر.س</span></div><button aria-label="عرض المتجر" class="w-9 h-9 rounded-lg bg-surface-container-high group-hover:bg-primary-container group-hover:text-on-primary-container text-on-surface flex items-center justify-center transition-colors" type="button"><span class="material-symbols-outlined text-[20px]">add</span></button></div></div></div><!-- Restaurant 2: Green Bowl Organic Salads --><div class="group flex flex-col bg-surface-container rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300"><div class="relative w-full h-48 overflow-hidden"><img alt="سلطات وأطباق صحية" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="assets/images/stitch/original-6.jpg"><div class="absolute top-space-sm right-space-sm px-space-sm py-1 bg-surface-container-lowest/90 backdrop-blur-md rounded-lg flex items-center gap-1 shadow-sm"><span class="material-symbols-outlined text-[16px] text-primary-container">timer</span><span class="font-label-sm text-label-sm text-on-surface font-bold">22 دقيقة</span></div><button aria-label="أضف للمفضلة" class="absolute top-space-sm left-space-sm w-8 h-8 rounded-lg bg-surface-container-lowest/80 backdrop-blur-md flex items-center justify-center text-on-surface-variant hover:text-error transition-colors" type="button"><span class="material-symbols-outlined text-[18px]">favorite</span></button><div class="absolute bottom-space-xs right-space-sm px-space-xs py-0.5 bg-surface-container-highest text-on-surface rounded font-label-sm text-label-sm font-bold">عضوي 100%</div></div><div class="p-space-md flex flex-col gap-space-xs flex-1 justify-between"><div><div class="flex items-center justify-between"><h4 class="font-title-md text-title-md text-on-surface font-bold group-hover:text-primary transition-colors">غرين بول سبيشالتي</h4><div class="flex items-center gap-1 text-secondary-fixed-dim"><span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span><span class="font-label-sm text-label-sm font-bold">4.9</span></div></div><p class="font-body-sm text-body-sm text-on-surface-variant mt-1">سلطات كينوا بوك • سموذي كولد برس • وجبات كيتو</p></div><div class="pt-space-sm flex items-center justify-between"><div class="flex flex-col"><span class="font-label-sm text-label-sm text-outline">رسوم التوصيل</span><span class="font-label-md text-label-md text-secondary-fixed-dim font-bold">مجاني للعملاء الجدد</span></div><button aria-label="عرض المتجر" class="w-9 h-9 rounded-lg bg-surface-container-high group-hover:bg-primary-container group-hover:text-on-primary-container text-on-surface flex items-center justify-center transition-colors" type="button"><span class="material-symbols-outlined text-[20px]">add</span></button></div></div></div><!-- Restaurant 3: Napoli Fire Artisan Pizza --><div class="group flex flex-col bg-surface-container rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300"><div class="relative w-full h-48 overflow-hidden"><img alt="بيتزا إيطالية بالحطب" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="assets/images/stitch/original-2.jpg"><div class="absolute top-space-sm right-space-sm px-space-sm py-1 bg-surface-container-lowest/90 backdrop-blur-md rounded-lg flex items-center gap-1 shadow-sm"><span class="material-symbols-outlined text-[16px] text-primary-container">timer</span><span class="font-label-sm text-label-sm text-on-surface font-bold">24 دقيقة</span></div><button aria-label="أضف للمفضلة" class="absolute top-space-sm left-space-sm w-8 h-8 rounded-lg bg-surface-container-lowest/80 backdrop-blur-md flex items-center justify-center text-on-surface-variant hover:text-error transition-colors" type="button"><span class="material-symbols-outlined text-[18px]">favorite</span></button><div class="absolute bottom-space-xs right-space-sm px-space-xs py-0.5 bg-primary-container text-on-primary-container rounded font-label-sm text-label-sm font-bold">فرن حطب نابولي</div></div><div class="p-space-md flex flex-col gap-space-xs flex-1 justify-between"><div><div class="flex items-center justify-between"><h4 class="font-title-md text-title-md text-on-surface font-bold group-hover:text-primary transition-colors">نابولي آرتيزان بيتزا</h4><div class="flex items-center gap-1 text-secondary-fixed-dim"><span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span><span class="font-label-sm text-label-sm font-bold">4.8</span></div></div><p class="font-body-sm text-body-sm text-on-surface-variant mt-1">بيتزا ترافل سوداء • بوراتا طازجة • باستا يدوية</p></div><div class="pt-space-sm flex items-center justify-between"><div class="flex flex-col"><span class="font-label-sm text-label-sm text-outline">رسوم التوصيل</span><span class="font-label-md text-label-md text-on-surface font-bold">9.00 ر.س</span></div><button aria-label="عرض المتجر" class="w-9 h-9 rounded-lg bg-surface-container-high group-hover:bg-primary-container group-hover:text-on-primary-container text-on-surface flex items-center justify-center transition-colors" type="button"><span class="material-symbols-outlined text-[20px]">add</span></button></div></div></div><!-- Restaurant 4: Tokyo Smoke Sushi & Robata --><div class="group flex flex-col bg-surface-container rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300"><div class="relative w-full h-48 overflow-hidden"><img alt="سوشي وماكي فاخر" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="assets/images/stitch/original-7.jpg"><div class="absolute top-space-sm right-space-sm px-space-sm py-1 bg-surface-container-lowest/90 backdrop-blur-md rounded-lg flex items-center gap-1 shadow-sm"><span class="material-symbols-outlined text-[16px] text-primary-container">timer</span><span class="font-label-sm text-label-sm text-on-surface font-bold">26 دقيقة</span></div><button aria-label="أضف للمفضلة" class="absolute top-space-sm left-space-sm w-8 h-8 rounded-lg bg-surface-container-lowest/80 backdrop-blur-md flex items-center justify-center text-on-surface-variant hover:text-error transition-colors" type="button"><span class="material-symbols-outlined text-[18px]">favorite</span></button><div class="absolute bottom-space-xs right-space-sm px-space-xs py-0.5 bg-secondary-container text-on-secondary-container rounded font-label-sm text-label-sm font-bold">شيف ياباني معتمد</div></div><div class="p-space-md flex flex-col gap-space-xs flex-1 justify-between"><div><div class="flex items-center justify-between"><h4 class="font-title-md text-title-md text-on-surface font-bold group-hover:text-primary transition-colors">طوكيو سموك سوشي</h4><div class="flex items-center gap-1 text-secondary-fixed-dim"><span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span><span class="font-label-sm text-label-sm font-bold">4.9</span></div></div><p class="font-body-sm text-body-sm text-on-surface-variant mt-1">سوشي فاخر • نيجيري سالمون مدخن • رامن تروفل</p></div><div class="pt-space-sm flex items-center justify-between"><div class="flex flex-col"><span class="font-label-sm text-label-sm text-outline">رسوم التوصيل</span><span class="font-label-md text-label-md text-on-surface font-bold">12.00 ر.س</span></div><button aria-label="عرض المتجر" class="w-9 h-9 rounded-lg bg-surface-container-high group-hover:bg-primary-container group-hover:text-on-primary-container text-on-surface flex items-center justify-center transition-colors" type="button"><span class="material-symbols-outlined text-[20px]">add</span></button></div></div></div><!-- Restaurant 5: Sultan Grill Shawarma & Kebab --><div class="group flex flex-col bg-surface-container rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300"><div class="relative w-full h-48 overflow-hidden"><img alt="مشاوي وشاورما فاخرة" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="assets/images/stitch/original-8.jpg"><div class="absolute top-space-sm right-space-sm px-space-sm py-1 bg-surface-container-lowest/90 backdrop-blur-md rounded-lg flex items-center gap-1 shadow-sm"><span class="material-symbols-outlined text-[16px] text-primary-container">timer</span><span class="font-label-sm text-label-sm text-on-surface font-bold">17 دقيقة</span></div><button aria-label="أضف للمفضلة" class="absolute top-space-sm left-space-sm w-8 h-8 rounded-lg bg-surface-container-lowest/80 backdrop-blur-md flex items-center justify-center text-on-surface-variant hover:text-error transition-colors" type="button"><span class="material-symbols-outlined text-[18px]">favorite</span></button><div class="absolute bottom-space-xs right-space-sm px-space-xs py-0.5 bg-primary-container text-on-primary-container rounded font-label-sm text-label-sm font-bold">الأكثر طلباً 🔥</div></div><div class="p-space-md flex flex-col gap-space-xs flex-1 justify-between"><div><div class="flex items-center justify-between"><h4 class="font-title-md text-title-md text-on-surface font-bold group-hover:text-primary transition-colors">شواية السلطان بريميوم</h4><div class="flex items-center gap-1 text-secondary-fixed-dim"><span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span><span class="font-label-sm text-label-sm font-bold">4.7</span></div></div><p class="font-body-sm text-body-sm text-on-surface-variant mt-1">شاورما لحم عجل بلدي • أوصال حلبية • صوصات خاصة</p></div><div class="pt-space-sm flex items-center justify-between"><div class="flex flex-col"><span class="font-label-sm text-label-sm text-outline">رسوم التوصيل</span><span class="font-label-md text-label-md text-secondary-fixed-dim font-bold">مجاني فوق 50 ر.س</span></div><button aria-label="عرض المتجر" class="w-9 h-9 rounded-lg bg-surface-container-high group-hover:bg-primary-container group-hover:text-on-primary-container text-on-surface flex items-center justify-center transition-colors" type="button"><span class="material-symbols-outlined text-[20px]">add</span></button></div></div></div><!-- Restaurant 6: Roast & Crema Specialty Coffee --><div class="group flex flex-col bg-surface-container rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300"><div class="relative w-full h-48 overflow-hidden"><img alt="قهوة مختصة وحلويات" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="assets/images/stitch/original-4.jpg"><div class="absolute top-space-sm right-space-sm px-space-sm py-1 bg-surface-container-lowest/90 backdrop-blur-md rounded-lg flex items-center gap-1 shadow-sm"><span class="material-symbols-outlined text-[16px] text-primary-container">timer</span><span class="font-label-sm text-label-sm text-on-surface font-bold">15 دقيقة</span></div><button aria-label="أضف للمفضلة" class="absolute top-space-sm left-space-sm w-8 h-8 rounded-lg bg-surface-container-lowest/80 backdrop-blur-md flex items-center justify-center text-on-surface-variant hover:text-error transition-colors" type="button"><span class="material-symbols-outlined text-[18px]">favorite</span></button><div class="absolute bottom-space-xs right-space-sm px-space-xs py-0.5 bg-surface-container-highest text-secondary-fixed-dim rounded font-label-sm text-label-sm font-bold">محصول إثيوبي خاص</div></div><div class="p-space-md flex flex-col gap-space-xs flex-1 justify-between"><div><div class="flex items-center justify-between"><h4 class="font-title-md text-title-md text-on-surface font-bold group-hover:text-primary transition-colors">روست &amp; كريما كوفي</h4><div class="flex items-center gap-1 text-secondary-fixed-dim"><span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span><span class="font-label-sm text-label-sm font-bold">4.9</span></div></div><p class="font-body-sm text-body-sm text-on-surface-variant mt-1">قهوة مقطرة V60 • فلات وايت • تشيز كيك سان سيباستيان</p></div><div class="pt-space-sm flex items-center justify-between"><div class="flex flex-col"><span class="font-label-sm text-label-sm text-outline">رسوم التوصيل</span><span class="font-label-md text-label-md text-on-surface font-bold">8.00 ر.س</span></div><button aria-label="عرض المتجر" class="w-9 h-9 rounded-lg bg-surface-container-high group-hover:bg-primary-container group-hover:text-on-primary-container text-on-surface flex items-center justify-center transition-colors" type="button"><span class="material-symbols-outlined text-[20px]">add</span></button></div></div></div><!-- Restaurant 7: Brioche & Butter Brunch Club --><div class="group flex flex-col bg-surface-container rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300"><div class="relative w-full h-48 overflow-hidden"><img alt="فطور وبرنش بريوش" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="assets/images/stitch/original-5.jpg"><div class="absolute top-space-sm right-space-sm px-space-sm py-1 bg-surface-container-lowest/90 backdrop-blur-md rounded-lg flex items-center gap-1 shadow-sm"><span class="material-symbols-outlined text-[16px] text-primary-container">timer</span><span class="font-label-sm text-label-sm text-on-surface font-bold">20 دقيقة</span></div><button aria-label="أضف للمفضلة" class="absolute top-space-sm left-space-sm w-8 h-8 rounded-lg bg-surface-container-lowest/80 backdrop-blur-md flex items-center justify-center text-on-surface-variant hover:text-error transition-colors" type="button"><span class="material-symbols-outlined text-[18px]">favorite</span></button><div class="absolute bottom-space-xs right-space-sm px-space-xs py-0.5 bg-primary-container text-on-primary-container rounded font-label-sm text-label-sm font-bold">توصيل صباحي مبكر</div></div><div class="p-space-md flex flex-col gap-space-xs flex-1 justify-between"><div><div class="flex items-center justify-between"><h4 class="font-title-md text-title-md text-on-surface font-bold group-hover:text-primary transition-colors">بريوش آند باتر برنش</h4><div class="flex items-center gap-1 text-secondary-fixed-dim"><span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span><span class="font-label-sm text-label-sm font-bold">4.8</span></div></div><p class="font-body-sm text-body-sm text-on-surface-variant mt-1">توست بيض بينديكت • بانكيك التوت البري • فرنش توست</p></div><div class="pt-space-sm flex items-center justify-between"><div class="flex flex-col"><span class="font-label-sm text-label-sm text-outline">رسوم التوصيل</span><span class="font-label-md text-label-md text-secondary-fixed-dim font-bold">مجاني فوق 75 ر.س</span></div><button aria-label="عرض المتجر" class="w-9 h-9 rounded-lg bg-surface-container-high group-hover:bg-primary-container group-hover:text-on-primary-container text-on-surface flex items-center justify-center transition-colors" type="button"><span class="material-symbols-outlined text-[20px]">add</span></button></div></div></div><!-- Restaurant 8: Smokehouse Texas BBQ --><div class="group flex flex-col bg-surface-container rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300"><div class="relative w-full h-48 overflow-hidden"><img alt="مشاوي تكساس مدخنة" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="assets/images/stitch/original-2.jpg"><div class="absolute top-space-sm right-space-sm px-space-sm py-1 bg-surface-container-lowest/90 backdrop-blur-md rounded-lg flex items-center gap-1 shadow-sm"><span class="material-symbols-outlined text-[16px] text-primary-container">timer</span><span class="font-label-sm text-label-sm text-on-surface font-bold">25 دقيقة</span></div><button aria-label="أضف للمفضلة" class="absolute top-space-sm left-space-sm w-8 h-8 rounded-lg bg-surface-container-lowest/80 backdrop-blur-md flex items-center justify-center text-on-surface-variant hover:text-error transition-colors" type="button"><span class="material-symbols-outlined text-[18px]">favorite</span></button><div class="absolute bottom-space-xs right-space-sm px-space-xs py-0.5 bg-secondary-container text-on-secondary-container rounded font-label-sm text-label-sm font-bold">تدخين حطب 14 ساعة</div></div><div class="p-space-md flex flex-col gap-space-xs flex-1 justify-between"><div><div class="flex items-center justify-between"><h4 class="font-title-md text-title-md text-on-surface font-bold group-hover:text-primary transition-colors">سموك هاوس تكساس باربكيو</h4><div class="flex items-center gap-1 text-secondary-fixed-dim"><span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span><span class="font-label-sm text-label-sm font-bold">4.9</span></div></div><p class="font-body-sm text-body-sm text-on-surface-variant mt-1">برسكت تكساس أسود • برجر مدخن بالجبن • أجنحة حارة</p></div><div class="pt-space-sm flex items-center justify-between"><div class="flex flex-col"><span class="font-label-sm text-label-sm text-outline">رسوم التوصيل</span><span class="font-label-md text-label-md text-on-surface font-bold">14.00 ر.س</span></div><button aria-label="عرض المتجر" class="w-9 h-9 rounded-lg bg-surface-container-high group-hover:bg-primary-container group-hover:text-on-primary-container text-on-surface flex items-center justify-center transition-colors" type="button"><span class="material-symbols-outlined text-[20px]">add</span></button></div></div></div></div><!-- Load More & Discovery Bar --><div class="mt-space-xl flex flex-col sm:flex-row items-center justify-center gap-space-md pt-space-md"><button class="w-full sm:w-auto px-space-xl py-space-sm bg-surface-container-high hover:bg-surface-container-highest text-on-surface font-label-lg text-label-lg rounded-xl transition-all shadow-md flex items-center justify-center gap-space-xs" type="button"><span class="material-symbols-outlined text-[20px]">expand_more</span><span class="">استكشف المزيد من المطاعم (+1,400 مطعم متوفر)</span></button><a class="w-full sm:w-auto px-space-lg py-space-sm bg-primary-container hover:bg-primary text-on-primary-container hover:text-on-primary font-label-lg text-label-lg rounded-xl transition-all shadow-md flex items-center justify-center gap-space-xs" data-path="restaurants-and-dining" href="index.html?category=food#products"><span class="">قائمة المطاعم الكاملة</span><span class="material-symbols-outlined text-[20px]">arrow_forward</span></a></div></section>
+<!-- Velocity Express Bar: "لماذا تختار VELOX؟" -->
+<section class="w-full max-w-[1440px] mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop py-space-xl">
+<div class="bg-surface-container-low rounded-xl p-space-lg md:p-space-xl shadow-xl relative overflow-hidden">
+<div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-space-md mb-space-xl">
+<div class="flex flex-col gap-space-xs">
+<span class="font-label-md text-label-md text-secondary-fixed-dim font-bold">المنظومة التقنية المتطورة</span>
+<h2 class="font-headline-lg text-headline-lg text-on-surface">لماذا تختار منصة VELOX؟</h2>
+</div>
+<div class="flex items-center gap-space-xs px-space-md py-space-xs bg-surface-container rounded-full shadow-sm">
+<span class="w-2 h-2 rounded-full bg-secondary-container animate-pulse"></span>
+<span class="font-label-sm text-label-sm text-on-surface font-semibold">معدل دقة المواعيد: 99.4%</span>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-gutter-desktop">
+<!-- Feature 1 -->
+<div class="flex flex-col gap-space-sm p-space-md bg-surface-container rounded-xl shadow-md">
+<div class="w-12 h-12 rounded-xl bg-surface-container-high text-secondary-fixed-dim flex items-center justify-center">
+<span class="material-symbols-outlined text-[26px]">radar</span>
+</div>
+<h3 class="font-title-lg text-title-lg text-on-surface font-bold">متابعة الطلبات</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">اعرض سجل مشترياتك وتابع الحالة المسجلة لكل طلب من صفحة طلباتي.</p>
 
-      <div class="header-search">
-        <label class="search-box" for="product-search">
-          <span class="search-icon" aria-hidden="true">⌕</span>
-          <input id="product-search" type="search" data-i18n-placeholder="home.searchPlaceholder" placeholder="ابحث عن منتج، مطعم، أو متجر..." autocomplete="off" aria-controls="product-grid">
-          <button type="button" id="search-clear" class="search-clear" hidden aria-label="مسح البحث">×</button>
-          <kbd>⌘ K</kbd>
-        </label>
-      </div>
+</div>
+<!-- Feature 2 -->
+<div class="flex flex-col gap-space-sm p-space-md bg-surface-container rounded-xl shadow-md">
+<div class="w-12 h-12 rounded-xl bg-surface-container-high text-primary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-[26px]">electric_moped</span>
+</div>
+<h3 class="font-title-lg text-title-lg text-on-surface font-bold">تفاصيل واضحة قبل الشراء</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">راجع السعر والكمية ورسوم التوصيل في ملخص الطلب قبل التأكيد.</p>
 
-      <div class="header-actions">
-        <button type="button" class="header-btn hide-mobile" id="theme-toggle" data-i18n-aria-label="nav.toggleTheme" aria-label="تبديل الوضع الليلي"><span aria-hidden="true">◐</span></button>
-        <button type="button" class="header-btn hide-mobile lang-btn" id="lang-toggle" data-i18n="nav.toggleLang">English</button>
-        <button type="button" class="header-btn account-btn" id="account-btn" data-action="login">
-          <span class="account-icon" aria-hidden="true">◉</span>
-          <span id="account-label" data-i18n="home.login">تسجيل الدخول</span>
-        </button>
-        <a class="header-btn notification-btn" id="notifications-toggle" href="notifications.html" aria-label="الإشعارات" title="الإشعارات">
-          <span aria-hidden="true">◌</span>
-          <b class="notification-count" id="notification-count">3</b>
+</div>
+<!-- Feature 3 -->
+<div class="flex flex-col gap-space-sm p-space-md bg-surface-container rounded-xl shadow-md">
+<div class="w-12 h-12 rounded-xl bg-surface-container-high text-tertiary flex items-center justify-center">
+<span class="material-symbols-outlined text-[26px]">shield_locked</span>
+</div>
+<h3 class="font-title-lg text-title-lg text-on-surface font-bold">حسابك ومفضلاتك</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">احفظ اختياراتك المفضلة، وعدّل بيانات حسابك وعناوينك بسهولة.</p>
+
+</div>
+</div>
+<!-- Quick Metrics Counter Strip -->
+<div class="mt-space-xl pt-space-lg grid grid-cols-2 md:grid-cols-4 gap-space-md text-center bg-surface-container-lowest p-space-md rounded-xl shadow-sm"><div><strong id="live-stat-products">—</strong><p>منتج في الكتالوج</p></div><div><strong>3</strong><p>أقسام رئيسية</p></div><div><strong>صور وتفاصيل</strong><p>قبل اختيار المنتج</p></div><div><strong>سلة واحدة</strong><p>لمراجعة اختياراتك</p></div></div>
+</div>
+</section>
+<!-- Interactive Live Tracker Teaser Widget -->
+<section class="w-full max-w-[1440px] mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop py-space-sm mb-space-md">
+<div class="p-space-md bg-surface-container rounded-xl shadow-lg flex flex-col md:flex-row items-center justify-between gap-space-md">
+<div class="flex items-center gap-space-md">
+<div class="w-10 h-10 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center shadow-sm shrink-0">
+<span class="material-symbols-outlined text-[22px]">navigation</span>
+</div>
+<div class="flex flex-col">
+<span class="font-title-md text-title-md text-on-surface font-semibold">هل لديك طلب قيد التوصيل؟</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">راجع تفاصيل طلبك وحالته من صفحة طلباتي</span>
+</div>
+</div>
+<div class="flex items-center gap-space-sm w-full md:w-auto">
+<input class="px-space-md py-space-xs rounded-lg bg-surface-container-high text-on-surface placeholder:text-outline font-body-sm text-body-sm focus:outline-none flex-1 md:w-64" placeholder="أدخل رقم الطلب (مثال: #VLX-9821)" type="text">
+<a class="px-space-md py-space-xs bg-surface-container-highest hover:bg-primary-container hover:text-on-primary-container text-on-surface font-label-md text-label-md rounded-lg transition-colors shrink-0 shadow-sm" data-path="live-order-telemetry" href="orders.html">
+          تتبع الطلب
         </a>
-        <button type="button" class="cart-btn" id="cart-toggle" aria-label="السلة" title="السلة">
-          <span aria-hidden="true">🛒</span>
-          <b class="cart-count" id="cart-count">0</b>
-        </button>
-      </div>
-    </div>
-  </header>
+</div>
+</div>
+</section>
+</div>
+</main><footer class="w-full bg-surface-container-lowest text-on-surface-variant mt-space-xl"><div class="w-full max-w-[1440px] mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop pt-space-xl pb-space-lg"><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-gutter-desktop mb-space-xl"><div class="lg:col-span-2 flex flex-col gap-space-md"><div class="flex items-center gap-space-sm"><img alt="VELOX Delivery Logo" class="h-8 w-auto object-contain" src="assets/images/stitch/original-1.jpg"><span class="font-headline-md text-headline-md font-bold tracking-tight text-primary-container uppercase">VELOX</span></div><p class="font-body-md text-body-md text-on-surface-variant max-w-md leading-relaxed">VELOX يجمع لك خيارات من الطعام والأزياء والإلكترونيات. استكشف المنتجات، واحفظ مفضلاتك، وراجع تفاصيل طلبك قبل التأكيد.</p><div class="flex items-center gap-space-sm pt-space-xs"><div class="p-space-xs rounded-lg bg-surface-container-low text-secondary-fixed-dim flex items-center justify-center"><span class="material-symbols-outlined text-[20px]">bolt</span></div><span class="font-label-md text-label-md text-on-surface font-semibold">تفاصيل التوصيل تظهر عند إتمام الطلب</span></div></div><div class="flex flex-col gap-space-sm"><span class="font-title-md text-title-md text-on-surface font-bold">الخدمات والأقسام</span><a class="font-body-sm text-body-sm hover:text-primary transition-colors" data-path="restaurants-and-dining" href="index.html?category=food#products">المطاعم والكافيهات الفاخرة</a><a class="font-body-sm text-body-sm hover:text-primary transition-colors" data-path="fashion-and-luxury" href="index.html?category=fashion#products">الموضة والأزياء الراقية</a><a class="font-body-sm text-body-sm hover:text-primary transition-colors" data-path="electronics-and-tech" href="index.html?category=electronics#products">الأجهزة والتقنية الحديثة</a><a class="font-body-sm text-body-sm hover:text-primary transition-colors" data-path="exclusive-deals" href="index.html#products">العروض الحصرية والتخفيضات</a><a class="font-body-sm text-body-sm hover:text-primary transition-colors" data-path="live-order-telemetry" href="orders.html">التتبع المباشر للطلبات</a></div><div class="flex flex-col gap-space-sm"><span class="font-title-md text-title-md text-on-surface font-bold">الشركة والدعم</span><a class="font-body-sm text-body-sm hover:text-primary transition-colors" data-path="home" href="index.html">عن منصة VELOX</a><a class="font-body-sm text-body-sm hover:text-primary transition-colors" href="partners.html">انضم كشريك تجاري</a><a class="font-body-sm text-body-sm hover:text-primary transition-colors" href="careers.html">انضم لأسطول الكباتن</a><a class="font-body-sm text-body-sm hover:text-primary transition-colors" href="legal.html#privacy">سياسة الخصوصية والأمان</a><a class="font-body-sm text-body-sm hover:text-primary transition-colors" href="support.html">مركز المساعدة والدعم الفني</a></div><div class="flex flex-col gap-space-md"><span class="font-title-md text-title-md text-on-surface font-bold">تسوّق من متصفحك</span><div class="p-space-sm bg-surface-container-low rounded-xl flex items-center gap-space-md"><div class="w-16 h-16 bg-surface-container-high rounded-lg flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-[36px] text-secondary-fixed-dim">qr_code_2</span></div><div class="flex flex-col"><span class="font-label-md text-label-md text-on-surface font-bold">على الهاتف والكمبيوتر</span><span class="font-body-sm text-body-sm text-on-surface-variant">تصفح المنتجات وأكمل بيانات طلبك</span></div></div><div class="flex flex-col gap-space-xs"><span class="font-label-sm text-label-sm text-on-surface-variant">الدفع عند الاستلام</span><div class="flex items-center gap-space-sm flex-wrap"></div></div></div></div><div class="pt-space-md flex flex-col md:flex-row items-center justify-between gap-space-sm text-center md:text-right"><span class="font-body-sm text-body-sm text-outline">جميع الحقوق محفوظة © VELOX 2026</span><div class="flex items-center gap-space-md"><span class="flex items-center gap-space-xs font-label-sm text-label-sm text-secondary-fixed-dim"><span class="w-2 h-2 rounded-full bg-secondary-container animate-pulse"></span>تواصل معنا للاستفسارات والمساعدة</span></div></div></div></footer>
 
-  <aside class="side-nav" id="side-nav" aria-label="التنقل الرئيسي" aria-hidden="true">
-    <div class="side-nav-head"><div class="side-brand"><span class="side-brand-dot">V</span><div><strong>VELOX</strong><small data-i18n="sidebar.quick">اختصارات سريعة</small></div></div><button type="button" class="side-close" id="side-nav-close" aria-label="إغلاق">×</button></div>
-    <div class="side-nav-section-label" data-i18n="sidebar.nav">التنقل</div>
-    <nav class="side-nav-links">
-      <a href="index.html" data-home-link><span>⌂</span><span data-i18n="sidebar.home">الرئيسية</span></a>
-      <a href="#categories" data-side-target><span>◫</span><span data-i18n="sidebar.categories">الأقسام</span></a>
-      <a href="#products" data-side-target><span>▦</span><span data-i18n="sidebar.products">المنتجات</span><b id="side-product-count">22</b></a>
-      <button type="button" id="side-cart-link"><span>🛒</span><span data-i18n="sidebar.cart">السلة</span><b id="side-cart-count">0</b></button>
-      <a href="orders.html"><span>◴</span><span data-i18n="sidebar.orders">طلباتي</span></a>
-      <a href="favorites.html"><span>♡</span><span data-i18n="sidebar.favorites">المفضلة</span></a><a href="offers.html"><span>٪</span><span>العروض والكوبونات</span></a><a href="plus.html"><span>♛</span><span>VELOX Plus</span></a><a href="rewards.html"><span>★</span><span>المكافآت والدعوات</span></a><a href="gift-cards.html"><span>🎁</span><span>بطاقات الهدايا</span></a><a href="addresses.html"><span>⌂</span><span>العناوين المحفوظة</span></a><a href="payment-methods.html"><span>▣</span><span>طرق الدفع</span></a><a href="delivery-areas.html"><span>⌖</span><span>مناطق التوصيل</span></a><a href="partners.html"><span>♙</span><span>انضم كشريك</span></a>
-    </nav>
-    <div class="side-nav-section-label" data-i18n="sidebar.yourAccount">حسابك</div>
-    <nav class="side-nav-links side-nav-links-secondary">
-      <a href="account.html"><span>◉</span><span data-i18n="sidebar.profile">الحساب الشخصي</span></a>
-      <a href="notifications.html"><span>◌</span><span data-i18n="sidebar.notifications">الإشعارات</span><b class="notification-badge">3</b></a>
-      <a href="settings.html"><span>⚙</span><span data-i18n="sidebar.settings">الضبط</span></a>
-      <a href="support.html"><span>?</span><span data-i18n="sidebar.support">المساعدة والتواصل</span></a>
-      <a href="feedback.html"><span>✎</span><span data-i18n="sidebar.feedback">الشكاوى والاقتراحات</span></a>
-      <a href="rating.html"><span>★</span><span data-i18n="sidebar.rating">تقييم التطبيق</span></a>
-    </nav>
-    <div class="side-nav-bottom">
-      <button type="button" id="side-location-link"><span>⌖</span><span data-i18n="sidebar.location">منطقة التوصيل</span></button>
-      <button type="button" id="side-theme-link"><span>◐</span><span data-i18n="sidebar.theme">الوضع الليلي</span></button>
-      <button type="button" id="side-lang-link"><span>文</span><span data-i18n="sidebar.language">English</span></button>
-    </div>
-  </aside>
-  <div class="side-nav-backdrop" id="side-nav-backdrop" hidden></div>
 
-  <main>
-    <section class="hero-section">
-      <div class="container hero-grid">
-        <div class="hero-copy">
-          <div class="hero-pill"><span>⚡</span><span data-i18n="home.heroPill">وصلتك أسرع من المتوقع</span></div>
-          <h1 data-i18n="home.heroTitle">كل اللي نفسك فيه،<br><span>أقرب مما تتخيل.</span></h1>
-          <p data-i18n="home.heroSubtitle">تسوّق من مطاعم ومتاجر موثوقة، أضف طلبك للسلة، وإحنا نهتم بالباقي.</p>
-          <div class="hero-actions">
-            <a class="btn btn-primary hero-cta" href="products.html?category=all" data-i18n="home.browseProducts">ابدأ التسوق</a>
-            <button type="button" class="btn btn-ghost" id="location-btn" data-i18n="home.locationBtn">📍 اختر منطقتك</button>
-          </div>
-          <div class="hero-trust">
-            <div><strong data-live-products>137+</strong><span data-i18n="home.trustProducts">منتج متاح</span></div>
-            <div><strong data-live-stores>20</strong><span data-i18n="home.trustStores">متاجر شريكة</span></div>
-            <div><strong>30–45</strong><span data-i18n="home.trustMinutes">دقيقة توصيل</span></div>
-          </div>
-        </div>
-        <div class="hero-visual" aria-hidden="true">
-          <div class="hero-orb hero-orb-a"></div>
-          <div class="hero-orb hero-orb-b"></div>
-          <div class="hero-logo-card">
-            <img src="assets/images/velox-logo.jpeg" alt="">
-            <div class="hero-logo-glow"></div>
-          </div>
-          <div class="floating-card floating-card-top"><span>⚡</span><div><strong>VELOX</strong><small data-i18n="home.floatTop">سرعة + سلاسة</small></div></div>
-          
-        </div>
-      </div>
-    </section>
-
-    <section class="category-section" id="categories">
-      <div class="container section-shell">
-        <div class="section-heading">
-          <div><span class="eyebrow" data-i18n="home.categoriesEyebrow">استكشف بسرعة</span><h2 data-i18n="home.categoriesTitle">اختار اللي نفسك فيه</h2></div>
-          <a class="text-btn" href="products.html?category=all" data-i18n="home.viewAll">عرض الكل <span>←</span></a>
-        </div>
-        <div class="category-grid" id="category-grid"></div>
-      </div>
-    </section>
-
-    <section class="catalog-cta-section" id="products">
-      <div class="container">
-        <div class="catalog-cta-card">
-          <div>
-            <span class="eyebrow" data-i18n="home.productsEyebrow">مختارات VELOX</span>
-            <h2 data-i18n="home.productsTitle">كل المنتجات في صفحة واحدة مرتبة وواضحة</h2>
-            <p data-i18n="home.productsSubtitle">افتح القسم المناسب وشاهد كل المنتجات، التفاصيل، الصور الكبيرة، والأسعار بدون زحمة في الصفحة الرئيسية.</p>
-          </div>
-          <a class="btn btn-primary" href="products.html?category=all" data-i18n="home.viewAllProducts">عرض كل المنتجات <span>←</span></a>
-        </div>
-      </div>
-    </section>
-
-    <section class="benefits-section">
-      <div class="container benefit-grid">
-        <article><span>⚡</span><div><h3 data-i18n="home.benefit1Title">توصيل سريع</h3><p data-i18n="home.benefit1Text">نتابع الطلب من المتجر لحد بابك.</p></div></article>
-        <article><span>🛍️</span><div><h3 data-i18n="home.benefit2Title">خيارات أكثر</h3><p data-i18n="home.benefit2Text">أكل، إلكترونيات، واحتياجات يومية.</p></div></article>
-        <article><span>🔒</span><div><h3 data-i18n="home.benefit3Title">تجربة موثوقة</h3><p data-i18n="home.benefit3Text">بيانات حسابك محفوظة في جلسة آمنة.</p></div></article>
-      </div>
-    </section>
-  </main>
-
-  <footer class="site-footer">
-    <div class="container footer-inner">
-      <div class="brand-lockup footer-brand">
-        <img src="assets/images/velox-logo.jpeg" alt="VELOX" class="brand-logo">
-        <span class="brand-copy"><strong>VELOX</strong><small data-i18n="app.tagline">كل شيء يوصلك في مكان واحد</small></span>
-      </div>
-      <div class="footer-links">
-        <a href="legal.html#about" data-i18n="footer.about">من نحن</a>
-        <a href="legal.html#terms" data-i18n="footer.terms">الشروط والأحكام</a>
-        <a href="legal.html#privacy" data-i18n="footer.privacy">سياسة الخصوصية</a>
-        <a href="support.html" data-i18n="footer.contact">تواصل معنا</a><a href="faq.html">الأسئلة الشائعة</a><a href="delivery-areas.html">مناطق التوصيل</a><a href="offers.html">العروض</a><a href="partners.html">للشركاء</a><a href="business.html">للشركات</a><a href="careers.html">الوظائف</a>
-      </div>
-    </div>
-  </footer>
-
-  <!-- Auth modal: optional on browsing, required only at checkout. -->
-  <div class="modal-backdrop" id="auth-modal" hidden>
-    <div class="modal-card auth-modal-card" role="dialog" aria-modal="true" aria-labelledby="auth-modal-title">
-      <button class="modal-close" type="button" data-close-modal aria-label="إغلاق">×</button>
-      <div class="modal-logo"><img src="assets/images/velox-logo.jpeg" alt="VELOX"></div>
-      <div class="modal-intro"><span class="eyebrow" data-i18n="authModal.eyebrow">حساب VELOX</span><h2 id="auth-modal-title">تسجيل الدخول</h2><p id="auth-modal-subtitle">سجّل الدخول لإكمال طلبك بسرعة وأمان.</p></div>
-      <div class="auth-tabs"><button class="auth-tab is-active" data-auth-tab="login" data-i18n="authModal.loginTab">تسجيل الدخول</button><button class="auth-tab" data-auth-tab="register" data-i18n="authModal.registerTab">حساب جديد</button></div>
-
-      <form id="modal-login-form" class="modal-form" novalidate>
-        <div class="field"><label for="modal-login-email" data-i18n="form.email.label">البريد الإلكتروني</label><input type="email" id="modal-login-email" name="email" autocomplete="email" placeholder="name@example.com"><div class="field-hint"></div></div>
-        <div class="field"><label for="modal-login-password" data-i18n="form.password.label">كلمة المرور</label><div class="input-wrap"><input type="password" id="modal-login-password" name="password" autocomplete="current-password" placeholder="••••••••"><button type="button" class="input-icon-btn" data-toggle-password="modal-login-password" aria-label="إظهار كلمة المرور">◉</button></div><div class="field-hint"></div></div>
-        <div id="modal-login-alert" aria-live="polite"></div>
-        <button type="submit" class="btn btn-primary btn-block" id="modal-login-submit"><span class="spinner"></span><span class="btn-label" data-i18n="login.submit">تسجيل الدخول</span></button>
-      </form>
-
-      <form id="modal-register-form" class="modal-form" hidden novalidate>
-        <div class="form-grid-2">
-          <div class="field"><label for="modal-register-name" data-i18n="form.fullName.label">الاسم الكامل</label><input type="text" id="modal-register-name" name="full_name" data-i18n-placeholder="form.fullName.placeholder" placeholder="اكتب اسمك بالكامل"><div class="field-hint"></div></div>
-          <div class="field"><label for="modal-register-phone" data-i18n="form.phone.label">رقم الهاتف</label><input type="tel" id="modal-register-phone" name="phone_number" placeholder="01xxxxxxxxx"><div class="field-hint"></div></div>
-        </div>
-        <div class="field"><label for="modal-register-email" data-i18n="form.email.label">البريد الإلكتروني</label><input type="email" id="modal-register-email" name="email" placeholder="name@example.com"><div class="field-hint"></div></div>
-        <div class="form-grid-2">
-          <div class="field"><label for="modal-register-governorate" data-i18n="form.governorate.label">المحافظة</label><select id="modal-register-governorate" name="governorate"><option value="">اختر المحافظة</option><option value="CAIRO" data-i18n="form.governorate.CAIRO">القاهرة</option><option value="GIZA" data-i18n="form.governorate.GIZA">الجيزة</option><option value="ALEXANDRIA" data-i18n="form.governorate.ALEXANDRIA">الإسكندرية</option><option value="DAMIETTA" data-i18n="form.governorate.DAMIETTA">دمياط</option><option value="BEHEIRA" data-i18n="form.governorate.BEHEIRA">البحيرة</option><option value="KAFR_EL_SHEIKH" data-i18n="form.governorate.KAFR_EL_SHEIKH">كفر الشيخ</option><option value="GHARBIA" data-i18n="form.governorate.GHARBIA">الغربية</option><option value="MENOFIA" data-i18n="form.governorate.MENOFIA">المنوفية</option><option value="QALYUBIA" data-i18n="form.governorate.QALYUBIA">القليوبية</option><option value="SHARKIA" data-i18n="form.governorate.SHARKIA">الشرقية</option><option value="DAKAHLIA" data-i18n="form.governorate.DAKAHLIA">الدقهلية</option><option value="PORT_SAID" data-i18n="form.governorate.PORT_SAID">بورسعيد</option><option value="ISMAILIA" data-i18n="form.governorate.ISMAILIA">الإسماعيلية</option><option value="SUEZ" data-i18n="form.governorate.SUEZ">السويس</option><option value="NORTH_SINAI" data-i18n="form.governorate.NORTH_SINAI">شمال سيناء</option><option value="SOUTH_SINAI" data-i18n="form.governorate.SOUTH_SINAI">جنوب سيناء</option><option value="FAYOUM" data-i18n="form.governorate.FAYOUM">الفيوم</option><option value="BENI_SUEF" data-i18n="form.governorate.BENI_SUEF">بني سويف</option><option value="MINYA" data-i18n="form.governorate.MINYA">المنيا</option><option value="ASYUT" data-i18n="form.governorate.ASYUT">أسيوط</option><option value="SOHAG" data-i18n="form.governorate.SOHAG">سوهاج</option><option value="QENA" data-i18n="form.governorate.QENA">قنا</option><option value="LUXOR" data-i18n="form.governorate.LUXOR">الأقصر</option><option value="ASWAN" data-i18n="form.governorate.ASWAN">أسوان</option><option value="NEW_VALLEY" data-i18n="form.governorate.NEW_VALLEY">الوادي الجديد</option><option value="MATROUH" data-i18n="form.governorate.MATROUH">مطروح</option><option value="RED_SEA" data-i18n="form.governorate.RED_SEA">البحر الأحمر</option></select><div class="field-hint"></div></div>
-          <div class="field"><label for="modal-register-password" data-i18n="form.password.label">كلمة المرور</label><input type="password" id="modal-register-password" name="password" autocomplete="new-password" placeholder="••••••••"><div class="field-hint"></div></div>
-        </div>
-        <div id="modal-register-alert" aria-live="polite"></div>
-        <button type="submit" class="btn btn-primary btn-block" id="modal-register-submit"><span class="spinner"></span><span class="btn-label" data-i18n="register.submit">إنشاء الحساب</span></button>
-      </form>
-
-      <form id="modal-otp-form" class="modal-form" hidden novalidate>
-        <p class="muted" data-i18n="otp.subtitle">أدخل كود التحقق المكون من 6 أرقام.</p>
-        <div class="field"><label for="modal-otp-code" data-i18n="otp.label">كود التحقق</label><input type="text" id="modal-otp-code" inputmode="numeric" maxlength="6" placeholder="••••••" autocomplete="one-time-code"><div class="field-hint"></div></div>
-        <div id="modal-otp-alert" aria-live="polite"></div>
-        <button type="submit" class="btn btn-primary btn-block" id="modal-otp-submit"><span class="spinner"></span><span class="btn-label" data-i18n="otp.submit">تأكيد الحساب</span></button>
-      </form>
-    </div>
-  </div>
-
-  <div class="modal-backdrop" id="location-modal" hidden>
-    <div class="modal-card location-modal-card" role="dialog" aria-modal="true" aria-labelledby="location-title">
-      <button class="modal-close" type="button" data-close-modal aria-label="إغلاق">×</button>
-      <div class="modal-icon-bubble">📍</div>
-      <span class="eyebrow" data-i18n="locationModal.eyebrow">التوصيل عندك</span>
-      <h2 id="location-title" data-i18n="locationModal.title">اختار المحافظة</h2>
-      <p data-i18n="locationModal.subtitle">هنستخدم اختيارك لتصفية المتاجر والمنتجات المناسبة لاحقًا.</p>
-      <div class="location-grid" id="location-grid"><button type="button" data-location="CAIRO">القاهرة</button><button type="button" data-location="GIZA">الجيزة</button><button type="button" data-location="ALEXANDRIA">الإسكندرية</button><button type="button" data-location="DAMIETTA">دمياط</button><button type="button" data-location="BEHEIRA">البحيرة</button><button type="button" data-location="KAFR_EL_SHEIKH">كفر الشيخ</button><button type="button" data-location="GHARBIA">الغربية</button><button type="button" data-location="MENOFIA">المنوفية</button><button type="button" data-location="QALYUBIA">القليوبية</button><button type="button" data-location="SHARKIA">الشرقية</button><button type="button" data-location="DAKAHLIA">الدقهلية</button><button type="button" data-location="PORT_SAID">بورسعيد</button><button type="button" data-location="ISMAILIA">الإسماعيلية</button><button type="button" data-location="SUEZ">السويس</button><button type="button" data-location="NORTH_SINAI">شمال سيناء</button><button type="button" data-location="SOUTH_SINAI">جنوب سيناء</button><button type="button" data-location="FAYOUM">الفيوم</button><button type="button" data-location="BENI_SUEF">بني سويف</button><button type="button" data-location="MINYA">المنيا</button><button type="button" data-location="ASYUT">أسيوط</button><button type="button" data-location="SOHAG">سوهاج</button><button type="button" data-location="QENA">قنا</button><button type="button" data-location="LUXOR">الأقصر</button><button type="button" data-location="ASWAN">أسوان</button><button type="button" data-location="NEW_VALLEY">الوادي الجديد</button><button type="button" data-location="MATROUH">مطروح</button><button type="button" data-location="RED_SEA">البحر الأحمر</button></div>
-    </div>
-  </div>
-
-  
-
-  <script src="js/config.js?v=23"></script>
-  <script src="js/i18n.js"></script>
-  <script src="js/theme.js"></script>
-  <script src="js/navControls.js"></script>
-  <script src="js/utils/validation.js"></script>
-  <script src="js/utils/domUtils.js"></script>
-  <script src="js/services/apiClient.js?v=19"></script>
-  <script src="js/services/authService.js?v=19"></script>
-  <script src="js/services/catalogService.js?v=16"></script>
-  <script src="js/services/orderService.js"></script>
-  <script src="js/pages/storefrontPage.js?v=22"></script>
-<script src="js/pages/growthFeatures.js?v=21"></script><script src="js/googleAuth.js?v=22"></script>
-<aside class="cart-drawer fixed top-0 bottom-0 h-full" id="cart-drawer" aria-label="سلة التسوق" aria-hidden="true" hidden>
-    <div class="cart-drawer-header"><div><span class="eyebrow" data-i18n="cart.eyebrow">سلتك</span><h2 data-i18n="cart.title">مراجعة الطلب</h2></div><button class="modal-close" type="button" id="cart-close" aria-label="إغلاق">×</button></div>
-    <div class="cart-items" id="cart-items"></div>
-    <div class="cart-empty" id="cart-empty"><div class="empty-icon">🛒</div><h3 data-i18n="cart.emptyTitle">السلة فاضية</h3><p data-i18n="cart.emptySubtitle">أضف منتجات من الصفحة الرئيسية وهتظهر هنا.</p></div>
-    <div class="cart-drawer-footer" id="cart-footer" hidden>
-      <div class="cart-total"><span data-i18n="cart.total">الإجمالي</span><strong id="cart-total">0 EGP</strong></div>
-      <div class="pay-method-row"><label for="pay-method" data-i18n="cart.payMethod">طريقة الدفع</label><select id="pay-method"><option value="CASH_ON_DELIVERY" data-i18n="cart.payCash">كاش عند الاستلام</option><option value="WALLET" data-i18n="cart.payWallet">المحفظة</option></select></div>
-      <button type="button" class="btn btn-primary btn-block" id="checkout-btn"><span data-i18n="cart.checkout">متابعة لإتمام الطلب</span><span>←</span></button>
-      <small data-i18n="cart.checkoutHint">سيُطلب تسجيل الدخول عند تأكيد الأوردر فقط.</small>
-    </div>
-  </aside>
-  <div class="drawer-backdrop" id="drawer-backdrop" hidden></div>
-</body>
-</html>
+<script src="js/config.js"></script><script src="js/services/apiClient.js"></script><script src="js/services/authService.js"></script><script src="js/services/catalogService.js"></script><script src="js/live-storefront.js"></script></body></html>

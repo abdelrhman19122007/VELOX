@@ -145,6 +145,14 @@
   // Render step
   function goToStep(n){
     currentStep=n;
+    if(document.body.classList.contains('stitch-checkout')){
+      currentStep=4;
+      $$('.step').forEach(step=>step.classList.add('is-active'));
+      [1,2,3,4].forEach(step=>{$(`#step-${step}`).hidden=false;});
+      $('#confirmation-screen').hidden=true;
+      renderConfirmation();
+      return;
+    }
     $$('.checkout-panel').forEach(p=>p.hidden=true);
     $(`#step-${n}`).hidden=false;
     $$('.step').forEach(s=>{
@@ -237,14 +245,14 @@
     const addr=$('#checkout-address').value;
     const phone=$('#checkout-phone').value;
     const name=$('#checkout-name').value;
-    $('#summary-address').innerHTML=`<strong>${esc(name)}</strong><br>${esc(addr)}<br>${govName} · ${esc(phone)}`;
+    $('#summary-address').innerHTML=name||addr||phone?`<strong>${esc(name)}</strong><br>${esc(addr)}<br>${esc(govName)} · ${esc(phone)}`:(AR()?'أكمل عنوان التوصيل ليظهر هنا.':'Enter your delivery address.');
     // Payment
     const payMethod=document.querySelector('input[name="payment"]:checked')?.value||'CASH_ON_DELIVERY';
     const payLabels={CASH_ON_DELIVERY:AR()?'كاش عند الاستلام':'Cash on Delivery',WALLET:AR()?'المحفظة':'Wallet',VISA:AR()?'فيزا / ماستركارد':'Visa / Mastercard'};
     $('#summary-payment').textContent=payLabels[payMethod]||payMethod;
     // Totals
     const sub=cartTotal();
-    shippingFee=GOV_SHIPPING[govKey]||20;
+    shippingFee=cart.length?(GOV_SHIPPING[govKey]||20):0;
     const total=sub+shippingFee;
     $('#summary-subtotal').textContent=money(sub);
     $('#summary-shipping').textContent=money(shippingFee);
@@ -341,6 +349,11 @@
     detectLocationAndFill();
     renderCheckoutItems();
     goToStep(1);
+    if(document.body.classList.contains('stitch-checkout')){
+      $('#confirm-order').disabled=!cart.length;
+      document.querySelector('.kinetic-checkout-grid').addEventListener('input',renderConfirmation);
+      document.querySelector('.kinetic-checkout-grid').addEventListener('change',renderConfirmation);
+    }
 
     // Step navigation
     $('#step1-next')?.addEventListener('click',()=>{

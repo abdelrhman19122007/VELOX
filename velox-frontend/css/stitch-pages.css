@@ -1,0 +1,234 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;500;600;700;800&display=swap');
+/* =====================================================================
+   VELOX — Stitch page compositions
+   Catalog (products) · Checkout · Orders & live tracking
+   Same Kinetic Obsidian language as the storefront (stitch-layout.css).
+   ===================================================================== */
+
+/* ---------------------------------------------------------------
+   Shared helpers
+   --------------------------------------------------------------- */
+.stitch-catalog,
+.stitch-checkout,
+.stitch-orders{background:#0f131d;color:#dfe2f1;font-family:'Noto Sans Arabic',sans-serif;font-size:14px;line-height:1.8}
+.stitch-catalog .container,
+.stitch-checkout .container,
+.stitch-orders .container{max-width:1440px;width:calc(100% - 96px);margin-inline:auto;padding:0}
+.stitch-catalog .stitch-main{padding-top:40px}
+
+/* ===============================================================
+   CATALOG / STORE  (products.html)
+   =============================================================== */
+.stitch-catalog-hero{position:relative;overflow:hidden;background:#1c1f2a;border-radius:12px;padding:40px;margin-bottom:8px}
+.stitch-catalog-hero::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at top left,#ff5e1e1f,transparent 70%);pointer-events:none}
+.stitch-catalog-copy{position:relative;z-index:1;max-width:760px}
+.stitch-catalog-hero h1{font-size:clamp(30px,3.2vw,48px);line-height:1.4;letter-spacing:-1.2px;margin:16px 0 10px;font-weight:800}
+.stitch-catalog-hero p{color:#bca7a1;font-size:14px;margin:0 0 26px}
+.stitch-catalog-stats{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.stitch-catalog-stats .stitch-count{display:inline-flex;align-items:center;gap:8px;background:#171b26;border-radius:20px;padding:6px 16px}
+.stitch-catalog-stats .stitch-count b{color:#00daf3;font-size:18px}
+.stitch-catalog-stats .stitch-count span{font-size:11px;color:#bca7a1}
+.stitch-catalog-stats .stitch-back{font-size:12px;color:#bca7a1}
+.stitch-catalog-stats .stitch-back:hover{color:#ff5e1e}
+
+.stitch-catalog .search-meta{font-size:12px;color:#bca7a1;margin:0 0 18px}
+.stitch-catalog .search-meta strong{color:#ff5e1e}
+.stitch-catalog .empty-products{text-align:center;padding:64px 20px;color:#bca7a1}
+.stitch-catalog .empty-products h3{color:#dfe2f1;margin:12px 0 6px;font-size:20px}
+.stitch-catalog .catalog-pagination{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;margin:44px 0 10px}
+.stitch-catalog .catalog-pagination button{min-width:38px;height:38px;padding:0 12px;border:0;border-radius:9px;background:#1c1f2a;color:#e3beb3;font-size:13px;font-weight:700;cursor:pointer;transition:.2s}
+.stitch-catalog .catalog-pagination button:hover:not(:disabled){background:#262a35;color:#dfe2f1}
+.stitch-catalog .catalog-pagination button.is-active{background:#ff5e1e;color:#29140b}
+.stitch-catalog .catalog-pagination button:disabled{opacity:.35;cursor:not-allowed}
+.stitch-catalog .catalog-pagination span{color:#aa897f;padding:0 4px}
+.stitch-catalog .catalog-pagination small{flex-basis:100%;text-align:center;color:#aa897f;font-size:11px;margin-top:12px}
+
+/* ===============================================================
+   CHECKOUT  (checkout.html)
+   =============================================================== */
+.stitch-checkout{min-height:100vh}
+.stitch-checkout .stitch-topbar{position:sticky;top:0;z-index:30;background:#0f131df2;backdrop-filter:blur(16px);box-shadow:0 4px 24px #0003}
+.stitch-checkout .stitch-topbar-inner{max-width:1120px;margin:auto;padding:14px 22px;display:flex;align-items:center;gap:16px}
+.stitch-checkout .stitch-topbar .back-btn{border:0;background:#171b26;color:#dfe2f1;border-radius:9px;padding:9px 14px;font-size:12px}
+.stitch-checkout .brand-mini{display:flex;align-items:center;gap:10px;flex:1}
+.stitch-checkout .brand-mini img{width:36px;height:36px;border-radius:9px;object-fit:contain;background:#171b26}
+.stitch-checkout .brand-mini strong{color:#ff5e1e;font-size:18px;display:block}
+.stitch-checkout .brand-mini small{display:none}
+.stitch-checkout .top-action{border:0;background:#171b26;color:#dfe2f1;border-radius:9px;width:40px;height:40px;font-size:16px;cursor:pointer}
+
+.stitch-checkout .app-main{max-width:1120px;margin:auto;padding:34px 22px 90px}
+
+/* Stepper → kinetic pills */
+.stitch-checkout .checkout-stepper{display:flex;align-items:center;justify-content:center;gap:0;padding:6px 0 30px;overflow-x:auto}
+.stitch-checkout .step{display:flex;flex-direction:column;align-items:center;gap:8px;min-width:86px;opacity:.45;transition:opacity .25s}
+.stitch-checkout .step.is-active,.stitch-checkout .step.is-done{opacity:1}
+.stitch-checkout .step-num{width:38px;height:38px;border-radius:50%;border:1.5px solid rgba(255,255,255,.12);background:#171b26;color:#94A3B8;font-size:14px;font-weight:800;display:grid;place-items:center;transition:all .25s}
+.stitch-checkout .step.is-active .step-num{background:#ff5e1e;color:#29140b;border-color:#ff5e1e;box-shadow:0 4px 18px rgba(255,94,30,.45)}
+.stitch-checkout .step.is-done .step-num{background:#00daf3;color:#00363d;border-color:#00daf3;box-shadow:0 0 14px rgba(0,218,243,.45)}
+.stitch-checkout .step span{font-size:11px;font-weight:700;color:#94A3B8;white-space:nowrap}
+.stitch-checkout .step.is-active span{color:#ff5e1e;font-weight:800}
+.stitch-checkout .step.is-done span{color:#00daf3}
+.stitch-checkout .step-line{flex:1;height:2px;background:rgba(255,255,255,.08);min-width:24px;margin:0 -4px;margin-bottom:26px}
+.stitch-checkout .step.is-done+.step-line{background:linear-gradient(90deg,#00daf3,#ff5e1e)}
+
+.stitch-checkout .checkout-panel{background:#1c1f2a;border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:30px;box-shadow:0 20px 60px -30px #000;animation:stitchPanelIn .3s ease}
+@keyframes stitchPanelIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.stitch-checkout .checkout-panel h2{font-size:22px;margin:0 0 22px;font-weight:800}
+.stitch-checkout .checkout-empty{text-align:center;padding:48px 20px}
+.stitch-checkout .checkout-empty .empty-icon{width:66px;height:66px;border-radius:20px;background:#171b26;display:grid;place-items:center;font-size:28px;margin:0 auto 14px}
+.stitch-checkout .checkout-empty p{color:#bca7a1;font-size:13px;margin-top:6px}
+
+/* Cart review rows */
+.stitch-checkout .checkout-cart-item{display:grid;grid-template-columns:60px 1fr auto;gap:14px;align-items:center;padding:14px 16px;margin-bottom:10px;background:#171b26;border:1px solid rgba(255,255,255,.05);border-radius:12px}
+.stitch-checkout .checkout-cart-item-img{width:60px;height:60px;border-radius:10px;background:#262a35;overflow:hidden;display:grid;place-items:center}
+.stitch-checkout .checkout-cart-item-img img{width:100%;height:100%;object-fit:cover}
+.stitch-checkout .checkout-cart-item h4{font-size:14px;font-weight:700;margin:0}
+.stitch-checkout .checkout-cart-item small{display:block;color:#00daf3;font-size:11px;margin-top:2px}
+.stitch-checkout .checkout-cart-item-right{text-align:end}
+.stitch-checkout .checkout-cart-item-price{font-size:15px;font-weight:800;color:#dfe2f1}
+.stitch-checkout .checkout-cart-qty{font-size:11px;color:#bca7a1;margin-top:2px}
+
+/* Forms */
+.stitch-checkout .checkout-form{display:grid;gap:16px}
+.stitch-checkout .field-app{display:grid;gap:7px}
+.stitch-checkout .field-app label{font-size:12px;color:#bca7a1;font-weight:600}
+.stitch-checkout .field-app input,
+.stitch-checkout .field-app select,
+.stitch-checkout .field-app textarea{background:#0e1422;border:1px solid rgba(255,255,255,.1);border-radius:9px;color:#dfe2f1;padding:12px 14px;font-family:inherit;font-size:13px;transition:.2s}
+.stitch-checkout .field-app input::placeholder,
+.stitch-checkout .field-app textarea::placeholder{color:#475569}
+.stitch-checkout .field-app input:focus,
+.stitch-checkout .field-app select:focus,
+.stitch-checkout .field-app textarea:focus{outline:0;border-color:#00daf3;box-shadow:0 0 0 3px rgba(0,218,243,.15)}
+.stitch-checkout .field-app.has-error input,
+.stitch-checkout .field-app.has-error select,
+.stitch-checkout .field-app.has-error textarea{border-color:#ff6b6b}
+.stitch-checkout .field-error{color:#ff6b6b;font-size:11px}
+.stitch-checkout .payment-details{display:grid;gap:14px;margin-top:16px;background:#171b26;border-radius:12px;padding:16px}
+.stitch-checkout .payment-detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.stitch-checkout .payment-security{color:#00daf3;font-size:11px}
+
+/* Payment options */
+.stitch-checkout .payment-options{display:grid;gap:12px}
+.stitch-checkout .payment-option{cursor:pointer}
+.stitch-checkout .payment-option input{position:absolute;opacity:0;pointer-events:none}
+.stitch-checkout .payment-card{display:flex;align-items:center;gap:14px;padding:16px;background:#171b26;border:1.5px solid rgba(255,255,255,.08);border-radius:12px;transition:.2s}
+.stitch-checkout .payment-option:hover .payment-card{border-color:rgba(255,255,255,.18)}
+.stitch-checkout .payment-option.is-selected .payment-card{border-color:#ff5e1e;background:#1c1f2a;box-shadow:0 8px 30px -12px rgba(255,94,30,.5)}
+.stitch-checkout .payment-icon{width:46px;height:46px;border-radius:11px;background:#262a35;display:grid;place-items:center;font-size:20px}
+.stitch-checkout .payment-card strong{font-size:14px;display:block}
+.stitch-checkout .payment-card small{color:#bca7a1;font-size:11px}
+
+/* Summary + confirmation */
+.stitch-checkout .order-summary{display:grid;gap:16px}
+.stitch-checkout .summary-section{background:#171b26;border-radius:12px;padding:18px}
+.stitch-checkout .summary-section h3{font-size:13px;color:#00daf3;margin:0 0 10px}
+.stitch-checkout .summary-section p{font-size:13px;color:#dfe2f1;margin:0}
+.stitch-checkout .summary-line{display:flex;justify-content:space-between;padding:7px 0;font-size:13px;color:#bca7a1}
+.stitch-checkout .summary-line strong{color:#dfe2f1}
+.stitch-checkout .summary-total{border-top:1px solid rgba(255,255,255,.08);margin-top:6px;padding-top:12px;font-size:16px}
+.stitch-checkout .summary-total strong{color:#ff5e1e;font-size:20px}
+.stitch-checkout .text-success{color:#00daf3!important}
+.stitch-checkout .confirmation-screen{text-align:center}
+.stitch-checkout .confirm-icon{width:76px;height:76px;border-radius:50%;margin:0 auto 18px;background:#00daf3;color:#00363d;font-size:38px;display:grid;place-items:center;box-shadow:0 0 30px rgba(0,218,243,.5)}
+.stitch-checkout .confirm-sub{color:#bca7a1;margin-bottom:22px}
+.stitch-checkout .confirm-details{display:grid;gap:10px;max-width:420px;margin:0 auto 22px;text-align:start}
+.stitch-checkout .confirm-row{display:flex;justify-content:space-between;background:#171b26;border-radius:10px;padding:12px 16px;font-size:13px;color:#bca7a1}
+.stitch-checkout .confirm-row strong{color:#dfe2f1}
+.stitch-checkout .confirm-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+
+/* Buttons */
+.stitch-checkout .checkout-nav,
+.stitch-checkout .checkout-next{display:flex;gap:12px;justify-content:flex-end;margin-top:24px}
+.stitch-checkout .checkout-next{justify-content:flex-end}
+.stitch-checkout .btn-app{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;cursor:pointer;background:#ff5e1e;color:#29140b!important;padding:12px 26px;border-radius:9px;font-weight:800;font-size:13px;box-shadow:0 4px 16px rgba(255,94,30,.35);transition:.2s;text-decoration:none}
+.stitch-checkout .btn-app:hover{transform:translateY(-1px);box-shadow:0 8px 26px rgba(255,94,30,.5)}
+.stitch-checkout .btn-app.secondary{background:rgba(255,255,255,.06);color:#dfe2f1!important;border:1px solid rgba(255,255,255,.12);box-shadow:none}
+.stitch-checkout .btn-app.btn-confirm{background:linear-gradient(120deg,#ff5e1e,#ff2e00)}
+
+/* ===============================================================
+   ORDERS & LIVE TRACKING  (orders.html)
+   =============================================================== */
+.stitch-orders{min-height:100vh}
+.stitch-orders .stitch-topbar{position:sticky;top:0;z-index:30;background:#0f131df2;backdrop-filter:blur(16px);box-shadow:0 4px 24px #0003}
+.stitch-orders .stitch-topbar-inner{max-width:1120px;margin:auto;padding:14px 22px;display:flex;align-items:center;gap:16px}
+.stitch-orders .stitch-topbar .back-btn{border:0;background:#171b26;color:#dfe2f1;border-radius:9px;padding:9px 14px;font-size:12px}
+.stitch-orders .brand-mini{display:flex;align-items:center;gap:10px;flex:1}
+.stitch-orders .brand-mini img{width:36px;height:36px;border-radius:9px;object-fit:contain;background:#171b26}
+.stitch-orders .brand-mini strong{color:#ff5e1e;font-size:18px;display:block}
+.stitch-orders .brand-mini small{display:none}
+.stitch-orders .top-action{border:0;background:#171b26;color:#dfe2f1;border-radius:9px;width:40px;height:40px;font-size:16px;cursor:pointer}
+
+.stitch-orders .app-main{max-width:1120px;margin:auto;padding:34px 22px 90px}
+.stitch-orders-hero{background:#1c1f2a;border-radius:14px;padding:34px;position:relative;overflow:hidden;margin-bottom:22px}
+.stitch-orders-hero::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at top right,#00daf31f,transparent 70%);pointer-events:none}
+.stitch-orders-hero .stitch-eyebrow{position:relative;z-index:1;color:#00daf3;font-size:11px}
+.stitch-orders-hero h1{position:relative;z-index:1;font-size:clamp(26px,2.8vw,38px);margin:10px 0 8px;font-weight:800}
+.stitch-orders-hero p{position:relative;z-index:1;color:#bca7a1;margin:0}
+
+.stitch-orders-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-bottom:22px}
+.stitch-orders-metrics .metric-card{background:#171b26;border-radius:12px;padding:22px;position:relative}
+.stitch-orders-metrics .metric-card .metric{font-size:34px;font-weight:800;line-height:1.2}
+.stitch-orders-metrics .metric-card:nth-child(1) .metric{color:#00daf3}
+.stitch-orders-metrics .metric-card:nth-child(2) .metric{color:#ff5e1e}
+.stitch-orders-metrics .metric-card:nth-child(3) .metric{color:#b573ff}
+.stitch-orders-metrics .metric-card h2{font-size:14px;margin:6px 0 2px}
+.stitch-orders-metrics .metric-card p{font-size:11px;color:#bca7a1;margin:0}
+.stitch-orders-metrics .metric-card .icon-tile{position:absolute;top:18px;left:18px;width:42px;height:42px;border-radius:11px;background:#262a35;display:grid;place-items:center;font-size:20px}
+
+.stitch-orders-panel{background:#1c1f2a;border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:26px;margin-bottom:22px}
+.stitch-orders-panel h2{font-size:18px;margin:0 0 4px}
+.stitch-orders-panel>p{color:#bca7a1;font-size:12px;margin:0 0 16px}
+.stitch-orders .order-tabs{display:flex;gap:8px;margin-bottom:18px}
+.stitch-orders .filter-pill{border:0;background:#171b26;color:#e3beb3;padding:8px 20px;border-radius:24px;font-size:12px;cursor:pointer;transition:.2s}
+.stitch-orders .filter-pill:hover{background:#262a35}
+.stitch-orders .filter-pill.is-active{background:#ff5e1e;color:#29140b;font-weight:800}
+
+.stitch-orders .list-item{display:flex;gap:14px;align-items:flex-start;background:#171b26;border:1px solid rgba(255,255,255,.05);border-radius:12px;padding:16px 18px;margin-bottom:10px;cursor:pointer;transition:.2s}
+.stitch-orders .list-item:hover{border-color:rgba(0,218,243,.35)}
+.stitch-orders .list-item.is-selected{border-color:#00daf3;box-shadow:0 0 0 3px rgba(0,218,243,.12)}
+.stitch-orders .list-item .dot{width:10px;height:10px;border-radius:50%;background:#00daf3;box-shadow:0 0 12px rgba(0,218,243,.7);margin-top:8px;flex-shrink:0}
+.stitch-orders .list-item .content{flex:1;min-width:0}
+.stitch-orders .list-item h3{font-size:14px;margin:0 0 4px}
+.stitch-orders .list-item p{font-size:12px;color:#bca7a1;margin:0 0 3px;word-break:break-word}
+.stitch-orders .list-item .muted{color:#aa897f}
+.stitch-orders .order-details{margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,.06)}
+.stitch-orders .order-details>div{display:flex;gap:10px;margin-top:10px;flex-wrap:wrap}
+
+.stitch-orders #tracking-box{background:#171b26;border:1px solid rgba(0,218,243,.25);border-radius:12px;padding:20px;margin-top:18px}
+.stitch-orders #tracking-box h3{font-size:18px;color:#00daf3;margin:0 0 8px}
+.stitch-orders #tracking-box p{font-size:12px;color:#bca7a1;margin:0 0 10px}
+.stitch-orders #tracking-box select{width:100%;margin-bottom:12px;background:#0e1422;border:1px solid rgba(255,255,255,.1);border-radius:9px;color:#dfe2f1;padding:11px 14px;font-family:inherit;font-size:13px}
+.stitch-orders #tracking-box select:focus{outline:0;border-color:#00daf3}
+.stitch-orders .progress{height:10px;border-radius:20px;background:#0a0e18;overflow:hidden;margin:14px 0}
+.stitch-orders .progress>div{height:100%;background:linear-gradient(90deg,#00daf3,#ff5e1e);border-radius:20px;transition:width .5s ease}
+
+.stitch-orders-cta{background:#171b26;border-radius:14px;padding:28px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.stitch-orders-cta h2{font-size:18px;margin:0 0 4px}
+.stitch-orders-cta p{color:#bca7a1;font-size:12px;margin:0}
+.stitch-orders .btn-app{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;cursor:pointer;background:#ff5e1e;color:#29140b!important;padding:12px 26px;border-radius:9px;font-weight:800;font-size:13px;box-shadow:0 4px 16px rgba(255,94,30,.35);transition:.2s;text-decoration:none}
+.stitch-orders .btn-app:hover{transform:translateY(-1px)}
+.stitch-orders .btn-app.secondary{background:rgba(255,255,255,.06);color:#dfe2f1!important;border:1px solid rgba(255,255,255,.12);box-shadow:none}
+
+/* ---------------------------------------------------------------
+   Responsive
+   --------------------------------------------------------------- */
+@media(max-width:1200px){
+  .stitch-catalog .container,.stitch-checkout .container,.stitch-orders .container{width:calc(100% - 48px)}
+  .stitch-catalog-hero{padding:28px}
+}
+@media(max-width:800px){
+  .stitch-catalog .container,.stitch-checkout .container,.stitch-orders .container{width:calc(100% - 32px)}
+  .stitch-catalog-hero{padding:24px 20px}
+  .stitch-catalog-hero h1{font-size:30px}
+  .stitch-checkout .checkout-panel{padding:20px}
+  .stitch-checkout .step span{display:none}
+  .stitch-checkout .step{min-width:auto}
+  .stitch-checkout .checkout-nav,.stitch-checkout .checkout-next{flex-direction:column}
+  .stitch-checkout .btn-app{width:100%}
+  .stitch-checkout .payment-detail-grid{grid-template-columns:1fr}
+  .stitch-orders-metrics{grid-template-columns:1fr}
+  .stitch-orders-hero{padding:24px 20px}
+  .stitch-orders-panel{padding:20px}
+  .stitch-orders-cta{flex-direction:column;align-items:flex-start}
+}
