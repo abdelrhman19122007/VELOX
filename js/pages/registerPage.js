@@ -1,0 +1,152 @@
+/**
+ * VELOX — Register page controller.
+ */
+(function () {
+  document.addEventListener('DOMContentLoaded', () => {
+    const { qs, setFieldError, clearFieldError, setButtonLoading, showAlert, clearAlert, setupPasswordToggle } = window.VeloxDom;
+    const { isRequired, isValidEmail, isValidEgyptPhone, hasMinLength, passwordStrength } = window.VeloxValidation;
+    const t = (key) => window.VeloxI18n.translate(key, window.VeloxI18n.getLang());
+
+    const form = qs('#register-form');
+    const nameField = qs('#field-fullname');
+    const nameInput = qs('#fullname');
+    const emailField = qs('#field-email');
+    const emailInput = qs('#email');
+    const phoneField = qs('#field-phone');
+    const phoneInput = qs('#phone');
+    const govField = qs('#field-governorate');
+    const govSelect = qs('#governorate');
+    const passwordField = qs('#field-password');
+    const passwordInput = qs('#password');
+    const passwordToggleBtn = qs('#password-toggle');
+    const confirmField = qs('#field-confirm-password');
+    const confirmInput = qs('#confirm-password');
+    const strengthMeter = qs('#strength-meter');
+    const strengthLabel = qs('#strength-label');
+    const submitBtn = qs('#register-submit');
+    const alertBox = qs('#register-alert');
+
+    function registrationErrorMessage(err) {
+      const ar = window.VeloxI18n.getLang() === 'ar';
+      if (err.code === 'EMAIL_ALREADY_REGISTERED') {
+        return ar ? 'البريد الإلكتروني مسجل بالفعل. اضغط «تسجيل الدخول» بالأسفل.' : 'This email is already registered. Use “Log in” below.';
+      }
+      if (err.code === 'PHONE_ALREADY_REGISTERED') {
+        return ar ? 'رقم الهاتف مسجل في حساب موجود بالفعل. استخدم تسجيل الدخول بدل إنشاء حساب جديد.' : 'This phone number belongs to an existing account. Log in instead of creating another account.';
+      }
+      if (err.code === 'WEAK_PASSWORD') {
+        return ar ? 'كلمة المرور لازم تكون 8 أحرف على الأقل وتحتوي على حرف كبير وصغير ورقم.' : 'Use at least 8 characters with uppercase, lowercase, and a number.';
+      }
+      return err.message || t('register.error.generic');
+    }
+
+    setupPasswordToggle(passwordInput, passwordToggleBtn);
+
+    passwordInput.addEventListener('input', () => {
+      const score = passwordStrength(passwordInput.value);
+      strengthMeter.setAttribute('data-level', passwordInput.value ? score || 1 : 0);
+      strengthLabel.textContent = passwordInput.value ? t(`strength.${score}`) : '';
+    });
+
+    function validate() {
+      let valid = true;
+
+      if (!isRequired(nameInput.value)) {
+        setFieldError(nameField, t('validation.required'));
+        valid = false;
+      } else clearFieldError(nameField);
+
+      if (!isRequired(emailInput.value)) {
+        setFieldError(emailField, t('validation.required'));
+        valid = false;
+      } else if (!isValidEmail(emailInput.value)) {
+        setFieldError(emailField, t('validation.email.invalid'));
+        valid = false;
+      } else clearFieldError(emailField);
+
+      if (!isRequired(phoneInput.value)) {
+        setFieldError(phoneField, t('validation.required'));
+        valid = false;
+      } else if (!isValidEgyptPhone(phoneInput.value)) {
+        setFieldError(phoneField, t('validation.phone.invalid'));
+        valid = false;
+      } else clearFieldError(phoneField);
+
+      if (!govSelect.value) {
+        setFieldError(govField, t('validation.required'));
+        valid = false;
+      } else clearFieldError(govField);
+
+      if (!isRequired(passwordInput.value)) {
+        setFieldError(passwordField, t('validation.required'));
+        valid = false;
+      } else if (!hasMinLength(passwordInput.value, 8)) {
+        setFieldError(passwordField, t('validation.password.minLength'));
+        valid = false;
+      } else clearFieldError(passwordField);
+
+      if (confirmInput.value !== passwordInput.value || !isRequired(confirmInput.value)) {
+        setFieldError(confirmField, t('validation.confirmPassword.mismatch'));
+        valid = false;
+      } else clearFieldError(confirmField);
+
+      return valid;
+    }
+
+    [nameInput, emailInput, phoneInput, govSelect, passwordInput, confirmInput].forEach((input) => {
+      input.addEventListener('input', () => clearFieldError(input.closest('.field')));
+      input.addEventListener('change', () => clearFieldError(input.closest('.field')));
+    });
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      clearAlert(alertBox);
+      if (!validate()) return;
+
+      setButtonLoading(submitBtn, true);
+      try {
+        const res = await window.VeloxAuthService.register({
+          full_name: nameInput.value.trim(),
+          email: emailInput.value.trim(),
+          password: passwordInput.value,
+          phone_number: phoneInput.value.trim(),
+          governorate: govSelect.value,
+        });
+        if (res && res.pending) {
+          pendingOtpEmail = res.email || emailInput.value.trim();
+          form.hidden = true;
+          const otpForm = qs('#otp-form');
+          if (otpForm) otpForm.hidden = false;
+          showAlert(qs('#otp-alert'), 'success', t('otp.sent'));
+          if (res.otp) showAlert(qs('#otp-alert'), 'success', t('otp.sent') + ' (' + t('otp.demoCode') + res.otp + ')');
+          return;
+        }
+        showAlert(alertBox, 'success', t('register.success'));
+        setTimeout(() => {
+          window.location.href = 'login.html?registered=1';
+        }, 900);
+      } catch (err) {
+        setButtonLoading(submitBtn, false);
+        showAlert(alertBox, 'error', registrationErrorMessage(err));
+      }
+    });
+
+    let pendingOtpEmail = '';
+    const otpForm = qs('#otp-form');
+    if (otpForm) otpForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const code = (qs('#otp-code') || {}).value || '';
+      if (code.trim().length !== 6) {
+        showAlert(qs('#otp-alert'), 'error', t('otp.error.invalid'));
+        return;
+      }
+      try {
+        await window.VeloxAuthService.verifyOtp({ email: pendingOtpEmail, code: code.trim() });
+        showAlert(qs('#otp-alert'), 'success', t('otp.success'));
+        setTimeout(() => { window.location.href = 'home.html'; }, 800);
+      } catch (err) {
+        showAlert(qs('#otp-alert'), 'error', t(err.i18nKey || 'otp.error.invalid'));
+      }
+    });
+  });
+})();

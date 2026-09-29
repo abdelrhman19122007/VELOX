@@ -1,0 +1,78 @@
+<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="description" content="VELOX Express — أسرع ديلفري"><title>VELOX Express</title><script>(function(){var t=localStorage.getItem('velox_theme')||'light';document.documentElement.setAttribute('data-theme',t);})();</script><link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="css/express.css"></head><body>
+<header class="ex-header"><div class="ex-wrap ex-header-in">
+  <div class="ex-brand"><img src="assets/images/velox-logo.jpeg" alt="VELOX"><div><strong>VELOX</strong><small>إكسبريس لتوصيل الطعام</small></div></div>
+  <div class="ex-loc">📍 <span>التوصيل إلى:<br><strong id="ex-location">الدقي، الجيزة، القاهرة</strong></span></div>
+  <div class="ex-search"><span>🔍</span><input id="ex-search" placeholder="ابحث عن مطعم، برجر، بيتزا، كريب، طربوش…"></div>
+  <nav class="ex-nav"><a href="express.html" class="is-active">الرئيسية</a><a href="restaurants.html">المطاعم</a><a href="#ex-coupons">العروض الحصرية</a><a href="orders.html">تتبع الطلب</a><a href="support.html">المساعدة</a></nav>
+  <button class="ex-icon-btn" id="ex-theme" aria-label="theme">◐</button>
+  <button class="ex-icon-btn" id="ex-bell" aria-label="notifications">🔔<span class="dot" id="ex-notif-dot" hidden></span></button>
+  <button class="ex-wallet" id="ex-wallet">👛 <span id="ex-balance">…</span></button>
+  <button class="ex-icon-btn" id="ex-cart" aria-label="cart">🛒<span class="dot" id="ex-cart-count" hidden>0</span></button>
+  <span class="ex-avatar" id="ex-avatar">V</span>
+</div></header>
+
+<main>
+<section class="ex-hero"><div class="ex-wrap ex-hero-grid">
+  <div>
+    <span class="ex-tag"><span class="pulse"></span> فيلوكس إكسبريس ديلفري ⚡ القاهرة والجيزة</span>
+    <h1>أسرع ديلفري لأشهى وجبات مطاعمك المفضلة <span>بكبسة زر</span></h1>
+    <p class="sub">توصيل فائق السرعة خلال 25 إلى 35 دقيقة، طعام ساخن وطازج من أرقى المطابخ مع تتبع حي ومباشر لكابتن التوصيل على الخريطة أولاً بأول.</p>
+    <div class="ex-console">
+      <div class="ex-console-row">
+        <div class="ex-search"><span>🔍</span><input id="ex-hero-search" placeholder="ابحث عن وجبة، ساندوتش، كريب، مطعم..."></div>
+        <button class="ex-btn" id="ex-explore">استكشف المطاعم ←</button>
+      </div>
+      <div class="ex-chips"><span>تصفية سريعة:</span>
+        <button class="ex-chip is-active" data-chip="fast">⚡ الأسرع توصيلاً</button>
+        <button class="ex-chip" data-chip="top">★ الأعلى تقييماً</button>
+        <button class="ex-chip" data-chip="offers">🏷️ عروض اليوم</button>
+        <button class="ex-chip" data-chip="free">🛵 توصيل مجاني</button>
+      </div>
+    </div>
+    <div class="ex-feats">
+      <div class="ex-feat"><i style="background:#f3e8ff">🎁</i><div><strong>شحن مجاني</strong><small>على أول 3 طلبات لك</small></div></div>
+      <div class="ex-feat"><i style="background:#ede9fe">📡</i><div><strong>تتبع حي GPS</strong><small>دقة حركة خطوة بخطوة</small></div></div>
+      <div class="ex-feat"><i style="background:#ffedd5">٪</i><div><strong>خصومات 50%</strong><small>عروض مطاعم حصرية</small></div></div>
+    </div>
+  </div>
+  <div class="ex-show" id="ex-showcase"><div class="ex-show-img"><img id="ex-show-img" alt=""><span class="ex-pill flash">⚡ Velox Flash</span><span class="ex-pill rate" id="ex-show-rate"></span><div class="ex-show-cap"><div><h3 id="ex-show-name"></h3><p id="ex-show-store"></p></div><strong id="ex-show-price"></strong></div></div>
+    <div class="ex-stats"><div><small>نسبة رضا العملاء</small><strong id="ex-stat-rating">–</strong></div><div><small>طلب مكتمل</small><strong id="ex-stat-orders">–</strong></div><div><small>السرعة المتوسطة</small><strong id="ex-stat-speed">–</strong></div></div>
+    <div class="ex-addbar"><button class="ex-btn" id="ex-show-add">🛒 أضف للطلب الآن</button><div class="ex-qty"><button id="ex-qty-dec">−</button><span id="ex-qty">1</span><button id="ex-qty-inc">+</button></div></div>
+  </div>
+</div></section>
+
+<section class="ex-sec"><div class="ex-wrap">
+  <div class="ex-sec-head"><h2>🍽️ استكشف حسب المطبخ والأكلات</h2><div><button class="ex-chip" id="ex-cat-prev">→</button> <button class="ex-chip" id="ex-cat-next">←</button></div></div>
+  <div class="ex-cats" id="ex-cats"></div>
+</div></section>
+
+<section class="ex-sec" id="ex-coupons"><div class="ex-wrap">
+  <div class="ex-sec-head"><div><span class="eyebrow" style="color:var(--ex-violet);font-size:12px;font-weight:800">عروض التوفير الأسبوعية</span><h2>🔥 كوبونات وخصومات فيلوكس الحصرية</h2></div><a href="restaurants.html" style="font-size:12px;font-weight:800;color:var(--ex-primary2)">شاهد كافة العروض ←</a></div>
+  <div class="ex-coupons" id="ex-coupon-grid"></div>
+</div></section>
+
+<section class="ex-sec"><div class="ex-wrap">
+  <div class="ex-sec-head"><div><span class="eyebrow" style="color:var(--ex-violet);font-size:12px;font-weight:800">مطاعم المدن الكبرى</span><h2>المطاعم الشريكة الأعلى تقييماً</h2></div><div><button class="ex-chip" id="ex-sort-fee">توصيل مجاني</button> <button class="ex-chip" id="ex-sort-rate">الأعلى تقييماً</button> <button class="ex-chip is-active" id="ex-sort-fast">الأسرع</button></div></div>
+  <div class="ex-rests" id="ex-rests"></div>
+</div></section>
+
+<section class="ex-sec"><div class="ex-wrap">
+  <div class="ex-sec-head"><div><span class="eyebrow" style="color:var(--ex-violet);font-size:12px;font-weight:800">تحديث مستمر للطلبات في منطقتك</span><h2>أشهر الوجبات الأكثر طلباً اليوم</h2></div></div>
+  <div class="ex-dishes" id="ex-dishes"></div>
+</div></section>
+</main>
+
+<div id="ex-tracker" hidden><div class="ex-track-row"><span>🛵</span><span id="ex-track-label"></span><div class="ex-track-bar"><div class="ex-track-fill" id="ex-track-fill"></div></div><span id="ex-track-pct"></span></div></div>
+
+<footer class="ex-footer"><div class="ex-wrap ex-foot-grid">
+  <div><h4>VELOX EXPRESS 🛵</h4><p style="font-size:12px;color:var(--ex-muted);line-height:1.9">توصيل أسرع لكل ما تحتاجه: أكل وأزياء وإلكترونيات من متاجر موثوقة في كل المحافظات.</p></div>
+  <div><h4>روابط سريعة</h4><a href="home.html">الرئيسية</a><a href="restaurants.html">المطاعم</a><a href="orders.html">طلباتي</a><a href="support.html">المساعدة</a></div>
+  <div><h4>حسابي</h4><a href="account.html">الملف الشخصي</a><a href="account.html">المحفظة</a><a href="favorites.html">المفضلة</a><a href="login.html">تسجيل الدخول</a></div>
+  <div><h4>تطبيقات الهاتف</h4><a href="#">App Store ⬇</a><a href="#">Google Play ⬇</a></div>
+</div></footer>
+
+<script src="js/config.js"></script>
+<script src="js/services/apiClient.js"></script>
+<script src="js/services/authService.js"></script>
+<script src="js/pages/expressPage.js"></script>
+</body></html>
