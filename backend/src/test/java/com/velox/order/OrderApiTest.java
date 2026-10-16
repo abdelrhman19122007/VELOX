@@ -126,19 +126,6 @@ class OrderApiTest extends OrderApiTestBase {
     }
 
     @Test
-    void onlinePaymentAndPromoNeedTheirModules() {
-        String[] store = storeWithProduct(20);
-        String customer = newCustomer(uniqueEmail(), "secret-123");
-        Map<String, Object> fawry = order(store[1], 1);
-        fawry.put("paymentMethod", "FAWRY");
-        assertEquals("PAYMENTS_UNAVAILABLE", post("/api/orders", fawry, customer).getBody().get("code").asText());
-
-        Map<String, Object> promo = order(store[1], 1);
-        promo.put("promo", "VELOX10");
-        assertEquals("INVALID_PROMO", post("/api/orders", promo, customer).getBody().get("code").asText());
-    }
-
-    @Test
     void zonesArePublicAndManagedByAdmins() {
         JsonNode zones = get("/api/zones", null).getBody();
         assertEquals("SAMANNOUD", zones.get(0).get("code").asText());

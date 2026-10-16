@@ -91,6 +91,7 @@ public class OrderService {
         lifecycle.created(id, first, customer);
         if (starter != null) {
             starter.start(saved, r.walletPhone());
+            saved = orders.findById(saved.id()).orElseThrow();   // a wallet payment is already PAID + PLACED
         }
         return views.of(saved);
     }
