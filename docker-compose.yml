@@ -1,0 +1,15 @@
+# Local PostgreSQL for development:  docker compose up -d
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: velox-db
+    environment:
+      POSTGRES_DB: velox
+      POSTGRES_USER: velox
+      POSTGRES_PASSWORD: velox   # local only — production uses DB_PASSWORD from the environment
+    ports:
+      - "5432:5432"
+    volumes:
+      - velox-db:/var/lib/postgresql/data
+volumes:
+  velox-db:
