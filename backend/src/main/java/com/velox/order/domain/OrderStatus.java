@@ -27,11 +27,11 @@ public enum OrderStatus {
                     PLACED, Set.of(Actor.SYSTEM),
                     CANCELLED, Set.of(Actor.CUSTOMER, Actor.SYSTEM, Actor.ADMIN)),
             PLACED, Map.of(
-                    ACCEPTED, Set.of(Actor.RESTAURANT),
+                    ACCEPTED, Set.of(Actor.RESTAURANT, Actor.SYSTEM),   // SYSTEM: an errand taken by a driver
                     REJECTED, Set.of(Actor.RESTAURANT),
                     CANCELLED, Set.of(Actor.CUSTOMER, Actor.SYSTEM, Actor.ADMIN)),
             ACCEPTED, Map.of(
-                    READY, Set.of(Actor.RESTAURANT),
+                    READY, Set.of(Actor.RESTAURANT, Actor.SYSTEM),      // SYSTEM: the errand driver has bought it
                     CANCELLED, Set.of(Actor.SYSTEM, Actor.ADMIN)),
             READY, Map.of(
                     PICKED_UP, Set.of(Actor.DRIVER),
