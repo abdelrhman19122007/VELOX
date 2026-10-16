@@ -40,9 +40,16 @@ legacy/       الكود اللي اتسلم قبل كده (tag: v1.0-submitted)
 | لوحات المطعم والمندوب والأدمن | Raheek (@Raheek25) | `feature/operations` |
 
 ## التشغيل
-> بيتكمّل لما الـ backend ينزل.
+محتاج Java 17 وDocker.
 
 ```bash
-docker compose up -d            # PostgreSQL
-cd backend && ./mvnw spring-boot:run
+docker compose up -d                      # PostgreSQL
+cd backend
+./mvnw spring-boot:run                    # الـ API على http://localhost:8080
+./mvnw verify                             # كل الاختبارات (بتشغّل PostgreSQL مؤقت لوحدها) + تقرير التغطية
+```
+
+أول أدمن بيتعمل من الـ environment (مفيش باسورد جوه الكود):
+```bash
+VELOX_ADMIN_EMAIL=admin@example.com VELOX_ADMIN_PASSWORD='at-least-12-chars' VELOX_TOKEN_SECRET='32+ random chars' ./mvnw spring-boot:run
 ```
