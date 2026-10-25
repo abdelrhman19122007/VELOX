@@ -31,6 +31,8 @@ public class TokenService {
     public record Claims(String publicId, int version) {
     }
 
+    private static final SecureRandom RANDOM = new SecureRandom();
+
     private final byte[] secret;
     private final Clock clock;
 
@@ -40,7 +42,7 @@ public class TokenService {
             log.warn("VELOX_TOKEN_SECRET is missing or shorter than 32 characters — using a random one: "
                     + "sessions end when the server restarts. Set it in production.");
             byte[] random = new byte[32];
-            new SecureRandom().nextBytes(random);
+            RANDOM.nextBytes(random);
             this.secret = random;
         } else {
             this.secret = secret.getBytes(StandardCharsets.UTF_8);
