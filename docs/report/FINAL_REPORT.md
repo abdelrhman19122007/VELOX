@@ -11,13 +11,13 @@
 
 **Team**
 
-| Member | GitHub | Module | Other responsibilities |
+| Member | GitHub | Backend module (Java) | Specialty |
 |---|---|---|---|
-| Nabeeh Mohamed (lead) | @nabosallem-svg | Accounts & security core | architecture, SRS, database, CI, integration, reviews |
-| Hoda | @hodayasser511-stack | Catalogue | ERD, Selenium UI tests, catalogue pentest |
-| Abdelrhman | @abdelrhman19122007 | Orders & delivery | delivery zones, Postman/Newman, user interface, orders pentest |
-| Fady | @fadyza15-collab | Payments, wallet & notifications | JMeter performance tests, payments pentest |
-| Raheek | @Raheek25 | Operations (store, driver, admin) | test plan, Flutter tests, privilege-escalation pentest |
+| Nabeeh Mohamed (lead) | @nabosallem-svg | Accounts & security core | architecture, integration & DevOps: SRS, database, CI/CD + security scans, Docker, API docs, hosting, Flutter app core, performance tests, reviews, this report |
+| Hoda | @hodayasser511-stack | Catalogue | UI/UX design: design system, all screens, usability testing |
+| Abdelrhman | @abdelrhman19122007 | Orders & delivery | web development: web app wired to the API, delivery zones |
+| Fady | @fadyza15-collab | Payments, wallet & notifications | mobile development: Flutter screens, push, Play Store release |
+| Raheek | @Raheek25 | Operations (store, driver, admin) | QA & security testing: test plan/report, Newman, Selenium, security report |
 
 > **Status legend used in this report:** ✅ done and verified · 🟡 in progress · ⬜ planned.
 > Sections marked _[to fill]_ are completed by the module owner after their manual tests.
@@ -274,8 +274,8 @@ stateDiagram-v2
 | **Orders** | server-side pricing, village fees, +10 EGP tuk-tuk surcharge for large items, errands, cash change, scheduled orders, lifecycle, cancel / return, timeouts, live updates | ✅ ready, upload pending |
 | **Payments** | Vodafone Cash (6-digit code, 5 tries), Fawry (9-digit reference), wallet with row locking, refunds, promo codes (percent / fixed / free delivery), loyalty points, inbox + push notifications | ✅ ready, upload pending |
 | **Operations** | store accept / reject / ready and daily numbers, driver online / offers / take / pick up / deliver / location / earnings, one order per driver, vehicle check, admin orders / cancel / stats, reviews, complaints with personal compensation codes | ✅ ready, upload pending |
-| **Web interface** | customer, store and admin pages | 🟡 design in progress (Abdelrhman) |
-| **Flutter app** | one app, screens by role, Arabic RTL | 🟡 v1 app exists; to be connected to the v2 API |
+| **Web interface** | customer, store and admin pages | 🟡 design (Hoda) → build (Abdelrhman) |
+| **Flutter app** | one app, screens by role, Arabic RTL | 🟡 core (Nabeeh) → screens (Fady); v1 app reused where possible |
 
 ### 5.2 Local features
 - **Landmark field** on every address and order.
@@ -365,10 +365,10 @@ Each owner runs the manual cases in their plan and fills in this table, adding s
 | Unit | JUnit 5 (state machine, opening hours, hashing, tokens) | ✅ |
 | Integration / API | Spring Boot Test + **Testcontainers PostgreSQL**: the real app over HTTP, on the real schema and migrations | ✅ |
 | Security | attack tests (above) + manual Burp / ZAP | ✅ automated / 🟡 manual |
-| API collection | Postman / Newman | ⬜ (Abdelrhman) |
-| UI / E2E | Selenium | ⬜ (Hoda), after the web UI |
-| Mobile | Flutter widget / integration tests | ⬜ (Raheek) |
-| Performance | Apache JMeter, 100 users, p95 < 500 ms | ⬜ (Fady) |
+| API collection | Postman / Newman | ⬜ (Raheek) |
+| UI / E2E | Selenium | ⬜ (Raheek, Abdelrhman), after the web UI |
+| Mobile | Flutter widget / integration tests | ⬜ (Fady) |
+| Performance | Apache JMeter, 100 users, p95 < 500 ms | ⬜ (Nabeeh) |
 
 **Why Testcontainers:** tests run on the same database engine, constraints and migrations as production. That
 is what makes the race-condition and constraint tests meaningful, which an in-memory database would not be.
