@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ڤيلوكس — توصيل سمنود</title>
+  <meta name="description" content="اطلب من مطاعم ومحلات وصيدليات سمنود والقرى اللي حواليها، وتابع طلبك لحد باب بيتك.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/tokens.css">
+  <link rel="stylesheet" href="/css/app.css">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <style>
+    .wrap { max-width: 1080px; margin: 0 auto; padding: 0 16px; }
+    header { display: flex; align-items: center; justify-content: space-between; padding: 16px 0; gap: 10px; }
+    .hero { display: grid; grid-template-columns: 1.2fr 1fr; gap: 28px; align-items: center; padding: 28px 0 40px; }
+    .hero h1 { font-size: clamp(30px, 5vw, 46px); line-height: 1.25; }
+    .hero h1 em { font-style: normal; color: var(--primary); }
+    .hero p { font-size: 18px; color: var(--text-2); max-width: 520px; }
+    .phone { background: var(--primary); border-radius: 36px; padding: 26px; color: var(--on-primary); box-shadow: var(--shadow); }
+    .phone .step { display: flex; gap: 12px; align-items: center; background: rgba(255,255,255,.12); border-radius: 16px; padding: 12px 14px; margin-bottom: 10px; font-weight: 700; }
+    .phone .step span { font-size: 22px; }
+    .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px; padding-bottom: 40px; }
+    .features .card h3 { margin-top: 6px; }
+    .cta { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
+    footer { border-top: 1px solid var(--line); padding: 20px 0 30px; color: var(--text-2); font-size: 14px; }
+    @media (max-width: 760px) { .hero { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand" style="padding:0"><span class="logo">🛵</span> ڤيلوكس</div>
+      <a class="btn outline sm" href="/admin/">دخول المحلات والإدارة</a>
+    </header>
+
+    <section class="hero">
+      <div>
+        <span class="chip ok">سمنود والقرى اللي حواليها</span>
+        <h1>طلباتك من قلب <em>سمنود</em> لحد باب بيتك</h1>
+        <p>مطاعم وسوبر ماركت وصيدليات من بلدك، بأسعار واضحة ومواعيد معروفة، وتتابع المندوب على الخريطة لحد ما يوصلك. ومش لاقي اللي عاوزه؟ اطلب "هاتلي أي حاجة".</p>
+        <div class="cta">
+          <a class="btn" href="/app/">اطلب من الموقع</a>
+          <a class="btn outline" href="/downloads/velox.apk" id="apk">⬇ نزّل التطبيق (أندرويد)</a>
+        </div>
+        <p class="small muted" style="margin-top:10px">الدفع: كاش عند الاستلام، فودافون كاش، فوري، أو محفظة ڤيلوكس.</p>
+      </div>
+      <div class="phone" aria-hidden="true">
+        <div class="step"><span>📍</span> اختار منطقتك — سمنود أو قريتك</div>
+        <div class="step"><span>🍽️</span> اختار المحل والأصناف واكتب ملاحظتك</div>
+        <div class="step"><span>🏁</span> اكتب علامة مميزة جنب بيتك</div>
+        <div class="step"><span>🛵</span> تابع المندوب لحد الباب</div>
+      </div>
+    </section>
+
+    <section class="features">
+      <div class="card"><span>🧾</span><h3>السعر واضح قبل ما تطلب</h3><p class="muted">تمن الأصناف والتوصيل والخصم قدامك، والسعر بيتحسب من المنيو الحقيقي.</p></div>
+      <div class="card"><span>🛺</span><h3>أنبوبة أو كرتونة؟</h3><p class="muted">الحاجات الكبيرة بتروح لتوكتوك أو عربية بس، عشان توصلك سليمة.</p></div>
+      <div class="card"><span>🛒</span><h3>هاتلي أي حاجة</h3><p class="muted">اكتب اللي محتاجه والمندوب يشتريه من أي محل في البلد.</p></div>
+      <div class="card"><span>🔔</span><h3>إشعار في كل خطوة</h3><p class="muted">المحل قبل، الطلب جاهز، المندوب في الطريق، وصل.</p></div>
+      <div class="card"><span>🔒</span><h3>بياناتك في أمان</h3><p class="muted">عنوانك ورقمك بيظهروا للمحل والمندوب بتوع طلبك بس.</p></div>
+      <div class="card"><span>🏪</span><h3>عندك محل؟</h3><p class="muted">كلّمنا ونضيفك. هتستلم الطلبات على لوحة بسيطة من الموبايل أو الكمبيوتر.</p></div>
+    </section>
+
+    <footer>ڤيلوكس — مشروع فريق مبادرة رواد مصر الرقمية (DEPI)، تراك اختبار الاختراق.</footer>
+  </div>
+</body>
+</html>

@@ -28,3 +28,6 @@ velox-backend/src/main/resources/application.properties
 # Firebase keys and uploaded files (never commit)
 .firebase/
 backend/uploads/
+
+# Built files served by the server (not source)
+web/downloads/
