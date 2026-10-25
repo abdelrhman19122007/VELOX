@@ -19,6 +19,12 @@ import com.velox.common.error.ApiException;
 @Component
 public class LoginThrottle {
 
+    /** Failed sign-ins for an email since its last successful one (fixed SQL: no column names are built at run time). */
+    private static final String EMAIL_FAILURES_SINCE_LAST_SUCCESS = "SELECT COUNT(*) FROM login_attempts a "
+            + "WHERE a.email = ? AND NOT a.success AND a.at >= ? AND a.at > COALESCE("
+            + "(SELECT MAX(s.at) FROM login_attempts s WHERE s.email = ? AND s.success), TIMESTAMP '1970-01-01')";
+    private static final String IP_FAILURES = "SELECT COUNT(*) FROM login_attempts WHERE ip = ? AND NOT success AND at >= ?";
+
     static final Duration WINDOW = Duration.ofMinutes(10);
     static final int MAX_FAILURES_PER_EMAIL = 5;
     static final int MAX_FAILURES_PER_IP = 30;
@@ -34,8 +40,8 @@ public class LoginThrottle {
     /** Throws 429 TOO_MANY_LOGINS when this email or network has failed too often recently. */
     public void check(String email, String ip) {
         Timestamp since = Timestamp.from(clock.instant().minus(WINDOW));
-        if (failuresSinceLastSuccess("email", email, since) >= MAX_FAILURES_PER_EMAIL
-                || (ip != null && failures("ip", ip, since) >= MAX_FAILURES_PER_IP)) {
+        if (count(EMAIL_FAILURES_SINCE_LAST_SUCCESS, email, since, email) >= MAX_FAILURES_PER_EMAIL
+                || (ip != null && count(IP_FAILURES, ip, since) >= MAX_FAILURES_PER_IP)) {
             throw new ApiException(HttpStatus.TOO_MANY_REQUESTS, "TOO_MANY_LOGINS",
                     "Too many wrong passwords, try again later", Map.of("minutes", WINDOW.toMinutes()));
         }
@@ -51,16 +57,8 @@ public class LoginThrottle {
         record(email, null, true);
     }
 
-    private int failuresSinceLastSuccess(String column, String value, Timestamp since) {
-        Integer n = db.queryForObject("SELECT COUNT(*) FROM login_attempts a WHERE a." + column + " = ? AND NOT a.success "
-                + "AND a.at >= ? AND a.at > COALESCE((SELECT MAX(s.at) FROM login_attempts s WHERE s." + column
-                + " = ? AND s.success), TIMESTAMP '1970-01-01')", Integer.class, value, since, value);
-        return n == null ? 0 : n;
-    }
-
-    private int failures(String column, String value, Timestamp since) {
-        Integer n = db.queryForObject("SELECT COUNT(*) FROM login_attempts WHERE " + column + " = ? AND NOT success AND at >= ?",
-                Integer.class, value, since);
+    private int count(String sql, Object... args) {
+        Integer n = db.queryForObject(sql, Integer.class, args);
         return n == null ? 0 : n;
     }
 }

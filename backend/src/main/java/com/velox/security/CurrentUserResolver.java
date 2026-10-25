@@ -35,7 +35,8 @@ public class CurrentUserResolver implements HandlerMethodArgumentResolver {
     public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mav, NativeWebRequest request,
                                   WebDataBinderFactory binderFactory) {
         AuthUser user = authenticate(request.getHeader("Authorization"));
-        boolean required = parameter.getParameterAnnotation(CurrentUser.class).required();
+        CurrentUser annotation = parameter.getParameterAnnotation(CurrentUser.class);
+        boolean required = annotation == null || annotation.required();
         if (user == null && required) {
             throw ApiException.unauthorized();
         }
