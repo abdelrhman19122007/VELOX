@@ -8,10 +8,19 @@ final class IdSequence {
     private IdSequence() {
     }
 
-    /** {@code table} is a constant from this package, never user input. */
+    private static final String MAX_STORE_ID =
+            "SELECT COALESCE(MAX(CAST(SUBSTRING(id FROM ?) AS INTEGER)), 0) FROM stores WHERE id ~ ?";
+    private static final String MAX_PRODUCT_ID =
+            "SELECT COALESCE(MAX(CAST(SUBSTRING(id FROM ?) AS INTEGER)), 0) FROM products WHERE id ~ ?";
+
+    /** {@code table} is "stores" or "products"; the SQL is fixed text, never built from input. */
     static String next(JdbcTemplate db, String table, String prefix) {
-        Integer max = db.queryForObject("SELECT COALESCE(MAX(CAST(SUBSTRING(id FROM ?) AS INTEGER)), 0) FROM " + table
-                + " WHERE id ~ ?", Integer.class, prefix.length() + 1, "^" + prefix + "[0-9]+$");
+        String sql = switch (table) {
+            case "stores" -> MAX_STORE_ID;
+            case "products" -> MAX_PRODUCT_ID;
+            default -> throw new IllegalArgumentException("Unknown table " + table);
+        };
+        Integer max = db.queryForObject(sql, Integer.class, prefix.length() + 1, "^" + prefix + "[0-9]+$");
         return prefix + ((max == null ? 0 : max) + 1);
     }
 }

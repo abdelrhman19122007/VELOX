@@ -67,7 +67,8 @@ public class FeedbackRepository {
     }
 
     public int openComplaints() {
-        return db.queryForObject("SELECT COUNT(*) FROM complaints WHERE status = 'OPEN'", Integer.class);
+        Integer n = db.queryForObject("SELECT COUNT(*) FROM complaints WHERE status = 'OPEN'", Integer.class);
+        return n == null ? 0 : n;
     }
 
     /** Only an open complaint can be closed (closing twice would hand out two compensations). */
