@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Findings reviewed and accepted, each with the reason. Keep this list short. -->
+<FindBugsFilter>
+    <!-- Records and Spring beans expose / store collaborators by design (dependency injection, immutable records). -->
+    <Match>
+        <Bug pattern="EI_EXPOSE_REP,EI_EXPOSE_REP2,CT_CONSTRUCTOR_THROW"/>
+    </Match>
+</FindBugsFilter>
