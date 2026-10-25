@@ -18,6 +18,7 @@ import com.velox.order.domain.Order;
 import com.velox.order.domain.OrderKind;
 import com.velox.order.domain.OrderStatus;
 import com.velox.order.dto.OrderDtos.OrderView;
+import com.velox.order.live.EventHub;
 import com.velox.order.repository.OrderRepository;
 import com.velox.order.service.OrderLifecycle;
 import com.velox.order.service.OrderViews;
@@ -42,16 +43,18 @@ public class DriverService {
     private final OrderLifecycle lifecycle;
     private final OrderViews views;
     private final ApplicationEventPublisher events;
+    private final EventHub hub;
     private final Clock clock;
 
     public DriverService(DriverRepository drivers, OperationsRepository ops, OrderRepository orders, OrderLifecycle lifecycle,
-                         OrderViews views, ApplicationEventPublisher events, Clock clock) {
+                         OrderViews views, ApplicationEventPublisher events, EventHub hub, Clock clock) {
         this.drivers = drivers;
         this.ops = ops;
         this.orders = orders;
         this.lifecycle = lifecycle;
         this.views = views;
         this.events = events;
+        this.hub = hub;
         this.clock = clock;
     }
 
@@ -67,10 +70,14 @@ public class DriverService {
         return status(me);
     }
 
+    /** Saves where the driver is and moves the driver on the customer's map at once (live tracking). */
     public void location(AuthUser me, double lat, double lng) {
         me.require(Role.DRIVER);
         if (!drivers.setLocation(me.id(), lat, lng)) {
             throw ApiException.conflict("NOT_ONLINE", "Go online first");
+        }
+        for (long id : ops.driverOrders(me.id(), true)) {
+            orders.findById(id).ifPresent(o -> hub.sendTo(orders.participants(id), "order", views.of(o)));
         }
     }
 

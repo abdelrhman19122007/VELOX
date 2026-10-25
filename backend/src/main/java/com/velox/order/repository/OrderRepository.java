@@ -11,7 +11,6 @@ import java.util.Optional;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Repository;
 
 import com.velox.order.domain.Order;
@@ -24,6 +23,9 @@ import com.velox.order.domain.PaymentStatus;
 /** SQL for orders, their items and their status timeline. Parameterised queries only. */
 @Repository
 public class OrderRepository {
+
+    private static final String STALE = "SELECT id FROM orders WHERE status = ? AND updated_at < ?";
+    private static final String STALE_WITHOUT_DRIVER = STALE + " AND driver_id IS NULL";
 
     /** One step of the timeline: status and when. */
     public record Step(OrderStatus status, Instant at) {
@@ -41,36 +43,16 @@ public class OrderRepository {
 
     /** Saves a new order with its items and returns its database id. */
     public long insert(Order o, List<OrderItem> items) {
-        GeneratedKeyHolder key = new GeneratedKeyHolder();
-        db.update(con -> {
-            var ps = con.prepareStatement("INSERT INTO orders (code, kind, customer_id, store_id, status, zone, phone, address, "
-                    + "landmark, lat, lng, errand_details, subtotal, discount, delivery_fee, total, cash_change_for, payment_method, "
-                    + "payment_status, promo, scheduled_for) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", new String[] {"id"});
-            int i = 1;
-            ps.setString(i++, o.code());
-            ps.setString(i++, o.kind().name());
-            ps.setLong(i++, o.customerId());
-            ps.setString(i++, o.storeId());
-            ps.setString(i++, o.status().name());
-            ps.setString(i++, o.zone());
-            ps.setString(i++, o.phone());
-            ps.setString(i++, o.address());
-            ps.setString(i++, o.landmark());
-            ps.setObject(i++, o.lat());
-            ps.setObject(i++, o.lng());
-            ps.setString(i++, o.errandDetails());
-            ps.setBigDecimal(i++, o.subtotal());
-            ps.setBigDecimal(i++, o.discount());
-            ps.setBigDecimal(i++, o.deliveryFee());
-            ps.setBigDecimal(i++, o.total());
-            ps.setBigDecimal(i++, o.cashChangeFor());
-            ps.setString(i++, o.paymentMethod().name());
-            ps.setString(i++, o.paymentStatus().name());
-            ps.setString(i++, o.promo());
-            ps.setTimestamp(i, o.scheduledFor() == null ? null : Timestamp.from(o.scheduledFor()));
-            return ps;
-        }, key);
-        long id = key.getKey().longValue();
+        Long id = db.queryForObject("INSERT INTO orders (code, kind, customer_id, store_id, status, zone, phone, address, "
+                + "landmark, lat, lng, errand_details, subtotal, discount, delivery_fee, total, cash_change_for, payment_method, "
+                + "payment_status, promo, scheduled_for) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) RETURNING id", Long.class,
+                o.code(), o.kind().name(), o.customerId(), o.storeId(), o.status().name(), o.zone(), o.phone(), o.address(),
+                o.landmark(), o.lat(), o.lng(), o.errandDetails(), o.subtotal(), o.discount(), o.deliveryFee(), o.total(),
+                o.cashChangeFor(), o.paymentMethod().name(), o.paymentStatus().name(), o.promo(),
+                o.scheduledFor() == null ? null : Timestamp.from(o.scheduledFor()));
+        if (id == null) {
+            throw new IllegalStateException("The order was not saved");
+        }
         for (OrderItem item : items) {
             db.update("INSERT INTO order_items (order_id, product_id, name, name_ar, unit_price, qty, note) VALUES (?,?,?,?,?,?,?)",
                     id, item.productId(), item.name(), item.nameAr(), item.unitPrice(), item.qty(), item.note());
@@ -122,8 +104,7 @@ public class OrderRepository {
 
     /** Orders in {@code status} not moved since {@code before} (for automatic timeouts). */
     public List<Long> stale(OrderStatus status, Instant before, boolean onlyWithoutDriver) {
-        return db.queryForList("SELECT id FROM orders WHERE status = ? AND updated_at < ?"
-                + (onlyWithoutDriver ? " AND driver_id IS NULL" : ""), Long.class, status.name(), Timestamp.from(before));
+        return db.queryForList(onlyWithoutDriver ? STALE_WITHOUT_DRIVER : STALE, Long.class, status.name(), Timestamp.from(before));
     }
 
     /** Accounts that follow this order live: its customer, its store's staff and its driver. */

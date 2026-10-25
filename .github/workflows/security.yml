@@ -1,6 +1,6 @@
 # Security checks (OWASP A03 / A06 / A05). Results appear in the repository's Security tab and as artifacts.
 #  - CodeQL:   static analysis of the Java code (injection, path traversal, weak crypto…)
-#  - SpotBugs + FindSecBugs: second static analyser, report only for now (each member fixes their module's findings)
+#  - SpotBugs + FindSecBugs: second static analyser; any new finding fails the build
 #  - Trivy:    known vulnerabilities in dependencies (pom.xml) and misconfigurations in the Dockerfile
 #  - ZAP:      baseline scan of the running API (headers, cookies, information leaks)
 name: security
@@ -40,7 +40,6 @@ jobs:
         with: { distribution: temurin, java-version: "17", cache: maven }
       - name: SpotBugs + FindSecBugs
         run: cd backend && chmod +x mvnw && ./mvnw -q -B compile spotbugs:check
-        continue-on-error: true   # becomes blocking once every module's findings are fixed
       - name: Report
         if: always()
         run: cd backend && ./mvnw -q -B spotbugs:spotbugs
