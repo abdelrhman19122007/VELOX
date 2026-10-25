@@ -1,4 +1,5 @@
-# Local PostgreSQL for development:  docker compose up -d
+# Local development:      docker compose up -d db          (PostgreSQL only; run the API with ./mvnw spring-boot:run)
+# Whole stack in Docker:  docker compose --profile app up -d --build   → API on http://localhost:8080
 services:
   db:
     image: postgres:16-alpine
@@ -11,5 +12,33 @@ services:
       - "5432:5432"
     volumes:
       - velox-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U velox"]
+      interval: 5s
+      retries: 10
+
+  api:
+    profiles: ["app"]
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: velox-api
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_URL: jdbc:postgresql://db:5432/velox
+      DB_USER: velox
+      DB_PASSWORD: velox
+      VELOX_TOKEN_SECRET: ${VELOX_TOKEN_SECRET:-local-dev-secret-change-me-at-least-32-chars}
+      VELOX_ADMIN_EMAIL: ${VELOX_ADMIN_EMAIL:-}
+      VELOX_ADMIN_PASSWORD: ${VELOX_ADMIN_PASSWORD:-}
+      VELOX_API_DOCS: "true"
+    ports:
+      - "8080:8080"
+    volumes:
+      - velox-uploads:/app/uploads
+
 volumes:
   velox-db:
+  velox-uploads:
