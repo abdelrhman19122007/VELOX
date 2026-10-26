@@ -31,3 +31,7 @@ backend/uploads/
 
 # Built files served by the server (not source)
 web/downloads/
+
+# Deployment secrets and logs (never commit)
+deploy/.env
+deploy/logs/
