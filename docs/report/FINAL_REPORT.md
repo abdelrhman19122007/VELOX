@@ -34,7 +34,7 @@ requirement is mapped to the OWASP Top 10 (2021). Every module ships with automa
 penetration-test plan written by its owner.
 
 The backend is a Java 17 / Spring Boot REST API on PostgreSQL, organised as five modules with a clean layered
-architecture and classic design patterns (State, Strategy, Observer). It is covered by **92 automated tests**
+architecture and classic design patterns (State, Strategy, Observer). It is covered by **94 automated backend tests**
 that run against a real PostgreSQL database, with **86 % instruction coverage**. Development already found and
 fixed a real high-severity vulnerability: unlimited guessing of the mobile-wallet confirmation code.
 
@@ -274,8 +274,8 @@ stateDiagram-v2
 | **Orders** | server-side pricing, village fees, +10 EGP tuk-tuk surcharge for large items, errands, cash change, scheduled orders, lifecycle, cancel / return, timeouts, live updates | ✅ ready, upload pending |
 | **Payments** | Vodafone Cash (6-digit code, 5 tries), Fawry (9-digit reference), wallet with row locking, refunds, promo codes (percent / fixed / free delivery), loyalty points, inbox + push notifications | ✅ ready, upload pending |
 | **Operations** | store accept / reject / ready and daily numbers, driver online / offers / take / pick up / deliver / location / earnings, one order per driver, vehicle check, admin orders / cancel / stats, reviews, complaints with personal compensation codes | ✅ ready, upload pending |
-| **Web interface** | customer, store and admin pages | 🟡 design (Hoda) → build (Abdelrhman) |
-| **Flutter app** | one app, screens by role, Arabic RTL | 🟡 core (Nabeeh) → screens (Fady); v1 app reused where possible |
+| **Website + dashboard** | landing page; admin (stores, menus with CSV import and photos, areas, promos, users, orders, complaints, numbers); store board with live orders | ✅ |
+| **Flutter app** | one app for customer / store / driver / admin, Arabic RTL, live tracking map, push; Android APK + same app on the web at /app | ✅ |
 
 ### 5.2 Local features
 - **Landmark field** on every address and order.
@@ -311,7 +311,7 @@ stateDiagram-v2
 | **A03 Injection** | Only parameterised SQL; LIKE wildcards escaped in search; status filters parsed to enums; `<` and `>` refused in free text (stored-XSS prevention) | SQLi / XSS cases in catalogue, orders, operations tests |
 | **A04 Insecure Design** | Server-side prices; state machine; conditional updates against races (`WHERE status = …`, `WHERE driver_id IS NULL`); wallet row lock; one order per driver; refunds in the same transaction | price-tampering, replay, race and lifecycle tests |
 | **A05 Security Misconfiguration** | No default credentials; generic errors; CORS allow-list; security headers (`nosniff`, `DENY` framing, referrer and permissions policy, `no-store` for API responses) | `AuthApiTest`, headers check |
-| **A06 Vulnerable Components** | Current Spring Boot 3.3; dependency scanning in CI | ⬜ OWASP Dependency-Check job planned |
+| **A06 Vulnerable Components** | Current Spring Boot 3.3; dependency scanning in CI | ✅ Trivy dependency + Dockerfile scan and CodeQL in CI (weekly too) |
 | **A07 Authentication Failures** | Lockout after 5 failures per email / 30 per IP in 10 minutes; token revocation (sign out everywhere, password change, block); 5-try limit on payment codes; identical error for every wrong promo code | `AuthApiTest`, `OnlinePaymentApiTest` |
 | **A08 Integrity Failures** | Uploads checked by magic bytes, 2 MB limit, random file names, never executed | `UploadApiTest` |
 | **A09 Logging & Monitoring** | `audit_log` for admin actions, blocks, password resets, order cancels, complaint closing; failed logins recorded | audit assertions in tests |
@@ -365,16 +365,16 @@ Each owner runs the manual cases in their plan and fills in this table, adding s
 | Unit | JUnit 5 (state machine, opening hours, hashing, tokens) | ✅ |
 | Integration / API | Spring Boot Test + **Testcontainers PostgreSQL**: the real app over HTTP, on the real schema and migrations | ✅ |
 | Security | attack tests (above) + manual Burp / ZAP | ✅ automated / 🟡 manual |
-| API collection | Postman / Newman | ⬜ (Raheek) |
-| UI / E2E | Selenium | ⬜ (Raheek, Abdelrhman), after the web UI |
-| Mobile | Flutter widget / integration tests | ⬜ (Fady) |
-| Performance | Apache JMeter, 100 users, p95 < 500 ms | ⬜ (Nabeeh) |
+| API collection | Postman / Newman | ✅ 30 requests, 42/42 assertions |
+| UI / E2E | Selenium (headless Chrome) | ✅ 4/4 |
+| Mobile | Flutter tests + analyzer | ✅ 6/6, no analyzer issues |
+| Performance | JMeter plan + Python load check, 100 users | ✅ p95 116 ms, 0 errors (dev PC) |
 
 **Why Testcontainers:** tests run on the same database engine, constraints and migrations as production. That
 is what makes the race-condition and constraint tests meaningful, which an in-memory database would not be.
 
 ### 7.2 Results (backend, October 2026)
-**92 tests, 0 failures. Instruction coverage 86 %** (JaCoCo). The SRS target is ≥ 70 %.
+**94 tests, 0 failures. Instruction coverage 86 %** (JaCoCo). The SRS target is ≥ 70 %.
 
 | Module | Test classes | Tests | Coverage |
 |---|---|---|---|
@@ -383,7 +383,8 @@ is what makes the race-condition and constraint tests meaningful, which an in-me
 | Orders | OrderStatusTest, OrderApiTest, OrderLifecycleTest | 16 | 88 % |
 | Payments & notifications | OnlinePaymentApiTest, WalletAndPromoApiTest, NotificationApiTest | 18 | payment 95 %, notification 56 %* |
 | Operations | RestaurantOrderApiTest, DriverApiTest, AdminAndFeedbackApiTest | 16 | 95 % |
-| **Total** | **18 classes** | **92** | **86 %** |
+| Core config (API docs) | ApiDocsTest | 2 | — |
+| **Total** | **19 classes** | **94** | **86 %** |
 
 \* Push delivery to Firebase isn't exercised in CI: there is no Firebase project in the test environment, and
 we don't call external services from tests. The inbox and device registration are fully tested.
@@ -408,6 +409,14 @@ we don't call external services from tests. The inbox and device registration ar
 - a privacy policy (Egyptian Law 151/2020: phone and address are shown only to the order's parties).
 
 ---
+
+## 8b. Security tooling added in the last iteration
+- **SpotBugs + FindSecBugs** (blocking): 4 findings in the core and 8 in the modules, all fixed — SQL is now fixed text
+  everywhere, null-safe counts, `INSERT … RETURNING id`.
+- **CodeQL** (security-extended), **Trivy** (dependencies + Dockerfile) and an **OWASP ZAP baseline** scan of the
+  running API in `.github/workflows/security.yml`.
+- **OpenAPI / Swagger UI** for the web, mobile and test members; switched off in production.
+- **Docker image** that runs as a non-root user.
 
 ## 9. Challenges and solutions
 | Challenge | Solution |

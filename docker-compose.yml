@@ -9,7 +9,7 @@ services:
       POSTGRES_USER: velox
       POSTGRES_PASSWORD: velox   # local only — production uses DB_PASSWORD from the environment
     ports:
-      - "5432:5432"
+      - "${VELOX_DB_PORT:-5432}:5432"   # VELOX_DB_PORT=5434 when a local PostgreSQL already uses 5432
     volumes:
       - velox-db:/var/lib/postgresql/data
     healthcheck:
