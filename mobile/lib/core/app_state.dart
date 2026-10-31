@@ -26,7 +26,7 @@ class AppState extends ChangeNotifier {
   final api = Api();
   late SharedPreferences _prefs;
 
-  String lang = 'ar';
+  String lang = 'en';
   ThemeMode themeMode = ThemeMode.light;
   User? user;
   bool ready = false;
@@ -81,6 +81,13 @@ class AppState extends ChangeNotifier {
 
   String storeName(Store s) => ar ? s.nameAr : s.name;
   String productName(Product p) => ar ? p.nameAr : p.name;
+
+  /// The description in the app's language, falling back to the other one.
+  String? productDesc(Product p) {
+    final first = ar ? p.description : p.descriptionEn;
+    final d = (first ?? '').trim().isNotEmpty ? first : (ar ? p.descriptionEn : p.description);
+    return (d ?? '').trim().isEmpty ? null : d!.trim();
+  }
   String itemName(OrderItem i) => ar ? i.nameAr : i.name;
   bool get isCustomer => user?.role == 'CUSTOMER';
 
@@ -88,7 +95,7 @@ class AppState extends ChangeNotifier {
   Future<void> init() async {
     _prefs = await SharedPreferences.getInstance();
     serverOverride = _prefs.getString('server');
-    lang = _prefs.getString('lang') ?? 'ar';
+    lang = _prefs.getString('lang') ?? 'en';
     themeMode = ThemeMode.values[_prefs.getInt('theme') ?? ThemeMode.light.index];
     zone = _prefs.getString('zone') ?? 'SAMANNOUD';
     phone = _prefs.getString('phone') ?? '';

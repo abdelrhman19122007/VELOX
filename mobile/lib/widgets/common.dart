@@ -55,6 +55,29 @@ String timeText(BuildContext context, DateTime? t) {
 }
 
 /// A store's picture, or — when it has none — its type icon on a warm gradient (never a fake photo).
+/// Photos fade in when they arrive instead of popping in.
+Widget _fadeIn(BuildContext context, Widget child, int? frame, bool sync) => sync
+    ? child
+    : AnimatedOpacity(opacity: frame == null ? 0 : 1, duration: const Duration(milliseconds: 350), curve: Curves.easeOut, child: child);
+
+/// List items rise and fade in one after another when a list first shows.
+class FadeSlideIn extends StatelessWidget {
+  final int index;
+  final Widget child;
+  const FadeSlideIn({super.key, required this.index, required this.child});
+  @override
+  Widget build(BuildContext context) {
+    final delay = index.clamp(0, 8) * 60;
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: Duration(milliseconds: 380 + delay),
+      curve: Interval(delay / (380 + delay), 1, curve: Curves.easeOutCubic),
+      builder: (c, v, child) => Opacity(opacity: v, child: Transform.translate(offset: Offset(0, 24 * (1 - v)), child: child)),
+      child: child,
+    );
+  }
+}
+
 class StoreImage extends StatelessWidget {
   final String? photoUrl;
   final String type;
@@ -95,7 +118,7 @@ class StoreImage extends StatelessWidget {
               width: double.infinity,
               fit: BoxFit.cover,
               errorBuilder: (_, _, _) => placeholder,
-              loadingBuilder: (c, child, p) => p == null ? child : placeholder),
+              frameBuilder: _fadeIn),
     );
   }
 }
@@ -118,7 +141,7 @@ class ProductImage extends StatelessWidget {
       borderRadius: BorderRadius.circular(14),
       child: url == null
           ? box
-          : Image.network(url, width: size, height: size, fit: BoxFit.cover, errorBuilder: (_, _, _) => box),
+          : Image.network(url, width: size, height: size, fit: BoxFit.cover, errorBuilder: (_, _, _) => box, frameBuilder: _fadeIn),
     );
   }
 }

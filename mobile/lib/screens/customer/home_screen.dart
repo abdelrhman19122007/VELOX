@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -126,6 +128,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
             ),
+            // featured stores with photos
+            if (s.stores.any((st) => st.photoUrl != null)) ...[
+              SliverToBoxAdapter(child: SectionTitle(s.t('featured'))),
+              SliverToBoxAdapter(child: _Featured(s.stores.where((st) => st.photoUrl != null).toList())),
+            ],
             // offers
             SliverToBoxAdapter(child: SectionTitle(s.t('offers'))),
             SliverToBoxAdapter(
@@ -227,7 +234,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 sliver: SliverList.separated(
                   itemCount: list.length,
                   separatorBuilder: (_, _) => const SizedBox(height: 14),
-                  itemBuilder: (c, i) => StoreCard(list[i]),
+                  itemBuilder: (c, i) => FadeSlideIn(index: i, child: StoreCard(list[i])),
                 ),
               ),
           ]),
@@ -274,6 +281,105 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
+/// Big photo cards that slide by themselves, for stores that have a photo.
+class _Featured extends StatefulWidget {
+  final List<Store> stores;
+  const _Featured(this.stores);
+  @override
+  State<_Featured> createState() => _FeaturedState();
+}
+
+class _FeaturedState extends State<_Featured> {
+  final page = PageController(viewportFraction: 0.88);
+  Timer? timer;
+  int current = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.stores.length > 1) {
+      timer = Timer.periodic(const Duration(seconds: 4), (_) {
+        if (!page.hasClients) return;
+        page.animateToPage((current + 1) % widget.stores.length,
+            duration: const Duration(milliseconds: 600), curve: Curves.easeOutCubic);
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    timer?.cancel();
+    page.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final s = context.watch<AppState>();
+    final cs = Theme.of(context).colorScheme;
+    return Column(children: [
+      SizedBox(
+        height: 190,
+        child: PageView.builder(
+          controller: page,
+          itemCount: widget.stores.length,
+          onPageChanged: (i) => setState(() => current = i),
+          itemBuilder: (c, i) {
+            final st = widget.stores[i];
+            final tagline = s.ar ? st.taglineAr : st.tagline;
+            return AnimatedScale(
+              scale: i == current ? 1 : 0.94,
+              duration: const Duration(milliseconds: 300),
+              child: GestureDetector(
+                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => StoreScreen(storeId: st.id))),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 6),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(20),
+                    child: Stack(fit: StackFit.expand, children: [
+                      StoreImage(photoUrl: st.photoUrl, type: st.type, height: 190),
+                      const DecoratedBox(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                              begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Colors.transparent, Colors.black87]),
+                        ),
+                      ),
+                      PositionedDirectional(
+                        start: 16,
+                        end: 16,
+                        bottom: 14,
+                        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                          Text(s.storeName(st), style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w900)),
+                          if ((tagline ?? '').isNotEmpty)
+                            Text(tagline!, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.white70)),
+                        ]),
+                      ),
+                    ]),
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+      if (widget.stores.length > 1)
+        Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+            for (var i = 0; i < widget.stores.length; i++)
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 250),
+                margin: const EdgeInsets.symmetric(horizontal: 3),
+                width: i == current ? 20 : 7,
+                height: 7,
+                decoration: BoxDecoration(color: i == current ? cs.primary : cs.outlineVariant, borderRadius: BorderRadius.circular(4)),
+              ),
+          ]),
+        ),
+    ]);
+  }
+}
+
 /// A store in a list: photo (or type icon), name, rating, open/closed, hours, delivery time and fee.
 class StoreCard extends StatelessWidget {
   final Store store;
@@ -292,7 +398,10 @@ class StoreCard extends StatelessWidget {
         onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => StoreScreen(storeId: store.id))),
         child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
           Stack(children: [
-            Opacity(opacity: store.orderable ? 1 : 0.55, child: StoreImage(photoUrl: store.photoUrl, type: store.type, height: 132)),
+            Hero(
+              tag: 'store-${store.id}',
+              child: Opacity(opacity: store.orderable ? 1 : 0.55, child: StoreImage(photoUrl: store.photoUrl, type: store.type, height: 150)),
+            ),
             PositionedDirectional(
               top: 10,
               start: 10,

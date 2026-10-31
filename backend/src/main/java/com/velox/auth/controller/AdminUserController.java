@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.velox.auth.dto.AuthDtos.AdminUserResponse;
 import com.velox.auth.dto.AuthDtos.BlockRequest;
+import com.velox.auth.dto.AuthDtos.StaffCreated;
+import com.velox.auth.dto.AuthDtos.StaffRequest;
 import com.velox.auth.dto.AuthDtos.TempPasswordResponse;
 import com.velox.auth.service.UserAdminService;
 import com.velox.security.AuthUser;
@@ -37,6 +39,14 @@ public class AdminUserController {
     @GetMapping
     public List<AdminUserResponse> list(@CurrentUser AuthUser me, @RequestParam(required = false) Role role) {
         return admin.list(me, role).stream().map(AdminUserResponse::of).toList();
+    }
+
+    /** A new admin or driver; the answer carries a temporary password to pass on (shown once). */
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public StaffCreated create(@CurrentUser AuthUser me, @Valid @RequestBody StaffRequest req) {
+        return new StaffCreated(req.email().trim().toLowerCase(java.util.Locale.ROOT),
+                admin.createStaff(me, req.name(), req.email(), req.phone(), req.role()));
     }
 
     @PatchMapping("/{id}")

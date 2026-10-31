@@ -27,10 +27,17 @@ public class ImageStorage {
     static final long MAX_BYTES = 2L * 1024 * 1024;
 
     private final Path dir;
+    private final CloudinaryClient cloud;
 
-    public ImageStorage(@Value("${velox.uploads.dir:uploads}") String dir) throws IOException {
+    /**
+     * With {@code CLOUDINARY_URL} set (cloudinary://key:secret@cloud) photos go to Cloudinary and survive a server
+     * whose disk is wiped on every deploy; without it they stay in the local uploads folder.
+     */
+    public ImageStorage(@Value("${velox.uploads.dir:uploads}") String dir,
+                        @Value("${CLOUDINARY_URL:}") String cloudinaryUrl) throws IOException {
         this.dir = Path.of(dir).toAbsolutePath().normalize();
         Files.createDirectories(this.dir);
+        this.cloud = cloudinaryUrl.isBlank() ? null : CloudinaryClient.parse(cloudinaryUrl);
     }
 
     public Path directory() {
@@ -51,6 +58,9 @@ public class ImageStorage {
             String ext = imageType(head);
             if (ext == null) {
                 throw ApiException.badRequest("NOT_AN_IMAGE", "Only JPEG, PNG or WebP photos");
+            }
+            if (cloud != null) {
+                return cloud.upload(file.getBytes(), ext);
             }
             String name = UUID.randomUUID() + "." + ext;
             Path target = dir.resolve(name).normalize();

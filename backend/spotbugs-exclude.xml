@@ -5,4 +5,10 @@
     <Match>
         <Bug pattern="EI_EXPOSE_REP,EI_EXPOSE_REP2,CT_CONSTRUCTOR_THROW"/>
     </Match>
+    <!-- Cloudinary's upload API defines its request signature as SHA-1 over the parameters plus the secret.
+         It authenticates one request; it is not used to store passwords or protect data at rest. -->
+    <Match>
+        <Class name="com.velox.catalog.service.CloudinaryClient"/>
+        <Bug pattern="WEAK_MESSAGE_DIGEST_SHA1"/>
+    </Match>
 </FindBugsFilter>

@@ -50,6 +50,16 @@ public final class AuthDtos {
     public record BlockRequest(@NotNull Boolean blocked) {
     }
 
+    /** Admin: a new admin or driver account. */
+    public record StaffRequest(@NotBlank @Size(min = 2, max = 60) String name,
+                               @NotBlank @Email @Size(max = 120) String email,
+                               @NotBlank @Pattern(regexp = EG_MOBILE, message = "Egyptian mobile number") String phone,
+                               @NotNull Role role) {
+    }
+
+    public record StaffCreated(String email, String password) {
+    }
+
     /** The public view of an account: no internal id, no password hash, no token version. */
     public record UserResponse(String id, String email, String name, String phone, Role role, String storeId) {
         public static UserResponse of(User u) {
