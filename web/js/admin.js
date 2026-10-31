@@ -7,7 +7,7 @@ const $ = (s, root = document) => root.querySelector(s);
 const view = $('#view');
 const SECTION_RE = /^[A-Z_]{2,20}$/;
 const SIZES = { SMALL: 'صغير', MEDIUM: 'وسط', LARGE: 'كبير (توكتوك)' };
-const SECTIONS = ['MEALS', 'SANDWICHES', 'PIZZA', 'FATEER', 'GRILLS', 'SIDES', 'DRINKS', 'DESSERTS', 'BREAKFAST', 'OFFERS',
+const SECTIONS = ['MEALS', 'SANDWICHES', 'SOUPS', 'SALADS', 'APPETIZERS', 'GRILL_PAN', 'TAGINES', 'TRAYS', 'PASTA_RICE', 'PIZZA', 'FATEER', 'GRILLS', 'SIDES', 'DRINKS', 'DESSERTS', 'BREAKFAST', 'OFFERS',
   'MEDICINE', 'CARE', 'BABY', 'DAIRY', 'BAKERY', 'VEGETABLES', 'CLEANING', 'GAS', 'OTHER'];
 
 const ADMIN_NAV = [
@@ -201,23 +201,23 @@ function storeDialog(existing) {
     ${edit ? '' : select('type', 'النوع', TYPES, 'FOOD')}
     <div class="row">${field('nameAr', 'الاسم بالعربي', 'required maxlength="80"', s.nameAr)}${field('name', 'الاسم بالإنجليزي', 'required maxlength="80"', s.name)}</div>
     ${field('cuisine', 'التصنيف (بالإنجليزي حروف كبيرة، مثلاً KOSHARY أو PIZZA أو PHARMACY)', 'required pattern="[A-Z_]{2,20}"', s.cuisine || '')}
-    ${field('taglineAr', 'وصف قصير', 'maxlength="120"', s.taglineAr)}
+    <div class="row">${field('taglineAr', 'وصف قصير بالعربي', 'maxlength="120"', s.taglineAr)}${field('tagline', 'وصف قصير بالإنجليزي', 'maxlength="120"', s.tagline)}</div>
+    <div class="row">${field('phone', 'تليفون المحل', 'pattern="(01[0125][0-9]{8}|0[0-9]{8,9})"', s.phone)}${field('address', 'العنوان', 'maxlength="300"', s.address)}</div>
     <div class="row">${field('opens', 'بيفتح (مثلاً 10:00)', 'type="time"', s.opens || '')}${field('closes', 'بيقفل (مثلاً 02:00)', 'type="time"', s.closes || '')}</div>
     <p class="small muted">سيب المواعيد فاضية لو المحل شغال طول اليوم. بعد نص الليل عادي (10:00 لـ 02:00).</p>
     ${field('commission', 'عمولة المنصة ٪', 'type="number" min="0" max="50" step="0.5"', s.commission ?? 10)}
     ${imageField(s.photoUrl)}
-    ${edit ? '' : `<div class="row">${field('phone', 'تليفون المحل', 'pattern="(01[0125][0-9]{8}|0[0-9]{8,9})"')}${field('address', 'العنوان', 'maxlength="300"')}</div>
-      <div class="row">${field('lat', 'خط العرض (اختياري)', 'type="number" step="any" min="22" max="32"')}${field('lng', 'خط الطول (اختياري)', 'type="number" step="any" min="24" max="37"')}</div>
+    ${edit ? '' : `<div class="row">${field('lat', 'خط العرض (اختياري)', 'type="number" step="any" min="22" max="32"')}${field('lng', 'خط الطول (اختياري)', 'type="number" step="any" min="24" max="37"')}</div>
       <h3 style="margin-top:14px">حساب صاحب المحل</h3>
       <div class="row">${field('accountEmail', 'إيميل الدخول', 'type="email" required')}${field('accountPassword', 'كلمة سر (٨ حروف على الأقل)', 'type="text" minlength="8" required')}</div>`}`,
   async (d) => {
     if (!SECTION_RE.test(d.cuisine)) throw new Error('التصنيف لازم يكون حروف إنجليزي كبيرة');
-    const common = { cuisine: d.cuisine, name: d.name.trim(), nameAr: d.nameAr.trim(), taglineAr: text(d.taglineAr), opens: d.opens || '', closes: d.closes || '', commission: num(d.commission), photoUrl: text(d.photoUrl) };
+    const common = { cuisine: d.cuisine, name: d.name.trim(), nameAr: d.nameAr.trim(), taglineAr: text(d.taglineAr), tagline: text(d.tagline), phone: text(d.phone) ?? '', address: text(d.address) ?? '', opens: d.opens || '', closes: d.closes || '', commission: num(d.commission), photoUrl: text(d.photoUrl) };
     if (edit) {
       await patch(`/admin/stores/${s.id}`, common);
       toast('اتحفظ');
     } else {
-      const r = await post('/admin/stores', { ...common, type: d.type, phone: text(d.phone), address: text(d.address), lat: num(d.lat), lng: num(d.lng), accountEmail: d.accountEmail.trim(), accountPassword: d.accountPassword });
+      const r = await post('/admin/stores', { ...common, type: d.type, lat: num(d.lat), lng: num(d.lng), accountEmail: d.accountEmail.trim(), accountPassword: d.accountPassword });
       toast(`اتضاف المحل ${r.id} — صاحب المحل يدخل بالإيميل وكلمة السر دي`);
     }
     route();
@@ -246,7 +246,7 @@ async function adminStoreMenu(id) {
   const d = await get(`/stores/${encodeURIComponent(id)}`);
   const s = d.store;
   setTitle(s.nameAr);
-  action('تعديل بيانات المحل', () => storeDialog(s), 'outline');
+  action('تعديل بيانات المحل', () => storeDialog({ ...s, phone: d.phone, address: d.address }), 'outline');
   action(s.accepting ? 'إيقاف الطلبات' : 'تشغيل الطلبات', async () => {
     await attempt(() => patch(`/admin/stores/${s.id}`, { accepting: !s.accepting }));
     route();
@@ -272,14 +272,14 @@ function productDialog(storeId, p) {
   const v = p || { size: 'MEDIUM', section: 'MEALS' };
   const f = dialog(edit ? `تعديل ${v.nameAr}` : 'صنف جديد', `
     <div class="row">${field('nameAr', 'الاسم بالعربي', 'required maxlength="120"', v.nameAr)}${field('name', 'الاسم بالإنجليزي', 'required maxlength="120"', v.name)}</div>
-    ${field('description', 'الوصف (اختياري)', 'maxlength="500"', v.description)}
+    <div class="row">${field('description', 'الوصف بالعربي (اختياري)', 'maxlength="500"', v.description)}${field('descriptionEn', 'الوصف بالإنجليزي (اختياري)', 'maxlength="500"', v.descriptionEn)}</div>
     <div class="row">${field('price', 'السعر (ج.م)', 'type="number" min="1" step="0.5" required', v.price)}
       ${select('size', 'الحجم', SIZES, v.size)}
       <div><label for="f-section">القسم</label><input id="f-section" name="section" list="sections" required pattern="[A-Z_]{2,20}" value="${esc(v.section)}"></div></div>
     <datalist id="sections">${SECTIONS.map((x) => `<option value="${x}">`).join('')}</datalist>
     ${imageField(v.photoUrl)}`,
   async (d) => {
-    const body = { name: d.name.trim(), nameAr: d.nameAr.trim(), description: text(d.description), price: Number(d.price), size: d.size, section: d.section.trim().toUpperCase(), photoUrl: text(d.photoUrl) };
+    const body = { name: d.name.trim(), nameAr: d.nameAr.trim(), description: text(d.description), descriptionEn: text(d.descriptionEn), price: Number(d.price), size: d.size, section: d.section.trim().toUpperCase(), photoUrl: text(d.photoUrl) };
     if (edit) await put(`/admin/products/${p.id}`, body); else await post(`/admin/stores/${storeId}/products`, body);
     toast('اتحفظ');
     route();
@@ -400,6 +400,19 @@ async function adminUsers() {
     const r = await attempt(() => post(`/admin/users/${b.dataset.reset}/reset-password`));
     if (r) dialog('كلمة السر المؤقتة', `<p>ادّيها لصاحب الحساب وخليه يغيّرها من الإعدادات. مش هتظهر تاني.</p><p style="font-size:24px;font-weight:900;direction:ltr;text-align:center">${esc(r.password)}</p>`, async () => true, 'تمام');
   }));
+  action('+ حساب إدارة أو مندوب', staffDialog);
+}
+
+function staffDialog() {
+  dialog('حساب جديد', `
+    <div class="row">${field('name', 'الاسم', 'required minlength="2" maxlength="60"')}${select('role', 'النوع', { DRIVER: 'مندوب', ADMIN: 'إدارة' }, 'DRIVER')}</div>
+    <div class="row">${field('email', 'الإيميل', 'type="email" required')}${field('phone', 'الموبايل', 'required pattern="01[0125][0-9]{8}"')}</div>
+    <p class="small muted">هيتعمل بكلمة سر مؤقتة تظهرلك مرة واحدة. حساب الإدارة يقدر يعمل كل حاجة، فاعمله للناس اللي واثق فيهم بس.</p>`,
+  async (d) => {
+    const r = await post('/admin/users', { name: d.name.trim(), email: d.email.trim(), phone: d.phone.trim(), role: d.role });
+    route();
+    dialog('اتعمل الحساب', `<p>الإيميل: <b style="direction:ltr">${esc(r.email)}</b></p><p>كلمة السر المؤقتة (مش هتظهر تاني):</p><p style="font-size:24px;font-weight:900;direction:ltr;text-align:center">${esc(r.password)}</p>`, async () => true, 'تمام');
+  });
 }
 
 async function adminComplaints() {

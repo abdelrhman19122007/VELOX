@@ -60,11 +60,18 @@ public class PushService {
     private String accessToken;
     private Instant accessTokenExpires = Instant.EPOCH;
 
-    public PushService(JdbcTemplate db, ObjectMapper json, @Value("${velox.firebase.dir:.firebase}") String dir) {
+    /**
+     * The two settings come from environment variables holding the JSON itself (for hosts without a disk:
+     * VELOX_FIREBASE_WEB_CONFIG, VELOX_FIREBASE_SERVICE_ACCOUNT), or else from the two files in the Firebase folder.
+     */
+    public PushService(JdbcTemplate db, ObjectMapper json, @Value("${velox.firebase.dir:.firebase}") String dir,
+                       @Value("${VELOX_FIREBASE_WEB_CONFIG:}") String webConfigJson,
+                       @Value("${VELOX_FIREBASE_SERVICE_ACCOUNT:}") String serviceAccountJson) {
         this.db = db;
         this.json = json;
-        this.webConfig = read(Path.of(dir, "web-config.json"));
-        this.serviceAccount = read(Path.of(dir, "service-account.json"));
+        this.webConfig = webConfigJson.isBlank() ? read(Path.of(dir, "web-config.json")) : parse("VELOX_FIREBASE_WEB_CONFIG", webConfigJson);
+        this.serviceAccount = serviceAccountJson.isBlank() ? read(Path.of(dir, "service-account.json"))
+                : parse("VELOX_FIREBASE_SERVICE_ACCOUNT", serviceAccountJson);
         if (enabled()) {
             log.info("Push notifications on (Firebase project {})", serviceAccount.path("project_id").asText());
         }
@@ -80,7 +87,7 @@ public class PushService {
             return null;
         }
         Map<String, String> c = new LinkedHashMap<>();
-        for (String k : List.of("apiKey", "authDomain", "projectId", "storageBucket", "messagingSenderId", "appId", "vapidKey")) {
+        for (String k : List.of("apiKey", "authDomain", "projectId", "storageBucket", "messagingSenderId", "appId", "androidAppId", "vapidKey")) {
             if (webConfig.hasNonNull(k)) {
                 c.put(k, webConfig.get(k).asText());
             }
@@ -172,6 +179,15 @@ public class PushService {
         rsa.initSign(key);
         rsa.update((header + "." + claims).getBytes(StandardCharsets.UTF_8));
         return header + "." + claims + "." + b64.encodeToString(rsa.sign());
+    }
+
+    private JsonNode parse(String name, String value) {
+        try {
+            return json.readTree(value);
+        } catch (Exception e) {
+            log.warn("{} is not valid JSON - push stays off", name);   // never log the value: it may hold the private key
+            return null;
+        }
     }
 
     private JsonNode read(Path file) {

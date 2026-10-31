@@ -1,4 +1,4 @@
-// Reads a menu exported from Excel as "CSV UTF-8": name_ar, name_en, price, section, size, description.
+// Reads a menu exported from Excel as "CSV UTF-8": name_ar, name_en, price, section, size, description, description_en.
 // Quoted fields, commas and new lines inside quotes, and Excel's BOM are handled. Bad rows are reported, not sent.
 
 export const MENU_TEMPLATE = [
@@ -47,8 +47,8 @@ export function parseCsv(text) {
     if (!(price >= 1)) return errors.push(`سطر ${line}: السعر غلط`);
     if (!/^[A-Z_]{2,20}$/.test(section)) return errors.push(`سطر ${line}: القسم لازم حروف إنجليزي`);
     if (!['SMALL', 'MEDIUM', 'LARGE'].includes(size)) return errors.push(`سطر ${line}: الحجم SMALL أو MEDIUM أو LARGE`);
-    if (/[<>]/.test(get('name_ar') + get('name_en') + get('description'))) return errors.push(`سطر ${line}: ممنوع < أو >`);
-    rows.push({ nameAr: get('name_ar'), name: get('name_en'), price, section, size, description: get('description') || null });
+    if (/[<>]/.test(get('name_ar') + get('name_en') + get('description') + get('description_en'))) return errors.push(`سطر ${line}: ممنوع < أو >`);
+    rows.push({ nameAr: get('name_ar'), name: get('name_en'), price, section, size, description: get('description') || null, descriptionEn: get('description_en') || null });
   });
   return { rows, errors };
 }

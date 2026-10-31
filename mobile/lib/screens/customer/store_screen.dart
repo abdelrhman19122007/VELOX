@@ -44,7 +44,7 @@ class _StoreScreenState extends State<StoreScreen> {
                 ]),
               ),
             ]),
-            if ((p.description ?? '').isNotEmpty) Padding(padding: const EdgeInsets.only(top: 8), child: Text(p.description!)),
+            if (s.productDesc(p) != null) Padding(padding: const EdgeInsets.only(top: 8), child: Text(s.productDesc(p)!)),
             if (p.large) Padding(padding: const EdgeInsets.only(top: 8), child: Text('🛺 ${s.t('large')}')),
             const SizedBox(height: 12),
             TextField(controller: note, maxLength: 200, decoration: InputDecoration(labelText: s.t('note'))),
@@ -126,7 +126,8 @@ class _StoreScreenState extends State<StoreScreen> {
                   ),
                 const SizedBox(width: 8),
               ],
-              flexibleSpace: FlexibleSpaceBar(background: StoreImage(photoUrl: store.photoUrl, type: store.type, height: 240)),
+              flexibleSpace: FlexibleSpaceBar(
+                  background: Hero(tag: 'store-${store.id}', child: StoreImage(photoUrl: store.photoUrl, type: store.type, height: 240))),
             ),
             SliverToBoxAdapter(
               child: Padding(
@@ -193,12 +194,15 @@ class _StoreScreenState extends State<StoreScreen> {
               SliverList.separated(
                 itemCount: sec.products.length,
                 separatorBuilder: (_, _) => const SizedBox(height: 10),
-                itemBuilder: (c, i) => Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: _ProductTile(
-                    product: sec.products[i],
-                    enabled: store.orderable && sec.products[i].available && s.isCustomer,
-                    onAdd: () => _add(s, store, sec.products[i]),
+                itemBuilder: (c, i) => FadeSlideIn(
+                  index: i,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: _ProductTile(
+                      product: sec.products[i],
+                      enabled: store.orderable && sec.products[i].available && s.isCustomer,
+                      onAdd: () => _add(s, store, sec.products[i]),
+                    ),
                   ),
                 ),
               ),
@@ -250,10 +254,10 @@ class _ProductTile extends StatelessWidget {
             Expanded(
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Text(s.productName(product), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
-                if ((product.description ?? '').isNotEmpty)
+                if (s.productDesc(product) != null)
                   Padding(
                     padding: const EdgeInsets.only(top: 2),
-                    child: Text(product.description!, maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(color: cs.onSurfaceVariant)),
+                    child: Text(s.productDesc(product)!, maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(color: cs.onSurfaceVariant)),
                   ),
                 const SizedBox(height: 6),
                 Row(children: [
@@ -300,6 +304,13 @@ String sectionName(AppState s, String code) {
   const names = {
     'MEALS': ['وجبات', 'Meals'],
     'SANDWICHES': ['ساندوتشات', 'Sandwiches'],
+    'SOUPS': ['شوربة', 'Soups'],
+    'SALADS': ['سلطات ومقبلات', 'Salads & dips'],
+    'APPETIZERS': ['مقبلات ساخنة', 'Hot appetizers'],
+    'GRILL_PAN': ['الجريل', 'Grill pan'],
+    'TAGINES': ['طواجن', 'Tagines'],
+    'TRAYS': ['صواني وشوايات', 'Trays & platters'],
+    'PASTA_RICE': ['مكرونة وأرز', 'Pasta & rice'],
     'PIZZA': ['بيتزا', 'Pizza'],
     'FATEER': ['فطير', 'Fateer'],
     'GRILLS': ['مشويات', 'Grills'],

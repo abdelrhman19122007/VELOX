@@ -70,7 +70,7 @@ class Store {
 
 class Product {
   final String id, storeId, name, nameAr, size, section;
-  final String? description, photoUrl;
+  final String? description, descriptionEn, photoUrl;
   final double price;
   final bool available;
   Product({
@@ -81,6 +81,7 @@ class Product {
     required this.size,
     required this.section,
     this.description,
+    this.descriptionEn,
     this.photoUrl,
     required this.price,
     required this.available,
@@ -93,6 +94,7 @@ class Product {
         size: j['size'] ?? 'MEDIUM',
         section: j['section'] ?? 'OTHER',
         description: j['description'],
+        descriptionEn: j['descriptionEn'],
         photoUrl: j['photoUrl'],
         price: _d(j['price']),
         available: j['available'] ?? true,
@@ -105,6 +107,7 @@ class Product {
         'size': size,
         'section': section,
         'description': description,
+        'descriptionEn': descriptionEn,
         'photoUrl': photoUrl,
         'price': price,
         'available': available,

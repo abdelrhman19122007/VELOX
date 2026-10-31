@@ -18,7 +18,7 @@ public class ProductRepository {
     private static final RowMapper<Product> PRODUCT = (rs, n) -> new Product(rs.getString("id"), rs.getString("store_id"),
             rs.getString("name"), rs.getString("name_ar"), rs.getString("description"), rs.getBigDecimal("price"),
             ProductSize.valueOf(rs.getString("size")), rs.getString("section"), rs.getString("photo_url"),
-            rs.getBoolean("available"));
+            rs.getBoolean("available"), rs.getString("description_en"));
 
     private final JdbcTemplate db;
 
@@ -44,14 +44,15 @@ public class ProductRepository {
         Integer sort = db.queryForObject("SELECT COALESCE(MAX(sort_order), 0) + 1 FROM products WHERE store_id = ?",
                 Integer.class, p.storeId());
         db.update("INSERT INTO products (id, store_id, name, name_ar, description, price, size, section, photo_url, available, "
-                        + "sort_order) VALUES (?,?,?,?,?,?,?,?,?,?,?)", p.id(), p.storeId(), p.name(), p.nameAr(), p.description(),
-                StoreRepository.money(p.price()), p.size().name(), p.section(), p.photoUrl(), p.available(), sort);
+                        + "sort_order, description_en) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)", p.id(), p.storeId(), p.name(), p.nameAr(),
+                p.description(), StoreRepository.money(p.price()), p.size().name(), p.section(), p.photoUrl(), p.available(), sort,
+                p.descriptionEn());
     }
 
     public void update(Product p) {
         db.update("UPDATE products SET name = ?, name_ar = ?, description = ?, price = ?, size = ?, section = ?, photo_url = ?, "
-                        + "available = ? WHERE id = ?", p.name(), p.nameAr(), p.description(), StoreRepository.money(p.price()),
-                p.size().name(), p.section(), p.photoUrl(), p.available(), p.id());
+                        + "available = ?, description_en = ? WHERE id = ?", p.name(), p.nameAr(), p.description(),
+                StoreRepository.money(p.price()), p.size().name(), p.section(), p.photoUrl(), p.available(), p.descriptionEn(), p.id());
     }
 
     public String nextId(StoreType type) {

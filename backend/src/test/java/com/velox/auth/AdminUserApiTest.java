@@ -58,6 +58,27 @@ class AdminUserApiTest extends IntegrationTest {
     }
 
     @Test
+    void adminCreatesStaffWithATemporaryPassword() {
+        String admin = login(ADMIN_EMAIL, ADMIN_PASSWORD);
+        String email = uniqueEmail();
+        ResponseEntity<JsonNode> made = post("/api/admin/users",
+                Map.of("name", "New Admin", "email", email, "phone", "01012345678", "role", "ADMIN"), admin);
+        assertEquals(HttpStatus.CREATED, made.getStatusCode());
+        String temp = made.getBody().get("password").asText();
+        ResponseEntity<JsonNode> in = post("/api/auth/login", Map.of("email", email, "password", temp), null);
+        assertEquals("ADMIN", in.getBody().get("user").get("role").asText());
+
+        assertEquals(HttpStatus.BAD_REQUEST, post("/api/admin/users",
+                Map.of("name", "Shop", "email", uniqueEmail(), "phone", "01012345678", "role", "RESTAURANT"), admin).getStatusCode(),
+                "store accounts come with their store");
+        assertEquals(HttpStatus.CONFLICT, post("/api/admin/users",
+                Map.of("name", "Again", "email", email, "phone", "01012345678", "role", "DRIVER"), admin).getStatusCode());
+        String customer = newCustomer(uniqueEmail(), "secret-123");
+        assertEquals(HttpStatus.FORBIDDEN, post("/api/admin/users",
+                Map.of("name", "Me", "email", uniqueEmail(), "phone", "01012345678", "role", "ADMIN"), customer).getStatusCode());
+    }
+
+    @Test
     void adminCannotBlockThemselves() {
         String admin = login(ADMIN_EMAIL, ADMIN_PASSWORD);
         assertEquals(HttpStatus.BAD_REQUEST,

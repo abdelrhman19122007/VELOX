@@ -47,6 +47,26 @@ public class UserAdminService {
         audit.record(admin, blocked ? "USER_BLOCK" : "USER_UNBLOCK", "user", publicId, null);
     }
 
+    /**
+     * A staff account (another admin or a driver) made by an admin, since nobody may sign up as admin.
+     * Returns a temporary password for the admin to pass on; the owner changes it after signing in.
+     */
+    @Transactional
+    public String createStaff(AuthUser admin, String name, String email, String phone, Role role) {
+        admin.require(Role.ADMIN);
+        if (role != Role.ADMIN && role != Role.DRIVER) {
+            throw ApiException.badRequest("INVALID_ROLE", "Staff accounts are admins or drivers; stores get theirs with the store");
+        }
+        String mail = email.trim().toLowerCase(java.util.Locale.ROOT);
+        if (users.emailExists(mail)) {
+            throw ApiException.conflict("EMAIL_TAKEN", "This email already has an account");
+        }
+        String temp = hasher.randomReadable(10);
+        users.insert(mail, name.trim(), phone, role, null, hasher.hash(temp));
+        audit.record(admin, "USER_CREATE", "user", mail, role.name());
+        return temp;
+    }
+
     /** "Forgot password": a one-time temporary password the admin passes to the owner. Ends their sessions. */
     @Transactional
     public String resetPassword(AuthUser admin, String publicId) {

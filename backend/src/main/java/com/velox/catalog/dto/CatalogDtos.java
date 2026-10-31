@@ -44,11 +44,11 @@ public final class CatalogDtos {
     }
 
     public record ProductView(String id, String storeId, String name, String nameAr, String description, BigDecimal price,
-                              ProductSize size, String section, String photoUrl, boolean available) {
+                              ProductSize size, String section, String photoUrl, boolean available, String descriptionEn) {
 
         public static ProductView of(Product p) {
             return new ProductView(p.id(), p.storeId(), p.name(), p.nameAr(), p.description(), p.price(), p.size(),
-                    p.section(), p.photoUrl(), p.available());
+                    p.section(), p.photoUrl(), p.available(), p.descriptionEn());
         }
     }
 
@@ -90,7 +90,10 @@ public final class CatalogDtos {
     public record StoreUpdateRequest(@Pattern(regexp = SECTION) String cuisine,
                                      @Size(min = 1, max = 80) @Pattern(regexp = PLAIN_TEXT) String name,
                                      @Size(min = 1, max = 80) @Pattern(regexp = PLAIN_TEXT) String nameAr,
+                                     @Size(max = 120) @Pattern(regexp = PLAIN_TEXT) String tagline,
                                      @Size(max = 120) @Pattern(regexp = PLAIN_TEXT) String taglineAr,
+                                     @Pattern(regexp = "^(01[0125]\\d{8}|0\\d{8,9})?$") String phone,
+                                     @Size(max = 300) @Pattern(regexp = PLAIN_TEXT) String address,
                                      @Pattern(regexp = TIME) String opens,
                                      @Pattern(regexp = TIME) String closes,
                                      Boolean accepting,
@@ -101,6 +104,7 @@ public final class CatalogDtos {
     public record ProductRequest(@NotBlank @Size(max = 120) @Pattern(regexp = PLAIN_TEXT) String name,
                                  @NotBlank @Size(max = 120) @Pattern(regexp = PLAIN_TEXT) String nameAr,
                                  @Size(max = 500) @Pattern(regexp = PLAIN_TEXT) String description,
+                                 @Size(max = 500) @Pattern(regexp = PLAIN_TEXT) String descriptionEn,
                                  @NotNull @DecimalMin("1") @DecimalMax("1000000") @Digits(integer = 7, fraction = 2) BigDecimal price,
                                  ProductSize size,
                                  @NotBlank @Pattern(regexp = SECTION) String section,

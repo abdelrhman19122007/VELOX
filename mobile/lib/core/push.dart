@@ -24,7 +24,7 @@ class Push {
         await Firebase.initializeApp(
           options: FirebaseOptions(
             apiKey: c['apiKey'],
-            appId: c['appId'],
+            appId: (!kIsWeb && defaultTargetPlatform == TargetPlatform.android ? c['androidAppId'] : null) ?? c['appId'],
             messagingSenderId: c['messagingSenderId'] ?? '',
             projectId: c['projectId'] ?? '',
             authDomain: c['authDomain'],

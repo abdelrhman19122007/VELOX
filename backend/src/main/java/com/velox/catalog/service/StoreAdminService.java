@@ -67,8 +67,9 @@ public class StoreAdminService {
         Store s = stores.findById(id).orElseThrow(() -> ApiException.notFound("UNKNOWN_STORE", "No such store"));
         OpeningHours hours = r.opens() != null || r.closes() != null ? hours(r.opens(), r.closes()) : s.hours();
         stores.update(new Store(id, s.type(), or(r.cuisine(), s.cuisine()), or(trim(r.name()), s.name()),
-                or(trim(r.nameAr()), s.nameAr()), s.tagline(), r.taglineAr() == null ? s.taglineAr() : blank(r.taglineAr()),
-                s.phone(), s.address(), r.photoUrl() == null ? s.photoUrl() : blank(r.photoUrl()), hours,
+                or(trim(r.nameAr()), s.nameAr()), r.tagline() == null ? s.tagline() : blank(r.tagline()),
+                r.taglineAr() == null ? s.taglineAr() : blank(r.taglineAr()),
+                r.phone() == null ? s.phone() : blank(r.phone()), r.address() == null ? s.address() : blank(r.address()), r.photoUrl() == null ? s.photoUrl() : blank(r.photoUrl()), hours,
                 r.accepting() == null ? s.accepting() : r.accepting(), s.lat(), s.lng(), or(r.commission(), s.commission())));
         audit.record(admin, "STORE_UPDATE", "store", id, null);
     }
@@ -79,7 +80,7 @@ public class StoreAdminService {
         Store s = stores.findById(storeId).orElseThrow(() -> ApiException.notFound("UNKNOWN_STORE", "No such store"));
         String id = products.nextId(s.type());
         products.insert(new Product(id, storeId, r.name().trim(), r.nameAr().trim(), blank(r.description()), r.price(),
-                r.size() == null ? ProductSize.MEDIUM : r.size(), r.section(), blank(r.photoUrl()), true));
+                r.size() == null ? ProductSize.MEDIUM : r.size(), r.section(), blank(r.photoUrl()), true, blank(r.descriptionEn())));
         audit.record(admin, "PRODUCT_CREATE", "product", id, storeId);
         return id;
     }
@@ -89,7 +90,7 @@ public class StoreAdminService {
         admin.require(Role.ADMIN);
         Product p = products.findById(productId).orElseThrow(() -> ApiException.notFound("UNKNOWN_PRODUCT", "No such product"));
         products.update(new Product(p.id(), p.storeId(), r.name().trim(), r.nameAr().trim(), blank(r.description()), r.price(),
-                r.size() == null ? p.size() : r.size(), r.section(), blank(r.photoUrl()), p.available()));
+                r.size() == null ? p.size() : r.size(), r.section(), blank(r.photoUrl()), p.available(), blank(r.descriptionEn())));
         audit.record(admin, "PRODUCT_UPDATE", "product", productId, null);
     }
 

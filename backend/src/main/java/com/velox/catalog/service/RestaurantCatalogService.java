@@ -45,7 +45,7 @@ public class RestaurantCatalogService {
                 .orElseThrow(() -> ApiException.notFound("UNKNOWN_PRODUCT", "Not one of your products"));
         products.update(new Product(p.id(), p.storeId(), p.name(), p.nameAr(), p.description(),
                 r.price() == null ? p.price() : r.price(), p.size(), p.section(), p.photoUrl(),
-                r.available() == null ? p.available() : r.available()));
+                r.available() == null ? p.available() : r.available(), p.descriptionEn()));
     }
 
     private static String storeOf(AuthUser me) {

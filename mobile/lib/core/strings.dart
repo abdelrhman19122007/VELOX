@@ -52,6 +52,7 @@ const Map<String, List<String>> _s = {
   'pickZone': ['اختار منطقتك', 'Choose your area'],
   'searchPh': ['دوّر على مطعم، أكلة، أو صيدلية…', 'Search restaurants, dishes, pharmacies…'],
   'offers': ['العروض', 'Offers'],
+  'featured': ['مطاعم مميزة', 'Featured'],
   'stores': ['المحلات', 'Stores'],
   'allTypes': ['الكل', 'All'],
   'type_FOOD': ['مطاعم', 'Restaurants'],
