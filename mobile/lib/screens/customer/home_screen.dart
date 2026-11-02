@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import '../../core/app_state.dart';
 import '../../core/models.dart';
 import '../../widgets/common.dart';
+import '../shared/inbox_screen.dart';
 import '../shared/settings_screen.dart';
 import 'errand_screen.dart';
 import 'search_screen.dart';
@@ -80,7 +81,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 ])),
       );
     }
-    final zone = s.zoneOf(s.zone);
     final list = _filtered(s);
     final lastDelivered = s.myOrders.where((o) => o.status == 'DELIVERED' && o.store != null).firstOrNull;
     return Scaffold(
@@ -106,14 +106,17 @@ class _HomeScreenState extends State<HomeScreen> {
                 ]),
               ),
               actions: [
-                if (zone != null)
-                  Padding(
-                    padding: const EdgeInsetsDirectional.only(end: 12),
-                    child: Chip(
-                      avatar: Icon(Icons.schedule, size: 18, color: cs.secondary),
-                      label: Text('${zone.etaMinutes + 15} ${s.t('min')} · ${s.money(zone.fee)}'),
-                    ),
+                TextButton(onPressed: s.toggleLang, child: Text(s.t('switchLang'))),
+                IconButton(
+                  tooltip: s.t('notifications'),
+                  onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const InboxScreen())),
+                  icon: Badge(
+                    isLabelVisible: s.unread > 0,
+                    label: Text('${s.unread}'),
+                    child: const Icon(Icons.notifications_outlined),
                   ),
+                ),
+                const SizedBox(width: 6),
               ],
             ),
             // greeting
@@ -151,6 +154,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
             // offers
             SliverToBoxAdapter(child: SectionTitle(s.t('offers'))),
+            SliverToBoxAdapter(child: _SubTitle(s.t('offersSub'))),
             SliverToBoxAdapter(
               child: SizedBox(
                 height: 118,
@@ -212,7 +216,13 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             // types + filters
+            if (s.stores.any((st) => st.orderable && st.photoUrl != null)) ...[
+              SliverToBoxAdapter(child: SectionTitle(s.t('popularTitle'))),
+              SliverToBoxAdapter(child: _SubTitle(s.t('popularSub'))),
+              SliverToBoxAdapter(child: _PopularDishes(s.stores.firstWhere((st) => st.orderable && st.photoUrl != null))),
+            ],
             SliverToBoxAdapter(child: SectionTitle(s.t('stores'))),
+            SliverToBoxAdapter(child: _SubTitle(s.t('storesSub'))),
             SliverToBoxAdapter(
               child: SizedBox(
                 height: 44,
@@ -294,6 +304,70 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ]),
+    );
+  }
+}
+
+/// A grey line under a section title.
+class _SubTitle extends StatelessWidget {
+  final String text;
+  const _SubTitle(this.text);
+  @override
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+        child: Text(text, style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+      );
+}
+
+/// Real dishes with photos and prices from an open store's menu; tapping opens the store.
+class _PopularDishes extends StatelessWidget {
+  final Store store;
+  const _PopularDishes(this.store);
+  @override
+  Widget build(BuildContext context) {
+    final s = context.watch<AppState>();
+    final cs = Theme.of(context).colorScheme;
+    return FutureBuilder<StoreDetail>(
+      future: s.storeDetail(store.id),
+      builder: (c, snap) {
+        if (!snap.hasData) return const SizedBox(height: 8);
+        // one dish from each section, so the row shows the whole menu's range
+        final dishes = [for (final sec in snap.data!.sections) if (sec.products.isNotEmpty) sec.products.first].take(8).toList();
+        return SizedBox(
+          height: 206,
+          child: ListView.separated(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            scrollDirection: Axis.horizontal,
+            itemCount: dishes.length,
+            separatorBuilder: (_, _) => const SizedBox(width: 12),
+            itemBuilder: (c, i) {
+              final p = dishes[i];
+              return FadeSlideIn(
+                index: i,
+                child: SizedBox(
+                  width: 150,
+                  child: Card(
+                    child: InkWell(
+                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => StoreScreen(storeId: store.id))),
+                      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                        ProductImage(p.photoUrl, size: 150),
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(10, 8, 10, 0),
+                          child: Text(s.productName(p), maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w800)),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 10),
+                          child: Text(s.money(p.price), style: TextStyle(color: cs.primary, fontWeight: FontWeight.w900)),
+                        ),
+                      ]),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        );
+      },
     );
   }
 }

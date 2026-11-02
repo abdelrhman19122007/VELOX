@@ -51,7 +51,8 @@ ThemeData buildTheme(Brightness b, String lang) {
   );
   final radius = BorderRadius.circular(14);
   return base.copyWith(
-    textTheme: text.apply(bodyColor: scheme.onSurface, displayColor: scheme.onSurface),
+    // 10 % larger than Material's defaults: the team found the text small on phones and laptops
+    textTheme: text.apply(bodyColor: scheme.onSurface, displayColor: scheme.onSurface, fontSizeFactor: 1.1),
     scaffoldBackgroundColor: scheme.surface,
     appBarTheme: AppBarTheme(
       backgroundColor: scheme.surface,
