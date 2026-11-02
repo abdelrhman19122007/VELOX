@@ -20,10 +20,26 @@ class OrdersScreen extends StatelessWidget {
       body: RefreshIndicator(
         onRefresh: s.refreshOrders,
         child: s.myOrders.isEmpty
-            ? ListView(children: [
-                const SizedBox(height: 80),
-                EmptyState(Icons.receipt_long_outlined, s.t('noOrders'),
-                    action: FilledButton(onPressed: () => context.read<AppState>().goTab(0), child: Text(s.t('browse')))),
+            ? ListView(padding: const EdgeInsets.fromLTRB(24, 40, 24, 24), children: [
+                EmptyState(Icons.receipt_long_outlined, s.t('ordersEmptyTitle'),
+                    subtitle: s.t('ordersEmptySub'),
+                    action: FilledButton.icon(
+                        icon: const Icon(Icons.restaurant_menu),
+                        onPressed: () => context.read<AppState>().goTab(0),
+                        label: Text(s.t('browse')))),
+                const SizedBox(height: 8),
+                for (final (icon, key) in [
+                  (Icons.location_on_outlined, 'tipTrack'),
+                  (Icons.payments_outlined, 'tipCash'),
+                  (Icons.replay, 'tipAgain'),
+                ])
+                  Card(
+                    margin: const EdgeInsets.only(bottom: 10),
+                    child: ListTile(
+                      leading: Icon(icon, color: Theme.of(context).colorScheme.secondary),
+                      title: Text(s.t(key)),
+                    ),
+                  ),
               ])
             : ListView(padding: const EdgeInsets.only(bottom: 24), children: [
                 if (active.isNotEmpty) SectionTitle(s.t('active')),

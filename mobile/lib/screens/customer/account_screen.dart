@@ -15,31 +15,82 @@ class AccountScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final s = context.watch<AppState>();
     final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
     void open(Widget w) => Navigator.push(context, MaterialPageRoute(builder: (_) => w));
     return Scaffold(
       appBar: AppBar(title: Text(s.t('account'))),
       body: ListView(children: [
-        ListTile(
-          leading: CircleAvatar(radius: 26, backgroundColor: cs.primaryContainer, child: Text(s.user!.name.characters.first, style: const TextStyle(fontSize: 20))),
-          title: Text(s.user!.name, style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 18)),
-          subtitle: Text('${s.user!.email}\n${s.user!.phone ?? ''}'),
-          isThreeLine: true,
+        Container(
+          margin: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+          padding: const EdgeInsets.all(18),
+          decoration: BoxDecoration(color: cs.primaryContainer, borderRadius: BorderRadius.circular(20)),
+          child: Row(children: [
+            CircleAvatar(
+              radius: 32,
+              backgroundColor: cs.primary,
+              child: Text(s.user!.name.characters.first, style: TextStyle(fontSize: 26, color: cs.onPrimary, fontWeight: FontWeight.w900)),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text(s.user!.name, style: tt.titleLarge?.copyWith(fontWeight: FontWeight.w900, color: cs.onPrimaryContainer)),
+                Text(s.user!.email, style: tt.bodyMedium?.copyWith(color: cs.onPrimaryContainer)),
+                if ((s.user!.phone ?? '').isNotEmpty) Text(s.user!.phone!, style: tt.bodyMedium?.copyWith(color: cs.onPrimaryContainer)),
+              ]),
+            ),
+          ]),
         ),
-        const Divider(),
-        ListTile(leading: const Icon(Icons.account_balance_wallet_outlined), title: Text(s.t('wallet')), trailing: const Icon(Icons.chevron_right), onTap: () => open(const WalletScreen())),
+        _row(Icons.account_balance_wallet_outlined, s.t('wallet'), s.t('walletSub'), () => open(const WalletScreen())),
         ListTile(
           leading: const Icon(Icons.notifications_outlined),
-          title: Text(s.t('notifications')),
+          title: Text(s.t('notifications'), style: const TextStyle(fontWeight: FontWeight.w700)),
+          subtitle: Text(s.t('notifSub')),
           trailing: s.unread > 0 ? Badge(label: Text('${s.unread}')) : const Icon(Icons.chevron_right),
           onTap: () => open(const InboxScreen()),
         ),
-        ListTile(leading: const Icon(Icons.location_on_outlined), title: Text(s.t('savedAddresses')), trailing: const Icon(Icons.chevron_right), onTap: () => open(const AddressesScreen())),
-        ListTile(leading: const Icon(Icons.support_agent), title: Text(s.t('complaints')), trailing: const Icon(Icons.chevron_right), onTap: () => open(const ComplaintsScreen())),
-        ListTile(leading: const Icon(Icons.settings_outlined), title: Text(s.t('settings')), trailing: const Icon(Icons.chevron_right), onTap: () => open(const SettingsScreen())),
+        _row(Icons.location_on_outlined, s.t('savedAddresses'), s.t('addressesSub'), () => open(const AddressesScreen())),
+        _row(Icons.support_agent, s.t('complaints'), s.t('complaintsSub'), () => open(const ComplaintsScreen())),
+        ListTile(
+          leading: const Icon(Icons.translate),
+          title: Text(s.t('languageRow'), style: const TextStyle(fontWeight: FontWeight.w700)),
+          subtitle: Text(s.ar ? 'العربية' : 'English'),
+          trailing: FilledButton.tonal(onPressed: s.toggleLang, child: Text(s.t('switchLang'))),
+        ),
+        _row(Icons.settings_outlined, s.t('settings'), s.t('settingsSub'), () => open(const SettingsScreen())),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+          child: Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Row(children: [
+                  Image.asset('assets/images/velox_logo.png', height: 34),
+                  const SizedBox(width: 10),
+                  Text(s.t('aboutTitle'), style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w900)),
+                ]),
+                const SizedBox(height: 8),
+                Text(s.t('aboutVelox'), style: tt.bodyMedium?.copyWith(color: cs.onSurfaceVariant)),
+                const Divider(height: 24),
+                Text(s.t('helpTitle'), style: tt.titleSmall?.copyWith(fontWeight: FontWeight.w800)),
+                const SizedBox(height: 4),
+                Text(s.t('helpBody'), style: tt.bodyMedium?.copyWith(color: cs.onSurfaceVariant)),
+              ]),
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
       ]),
     );
   }
 }
+
+Widget _row(IconData icon, String title, String sub, VoidCallback onTap) => ListTile(
+      leading: Icon(icon),
+      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w700)),
+      subtitle: Text(sub),
+      trailing: const Icon(Icons.chevron_right),
+      onTap: onTap,
+    );
 
 class WalletScreen extends StatefulWidget {
   const WalletScreen({super.key});
