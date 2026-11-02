@@ -116,6 +116,22 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
               ],
             ),
+            // greeting
+            SliverToBoxAdapter(
+              child: FadeSlideIn(
+                index: 0,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 10),
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Text('${s.t('hello')}${s.user == null ? '' : ' ${s.user!.name.split(' ').first}'} 👋',
+                        style: tt.titleMedium?.copyWith(color: cs.onSurfaceVariant)),
+                    Text(s.t('craving'), style: tt.headlineSmall?.copyWith(fontWeight: FontWeight.w900)),
+                    const SizedBox(height: 4),
+                    Text(s.t('heroSub'), style: tt.bodyMedium?.copyWith(color: cs.onSurfaceVariant)),
+                  ]),
+                ),
+              ),
+            ),
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
@@ -237,6 +253,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   itemBuilder: (c, i) => FadeSlideIn(index: i, child: StoreCard(list[i])),
                 ),
               ),
+            const SliverToBoxAdapter(child: _HowItWorks()),
           ]),
         ),
       ),
@@ -276,6 +293,61 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Text(s.t('useCode')),
           ),
         ),
+      ]),
+    );
+  }
+}
+
+/// "How it works" and "why VELOX": short reassurance text under the store list, like the big apps.
+class _HowItWorks extends StatelessWidget {
+  const _HowItWorks();
+  @override
+  Widget build(BuildContext context) {
+    final s = context.watch<AppState>();
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+    Widget step(IconData icon, String title, String sub) => Expanded(
+          child: Column(children: [
+            CircleAvatar(radius: 24, backgroundColor: cs.primaryContainer, child: Icon(icon, color: cs.primary)),
+            const SizedBox(height: 8),
+            Text(title, textAlign: TextAlign.center, style: tt.titleSmall?.copyWith(fontWeight: FontWeight.w800)),
+            const SizedBox(height: 2),
+            Text(sub, textAlign: TextAlign.center, style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant)),
+          ]),
+        );
+    Widget why(String text) => Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          child: Row(children: [
+            Icon(Icons.check_circle, size: 20, color: cs.secondary),
+            const SizedBox(width: 8),
+            Expanded(child: Text(text)),
+          ]),
+        );
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 28),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        Text(s.t('howTitle'), style: tt.titleLarge?.copyWith(fontWeight: FontWeight.w900)),
+        const SizedBox(height: 14),
+        Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          step(Icons.restaurant_menu, s.t('how1'), s.t('how1Sub')),
+          step(Icons.payments_outlined, s.t('how2'), s.t('how2Sub')),
+          step(Icons.delivery_dining, s.t('how3'), s.t('how3Sub')),
+        ]),
+        const SizedBox(height: 22),
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(14),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(s.t('whyTitle'), style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w900)),
+              const SizedBox(height: 6),
+              why(s.t('why1')),
+              why(s.t('why2')),
+              why(s.t('why3')),
+            ]),
+          ),
+        ),
+        const SizedBox(height: 18),
+        Text(s.t('footer'), textAlign: TextAlign.center, style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant)),
       ]),
     );
   }

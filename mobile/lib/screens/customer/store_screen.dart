@@ -141,6 +141,9 @@ class _StoreScreenState extends State<StoreScreen> {
                     Text((s.ar ? store.taglineAr : store.tagline)!, style: tt.bodyMedium?.copyWith(color: cs.onSurfaceVariant)),
                   const SizedBox(height: 8),
                   Wrap(spacing: 16, runSpacing: 6, children: [
+                    if (s.zoneOf(s.zone) != null)
+                      Text('🛵 ${s.t('deliveryInfo')} ${s.zoneOf(s.zone)!.etaMinutes + 15} ${s.t('min')} · ${s.money(s.zoneOf(s.zone)!.fee)}'),
+                    Text('📋 ${d.sections.fold<int>(0, (n, sec) => n + sec.products.length)} ${s.t('itemsCount')}'),
                     if (store.opens != null && store.closes != null)
                       Text('🕒 ${clock(s, store.opens!)} – ${clock(s, store.closes!)}'),
                     if (d.address != null) Text('📍 ${d.address}'),
