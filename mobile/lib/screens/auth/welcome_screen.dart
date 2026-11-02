@@ -52,18 +52,41 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 key: _form,
                 child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
                   Center(
-                    child: Container(
-                      width: 92,
-                      height: 92,
-                      decoration: BoxDecoration(color: cs.primary, borderRadius: BorderRadius.circular(28)),
-                      child: Icon(Icons.delivery_dining, size: 54, color: cs.onPrimary),
+                    // the logo pops in once when the screen opens
+                    child: TweenAnimationBuilder<double>(
+                      tween: Tween(begin: 0.6, end: 1),
+                      duration: const Duration(milliseconds: 700),
+                      curve: Curves.elasticOut,
+                      builder: (c, v, child) => Transform.scale(scale: v, child: child),
+                      child: Container(
+                        width: 92,
+                        height: 92,
+                        decoration: BoxDecoration(color: cs.primary, borderRadius: BorderRadius.circular(28)),
+                        child: Icon(Icons.delivery_dining, size: 54, color: cs.onPrimary),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 18),
                   Text(s.t('welcome'), textAlign: TextAlign.center, style: tt.headlineSmall?.copyWith(fontWeight: FontWeight.w900)),
                   const SizedBox(height: 4),
                   Text(s.t('tagline'), textAlign: TextAlign.center, style: tt.bodyLarge?.copyWith(color: cs.onSurfaceVariant)),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 14),
+                  Wrap(alignment: WrapAlignment.center, spacing: 8, runSpacing: 8, children: [
+                    for (final (i, p) in [
+                      (Icons.storefront, 'perk1'),
+                      (Icons.location_on_outlined, 'perk2'),
+                      (Icons.payments_outlined, 'perk3'),
+                    ].indexed)
+                      FadeSlideIn(
+                        index: i + 1,
+                        child: Chip(
+                          avatar: Icon(p.$1, size: 18, color: cs.primary),
+                          label: Text(s.t(p.$2)),
+                          visualDensity: VisualDensity.compact,
+                        ),
+                      ),
+                  ]),
+                  const SizedBox(height: 22),
                   SegmentedButton<bool>(
                     segments: [
                       ButtonSegment(value: false, label: Text(s.t('signIn'))),
