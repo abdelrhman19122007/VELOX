@@ -34,12 +34,12 @@ public class AuthService {
         this.throttle = throttle;
     }
 
-    /** Customers and drivers sign up themselves; store and admin accounts are made by an admin. */
+    /** Customers sign up themselves; driver, store and admin accounts are made by an admin. */
     @Transactional
     public SessionResponse register(RegisterRequest req) {
         Role role = req.role() == null ? Role.CUSTOMER : req.role();
         if (!role.canSelfRegister()) {
-            throw ApiException.badRequest("INVALID_ROLE", "Only customers and drivers can sign up");
+            throw ApiException.badRequest("INVALID_ROLE", "Only customers can sign up; drivers are added by the admin");
         }
         String email = normalize(req.email());
         if (users.emailExists(email)) {

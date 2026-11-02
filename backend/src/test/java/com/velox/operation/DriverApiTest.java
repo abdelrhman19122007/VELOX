@@ -106,8 +106,7 @@ class DriverApiTest extends OperationsApiTestBase {
 
     @Test
     void locationIsCheckedAndShownToTheCustomer() {
-        String token = post("/api/auth/register", Map.of("name", "New Driver", "email", uniqueEmail(), "phone", "01112345678",
-                "password", "driver-pass-1", "role", "DRIVER"), null).getBody().get("token").asText();
+        String token = newDriver();
         assertEquals("NOT_ONLINE", post("/api/driver/location", Map.of("lat", 31.0, "lng", 31.2), token).getBody().get("code").asText());
         post("/api/driver/status", Map.of("online", true), token);
         assertEquals(HttpStatus.NO_CONTENT, post("/api/driver/location", Map.of("lat", 31.0, "lng", 31.2), token).getStatusCode());

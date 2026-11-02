@@ -47,10 +47,17 @@ abstract class OperationsApiTestBase extends IntegrationTest {
         return newCustomer(uniqueEmail(), "secret-123");
     }
 
-    /** A driver who registered themselves and went online. */
+    /** A driver account made by the admin (drivers can't sign up themselves), signed in with its temporary password. */
+    protected String newDriver() {
+        String email = uniqueEmail();
+        String temp = post("/api/admin/users", Map.of("name", "Driver", "email", email, "phone", "01112345678", "role", "DRIVER"),
+                login(ADMIN_EMAIL, ADMIN_PASSWORD)).getBody().get("password").asText();
+        return login(email, temp);
+    }
+
+    /** A driver who went online. */
     protected String onlineDriver(String vehicle) {
-        String token = post("/api/auth/register", Map.of("name", "Driver", "email", uniqueEmail(), "phone", "01112345678",
-                "password", "driver-pass-1", "role", "DRIVER"), null).getBody().get("token").asText();
+        String token = newDriver();
         post("/api/driver/status", Map.of("online", true, "vehicle", vehicle), token);
         return token;
     }
