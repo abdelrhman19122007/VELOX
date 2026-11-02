@@ -79,6 +79,20 @@ class AdminUserApiTest extends IntegrationTest {
     }
 
     @Test
+    void customerDeletesTheirAccount() {
+        String email = uniqueEmail();
+        String token = newCustomer(email, "secret-123");
+        assertEquals(HttpStatus.BAD_REQUEST, post("/api/me/delete", Map.of("password", "wrong-one"), token).getStatusCode());
+        assertEquals(HttpStatus.NO_CONTENT, post("/api/me/delete", Map.of("password", "secret-123"), token).getStatusCode());
+        assertEquals(HttpStatus.UNAUTHORIZED, get("/api/auth/me", token).getStatusCode(), "session ends");
+        assertEquals(HttpStatus.UNAUTHORIZED, post("/api/auth/login", Map.of("email", email, "password", "secret-123"), null).getStatusCode(),
+                "the email is gone");
+        String admin = login(ADMIN_EMAIL, ADMIN_PASSWORD);
+        assertEquals(HttpStatus.FORBIDDEN, post("/api/me/delete", Map.of("password", ADMIN_PASSWORD), admin).getStatusCode(),
+                "admins are closed by another admin");
+    }
+
+    @Test
     void nobodyCanSignUpAsADriver() {
         assertEquals("INVALID_ROLE", post("/api/auth/register", Map.of("name", "Fake Driver", "email", uniqueEmail(),
                 "phone", "01112345678", "password", "driver-pass-1", "role", "DRIVER"), null).getBody().get("code").asText());

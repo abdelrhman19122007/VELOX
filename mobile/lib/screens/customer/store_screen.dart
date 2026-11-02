@@ -142,12 +142,13 @@ class _StoreScreenState extends State<StoreScreen> {
                   const SizedBox(height: 8),
                   Wrap(spacing: 16, runSpacing: 6, children: [
                     if (s.zoneOf(s.zone) != null)
-                      Text('🛵 ${s.t('deliveryInfo')} ${s.zoneOf(s.zone)!.etaMinutes + 15} ${s.t('min')} · ${s.money(s.zoneOf(s.zone)!.fee)}'),
-                    Text('📋 ${d.sections.fold<int>(0, (n, sec) => n + sec.products.length)} ${s.t('itemsCount')}'),
+                      _Info(Icons.delivery_dining,
+                          '${s.t('deliveryInfo')} ${s.zoneOf(s.zone)!.etaMinutes + 15} ${s.t('min')} · ${s.money(s.zoneOf(s.zone)!.fee)}'),
+                    _Info(Icons.restaurant_menu, '${d.sections.fold<int>(0, (n, sec) => n + sec.products.length)} ${s.t('itemsCount')}'),
                     if (store.opens != null && store.closes != null)
-                      Text('🕒 ${clock(s, store.opens!)} – ${clock(s, store.closes!)}'),
-                    if (d.address != null) Text('📍 ${d.address}'),
-                    if (d.phone != null) InkWell(onTap: () => callPhone(d.phone!), child: Text('📞 ${d.phone}')),
+                      _Info(Icons.schedule, '${clock(s, store.opens!)} – ${clock(s, store.closes!)}'),
+                    if (d.address != null) _Info(Icons.location_on_outlined, d.address!),
+                    if (d.phone != null) InkWell(onTap: () => callPhone(d.phone!), child: _Info(Icons.call_outlined, d.phone!)),
                   ]),
                   if (!store.orderable)
                     Container(
@@ -235,6 +236,19 @@ class _StoreScreenState extends State<StoreScreen> {
       },
     );
   }
+}
+
+/// An icon and a line of store info (time, address, phone…).
+class _Info extends StatelessWidget {
+  final IconData icon;
+  final String text;
+  const _Info(this.icon, this.text);
+  @override
+  Widget build(BuildContext context) => Row(mainAxisSize: MainAxisSize.min, children: [
+        Icon(icon, size: 18, color: Theme.of(context).colorScheme.primary),
+        const SizedBox(width: 6),
+        Flexible(child: Text(text)),
+      ]);
 }
 
 class _ProductTile extends StatelessWidget {

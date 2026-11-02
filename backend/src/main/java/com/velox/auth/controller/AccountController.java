@@ -2,7 +2,9 @@ package com.velox.auth.controller;
 
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -34,6 +36,16 @@ public class AccountController {
     @PostMapping("/password")
     public SessionResponse changePassword(@CurrentUser AuthUser me, @Valid @RequestBody PasswordChangeRequest req) {
         return account.changePassword(me, req.current(), req.password());
+    }
+
+    /** Deletes the signed-in account after checking its password (POST, so the password travels in the body). */
+    @PostMapping("/delete")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteAccount(@CurrentUser AuthUser me, @RequestBody DeleteAccountRequest req) {
+        account.deleteAccount(me, req.password());
+    }
+
+    public record DeleteAccountRequest(String password) {
     }
 
     @GetMapping("/addresses")

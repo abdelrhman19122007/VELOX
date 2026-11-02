@@ -233,6 +233,12 @@ class AppState extends ChangeNotifier {
   Future<void> changePassword(String current, String password) async =>
       _session(await api.post('/me/password', {'current': current, 'password': password}));
 
+  /// Deletes this account on the server (needs the password), then signs out.
+  Future<void> deleteAccount(String password) async {
+    await api.post('/me/delete', {'password': password});
+    signOut();
+  }
+
   Future<void> logoutEverywhere() async {
     try {
       await api.post('/auth/logout-everywhere');
