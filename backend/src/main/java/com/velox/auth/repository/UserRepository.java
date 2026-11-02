@@ -67,6 +67,19 @@ public class UserRepository {
         db.update("UPDATE users SET token_version = token_version + 1 WHERE id = ?", userId);
     }
 
+    /**
+     * "Delete my account": the personal data goes (name, email, phone, picture, password, addresses, devices,
+     * favorites, notifications). The row stays, anonymous and blocked, because past orders must still add up.
+     */
+    public void anonymize(long userId) {
+        db.update("UPDATE users SET email = 'deleted-' || public_id || '@deleted.velox', name = 'Deleted user', phone = NULL, "
+                + "picture = NULL, password_hash = NULL, blocked = TRUE, token_version = token_version + 1 WHERE id = ?", userId);
+        db.update("DELETE FROM addresses WHERE user_id = ?", userId);
+        db.update("DELETE FROM push_devices WHERE user_id = ?", userId);
+        db.update("DELETE FROM favorites WHERE user_id = ?", userId);
+        db.update("DELETE FROM notifications WHERE user_id = ?", userId);
+    }
+
     public boolean setBlocked(String publicId, boolean blocked) {
         return db.update("UPDATE users SET blocked = ?, token_version = token_version + 1 WHERE public_id = ?",
                 blocked, publicId) > 0;
