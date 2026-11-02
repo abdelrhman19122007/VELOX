@@ -58,12 +58,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                       duration: const Duration(milliseconds: 700),
                       curve: Curves.elasticOut,
                       builder: (c, v, child) => Transform.scale(scale: v, child: child),
-                      child: Container(
-                        width: 92,
-                        height: 92,
-                        decoration: BoxDecoration(color: cs.primary, borderRadius: BorderRadius.circular(28)),
-                        child: Icon(Icons.delivery_dining, size: 54, color: cs.onPrimary),
-                      ),
+                      child: Image.asset('assets/images/velox_logo.png', height: 130),
                     ),
                   ),
                   const SizedBox(height: 18),
