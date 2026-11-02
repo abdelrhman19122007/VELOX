@@ -1,7 +1,7 @@
 ﻿name: velox_app
 description: "VELOX â€” delivery for Samannoud and its villages. One app for customers, stores, drivers and the admin."
 publish_to: 'none'
-version: 2.1.0+21
+version: 2.1.1+22
 
 environment:
   sdk: ^3.11.5

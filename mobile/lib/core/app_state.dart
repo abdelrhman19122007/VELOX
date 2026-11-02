@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -124,6 +125,27 @@ class AppState extends ChangeNotifier {
     ready = true;
     notifyListeners();
     loadCatalog();
+    checkForUpdate();
+  }
+
+  /// This build's number — keep it equal to the +N in pubspec.yaml and to downloads/version.json.
+  static const appBuild = 22;
+
+  /// Set when the server offers a newer Android build; the home screen shows an "update" card.
+  String? updateUrl;
+
+  /// Android only: a sideloaded APK can't update itself, so it asks the server for the newest build.
+  Future<void> checkForUpdate() async {
+    if (kIsWeb || defaultTargetPlatform != TargetPlatform.android) return;
+    try {
+      final res = await http.get(Uri.parse('$apiBase/downloads/version.json')).timeout(const Duration(seconds: 10));
+      if (res.statusCode != 200) return;
+      final v = jsonDecode(res.body);
+      if ((v['build'] as num? ?? 0) > appBuild) {
+        updateUrl = '$apiBase/${v['path'] ?? 'downloads/velox.apk'}';
+        notifyListeners();
+      }
+    } catch (_) {}
   }
 
   bool _discovering = false;

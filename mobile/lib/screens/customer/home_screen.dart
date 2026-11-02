@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/app_state.dart';
 import '../../core/models.dart';
@@ -121,6 +122,24 @@ class _HomeScreenState extends State<HomeScreen> {
                 const SizedBox(width: 6),
               ],
             ),
+            if (s.updateUrl != null)
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+                  child: Card(
+                    color: cs.secondaryContainer,
+                    child: ListTile(
+                      leading: Icon(Icons.system_update, color: cs.onSecondaryContainer),
+                      title: Text(s.t('updateTitle'), style: const TextStyle(fontWeight: FontWeight.w800)),
+                      subtitle: Text(s.t('updateBody')),
+                      trailing: FilledButton(
+                        onPressed: () => launchUrl(Uri.parse(s.updateUrl!), mode: LaunchMode.externalApplication),
+                        child: Text(s.t('updateNow')),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
             // greeting
             SliverToBoxAdapter(
               child: FadeSlideIn(
