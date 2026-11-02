@@ -79,10 +79,18 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                     ].indexed)
                       FadeSlideIn(
                         index: i + 1,
-                        child: Chip(
-                          avatar: Icon(p.$1, size: 18, color: cs.primary),
-                          label: Text(s.t(p.$2)),
-                          visualDensity: VisualDensity.compact,
+                        // a plain pill: Chip clips the Cairo font's tall line height on the web
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: cs.primaryContainer.withValues(alpha: 0.45),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Row(mainAxisSize: MainAxisSize.min, children: [
+                            Icon(p.$1, size: 18, color: cs.primary),
+                            const SizedBox(width: 6),
+                            Text(s.t(p.$2), style: tt.labelLarge),
+                          ]),
                         ),
                       ),
                   ]),
