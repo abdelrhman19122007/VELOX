@@ -78,10 +78,47 @@ class AccountScreen extends StatelessWidget {
             ),
           ),
         ),
+        Center(
+          child: TextButton.icon(
+            style: TextButton.styleFrom(foregroundColor: cs.error),
+            icon: const Icon(Icons.delete_forever_outlined),
+            label: Text(s.t('deleteAccount')),
+            onPressed: () => _confirmDelete(context, s),
+          ),
+        ),
         const SizedBox(height: 16),
       ]),
     );
   }
+}
+
+Future<void> _confirmDelete(BuildContext context, AppState s) async {
+  final password = TextEditingController();
+  final ok = await showDialog<bool>(
+    context: context,
+    builder: (c) => AlertDialog(
+      title: Text(s.t('deleteTitle')),
+      content: Column(mainAxisSize: MainAxisSize.min, children: [
+        Text(s.t('deleteBody')),
+        const SizedBox(height: 12),
+        TextField(controller: password, obscureText: true, decoration: InputDecoration(labelText: s.t('password'))),
+      ]),
+      actions: [
+        TextButton(onPressed: () => Navigator.pop(c, false), child: Text(s.t('cancel'))),
+        FilledButton(
+          style: FilledButton.styleFrom(backgroundColor: Theme.of(c).colorScheme.error),
+          onPressed: () => Navigator.pop(c, true),
+          child: Text(s.t('deleteConfirm')),
+        ),
+      ],
+    ),
+  );
+  if (ok != true || !context.mounted) return;
+  final done = await busy(context, () async {
+    await s.deleteAccount(password.text);
+    return true;
+  });
+  if (done == true && context.mounted) showInfo(context, s.t('deleted'));
 }
 
 Widget _row(IconData icon, String title, String sub, VoidCallback onTap) => ListTile(

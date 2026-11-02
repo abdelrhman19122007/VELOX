@@ -22,6 +22,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   String type = 'ALL';
+  String cuisine = 'ALL';
   bool openOnly = false, favOnly = false;
 
   static const _types = ['FOOD', 'GROCERY', 'PHARMACY', 'CLOTHES', 'TECH', 'OTHER'];
@@ -30,6 +31,7 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Store> _filtered(AppState s) {
     final list = s.stores.where((st) {
       if (type != 'ALL' && st.type != type) return false;
+      if (cuisine != 'ALL' && st.cuisine != cuisine) return false;
       if (openOnly && !st.orderable) return false;
       if (favOnly && !s.favorites.contains('store:${st.id}')) return false;
       return true;
@@ -126,7 +128,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(16, 4, 16, 10),
                   child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    Text('${s.t('hello')}${s.user == null ? '' : ' ${s.user!.name.split(' ').first}'} 👋',
+                    Text('${s.t('hello')}${s.user == null ? '' : ' ${s.user!.name.split(' ').first}'}',
                         style: tt.titleMedium?.copyWith(color: cs.onSurfaceVariant)),
                     Text(s.t('craving'), style: tt.headlineSmall?.copyWith(fontWeight: FontWeight.w900)),
                     const SizedBox(height: 4),
@@ -152,12 +154,34 @@ class _HomeScreenState extends State<HomeScreen> {
               SliverToBoxAdapter(child: SectionTitle(s.t('featured'))),
               SliverToBoxAdapter(child: _Featured(s.stores.where((st) => st.photoUrl != null).toList())),
             ],
+            // categories, like the big apps: a row of circles that filter the stores below
+            if (s.stores.map((st) => st.cuisine).toSet().length > 1) ...[
+              SliverToBoxAdapter(child: SectionTitle(s.t('categories'))),
+              SliverToBoxAdapter(
+                child: SizedBox(
+                  height: 104,
+                  child: ListView(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    scrollDirection: Axis.horizontal,
+                    children: [
+                      for (final c in ['ALL', ...{for (final st in s.stores) st.cuisine}])
+                        _CuisineCircle(
+                          label: s.t('cuisine_$c') == 'cuisine_$c' ? c : s.t('cuisine_$c'),
+                          icon: _cuisineIcon(c),
+                          selected: cuisine == c,
+                          onTap: () => setState(() => cuisine = c),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
             // offers
             SliverToBoxAdapter(child: SectionTitle(s.t('offers'))),
             SliverToBoxAdapter(child: _SubTitle(s.t('offersSub'))),
             SliverToBoxAdapter(
               child: SizedBox(
-                height: 118,
+                height: 138,
                 child: ListView.separated(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   scrollDirection: Axis.horizontal,
@@ -304,6 +328,54 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ]),
+    );
+  }
+}
+
+IconData _cuisineIcon(String c) => switch (c) {
+      'ALL' => Icons.apps,
+      'GRILLS' => Icons.outdoor_grill,
+      'CAFE' => Icons.local_cafe,
+      'PIZZA' => Icons.local_pizza,
+      'SWEETS' => Icons.icecream,
+      'FASTFOOD' => Icons.lunch_dining,
+      'SEAFOOD' => Icons.set_meal,
+      'PHARMACY' => Icons.local_pharmacy,
+      'GROCERY' => Icons.local_grocery_store,
+      _ => Icons.restaurant,
+    };
+
+/// One category circle; the chosen one is filled with the brand colour.
+class _CuisineCircle extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final bool selected;
+  final VoidCallback onTap;
+  const _CuisineCircle({required this.label, required this.icon, required this.selected, required this.onTap});
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return InkWell(
+      borderRadius: BorderRadius.circular(16),
+      onTap: onTap,
+      child: SizedBox(
+        width: 80,
+        child: Column(children: [
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            width: 60,
+            height: 60,
+            decoration: BoxDecoration(
+              color: selected ? cs.primary : cs.primaryContainer,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, color: selected ? cs.onPrimary : cs.primary, size: 28),
+          ),
+          const SizedBox(height: 6),
+          Text(label, maxLines: 1, overflow: TextOverflow.ellipsis,
+              style: TextStyle(fontWeight: selected ? FontWeight.w900 : FontWeight.w600, fontSize: 13)),
+        ]),
+      ),
     );
   }
 }

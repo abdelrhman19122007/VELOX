@@ -12,8 +12,10 @@ import com.velox.auth.dto.AuthDtos.UserResponse;
 import com.velox.auth.repository.AddressRepository;
 import com.velox.auth.repository.UserRepository;
 import com.velox.common.error.ApiException;
+import com.velox.security.AuditLog;
 import com.velox.security.AuthUser;
 import com.velox.security.PasswordHasher;
+import com.velox.security.Role;
 import com.velox.security.TokenService;
 
 /** What a signed-in user manages about their own account: password and saved addresses (FR-AUTH-04, -07). */
@@ -26,12 +28,15 @@ public class AccountService {
     private final AddressRepository addresses;
     private final PasswordHasher hasher;
     private final TokenService tokens;
+    private final AuditLog audit;
 
-    public AccountService(UserRepository users, AddressRepository addresses, PasswordHasher hasher, TokenService tokens) {
+    public AccountService(UserRepository users, AddressRepository addresses, PasswordHasher hasher, TokenService tokens,
+                          AuditLog audit) {
         this.users = users;
         this.addresses = addresses;
         this.hasher = hasher;
         this.tokens = tokens;
+        this.audit = audit;
     }
 
     /**
@@ -47,6 +52,21 @@ public class AccountService {
         users.updatePassword(user.id(), hasher.hash(next));
         User updated = users.findByPublicId(me.publicId()).orElseThrow();
         return new SessionResponse(tokens.issue(updated.publicId(), updated.tokenVersion()), UserResponse.of(updated));
+    }
+
+    /**
+     * Customers and drivers can delete their own account (Google Play requires it); store and admin accounts are
+     * closed by an admin. Needs the password, so a stolen session alone can't erase an account.
+     */
+    @Transactional
+    public void deleteAccount(AuthUser me, String password) {
+        me.require(Role.CUSTOMER, Role.DRIVER);
+        User user = users.findByPublicId(me.publicId()).orElseThrow(ApiException::unauthorized);
+        if (password == null || !hasher.matches(password, user.passwordHash())) {
+            throw ApiException.badRequest("WRONG_PASSWORD", "The password is wrong");
+        }
+        users.anonymize(user.id());
+        audit.record(me, "ACCOUNT_DELETE", "user", me.publicId(), null);
     }
 
     public List<Address> addresses(AuthUser me) {

@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>مسح الحساب — VELOX</title>
+<link rel="icon" href="/img/velox-icon.png" type="image/png">
+<style>
+  body { font-family: 'Cairo', system-ui, sans-serif; background: #FFF8F5; color: #231914; margin: 0; line-height: 1.8; }
+  main { max-width: 520px; margin: 0 auto; padding: 24px 18px 48px; }
+  h1 { color: #9C3D10; margin: 8px 0; }
+  label { display: block; font-weight: 700; margin-top: 12px; }
+  input { width: 100%; box-sizing: border-box; padding: 12px; border: 1px solid #E6D3CB; border-radius: 12px; font: inherit; background: #fff; }
+  button { margin-top: 18px; width: 100%; padding: 14px; border: 0; border-radius: 12px; background: #BA1A1A; color: #fff; font: inherit; font-weight: 800; cursor: pointer; }
+  .box { background: #fff; border: 1px solid #EADFD8; border-radius: 16px; padding: 18px; margin-top: 16px; }
+  .muted { color: #6E5A4E; } .msg { margin-top: 14px; font-weight: 700; }
+  .en { direction: ltr; text-align: left; margin-top: 28px; }
+</style>
+</head>
+<body>
+<main>
+  <img src="/img/velox-logo.png" alt="VELOX" style="height:64px">
+  <h1>مسح حساب ڤيلوكس</h1>
+  <p>تقدر تمسح حسابك من التطبيق: <b>حسابي ← امسح حسابي</b>. أو من هنا بالإيميل وكلمة السر.</p>
+  <p class="muted">هيتمسح فورًا: اسمك، إيميلك، موبايلك، عناوينك، وإشعاراتك. الطلبات القديمة بتفضل من غير أي بيانات شخصية عشان حسابات المطاعم. الحساب مينفعش يرجع.</p>
+
+  <form class="box" id="f">
+    <label for="email">الإيميل</label>
+    <input id="email" type="email" required autocomplete="email">
+    <label for="password">كلمة السر</label>
+    <input id="password" type="password" required autocomplete="current-password">
+    <button type="submit">امسح حسابي نهائيًا</button>
+    <div class="msg" id="msg" role="status"></div>
+  </form>
+
+  <section class="en">
+    <h2>Delete your VELOX account</h2>
+    <p>In the app: <b>Account → Delete my account</b>, or sign in above with your email and password.
+      Your name, email, phone, addresses and notifications are erased immediately. Past orders stay without personal data. This can't be undone.</p>
+  </section>
+</main>
+<script>
+  const msg = (t, ok) => { const m = document.getElementById('msg'); m.textContent = t; m.style.color = ok ? '#1F6F4A' : '#BA1A1A'; };
+  document.getElementById('f').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!confirm('متأكد؟ الحساب هيتمسح ومش هيرجع. / Are you sure? This cannot be undone.')) return;
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    try {
+      const r = await fetch('/api/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password }) });
+      if (!r.ok) return msg('الإيميل أو كلمة السر غلط / Wrong email or password');
+      const { token } = await r.json();
+      const d = await fetch('/api/me/delete', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token }, body: JSON.stringify({ password }) });
+      if (d.status === 204) { msg('حسابك اتمسح ✔ / Your account was deleted', true); e.target.reset(); }
+      else if (d.status === 403) msg('حسابات المطاعم والإدارة بتتقفل من الإدارة / Store and admin accounts are closed by the admin');
+      else msg('حصلت مشكلة، جرّب تاني / Something went wrong, try again');
+    } catch { msg('مفيش اتصال بالسيرفر / Can\'t reach the server'); }
+  });
+</script>
+</body>
+</html>
