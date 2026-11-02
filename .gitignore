@@ -1,0 +1,37 @@
+# VELOX monorepo — shared ignores (each part keeps its own too)
+target/
+*.class
+*.log
+*.iml
+.idea/
+.vscode/
+.project
+.classpath
+.settings/
+bin/
+.DS_Store
+Thumbs.db
+
+# Runtime / local-only data (never commit)
+data/
+*.dat
+orders.dat
+complaints.txt
+invoices_history.txt
+application-local.properties
+.env
+Velox.jar
+
+# Local DB credentials template override (use *.example as template)
+velox-backend/src/main/resources/application.properties
+
+# Firebase keys and uploaded files (never commit)
+.firebase/
+backend/uploads/
+
+# Built files served by the server (not source)
+web/downloads/
+
+# Deployment secrets and logs (never commit)
+deploy/.env
+deploy/logs/

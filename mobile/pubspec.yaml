@@ -1,0 +1,32 @@
+name: velox_app
+description: "VELOX — delivery for Samannoud and its villages. One app for customers, stores, drivers and the admin."
+publish_to: 'none'
+version: 2.0.0+20
+
+environment:
+  sdk: ^3.11.5
+
+dependencies:
+  firebase_core: ^4.15.0
+  firebase_messaging: ^16.7.0
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  flutter_map: ^8.3.2
+  geolocator: ^14.1.1
+  google_fonts: ^8.2.1
+  http: ^1.6.0
+  intl: ^0.20.2
+  latlong2: ^0.10.1
+  provider: ^6.1.5+1
+  shared_preferences: ^2.5.5
+  url_launcher: ^6.3.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
