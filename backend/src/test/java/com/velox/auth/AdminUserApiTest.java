@@ -79,6 +79,12 @@ class AdminUserApiTest extends IntegrationTest {
     }
 
     @Test
+    void nobodyCanSignUpAsADriver() {
+        assertEquals("INVALID_ROLE", post("/api/auth/register", Map.of("name", "Fake Driver", "email", uniqueEmail(),
+                "phone", "01112345678", "password", "driver-pass-1", "role", "DRIVER"), null).getBody().get("code").asText());
+    }
+
+    @Test
     void adminCannotBlockThemselves() {
         String admin = login(ADMIN_EMAIL, ADMIN_PASSWORD);
         assertEquals(HttpStatus.BAD_REQUEST,

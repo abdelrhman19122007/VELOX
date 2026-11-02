@@ -16,6 +16,7 @@ const Map<String, List<String>> _s = {
   'next': ['التالي', 'Next'],
   'loading': ['ثواني…', 'Loading…'],
   'empty': ['مفيش حاجة هنا لسه', 'Nothing here yet'],
+  'driverNote': ['عايز تشتغل مندوب؟ كلّم الإدارة وهي تعملك حساب', 'Want to drive for VELOX? Ask the admin to create your account'],
   'perk1': ['مطاعم سمنود الحقيقية', "Samannoud's real restaurants"],
   'perk2': ['تتبع المندوب على الخريطة', 'Track your driver live'],
   'perk3': ['ادفع كاش عند الاستلام', 'Pay cash on delivery'],

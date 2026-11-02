@@ -16,14 +16,14 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   final _form = GlobalKey<FormState>();
   final name = TextEditingController(), email = TextEditingController(), phone = TextEditingController();
   final password = TextEditingController();
-  bool signUp = false, driver = false, hide = true, loading = false;
+  bool signUp = false, hide = true, loading = false;
 
   Future<void> submit() async {
     if (!_form.currentState!.validate()) return;
     final s = context.read<AppState>();
     setState(() => loading = true);
     await busy(context, () => signUp
-        ? s.register(name.text, email.text, phone.text, password.text, driver)
+        ? s.register(name.text, email.text, phone.text, password.text, false)
         : s.login(email.text, password.text));
     if (mounted) setState(() => loading = false);
   }
@@ -141,12 +141,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                     validator: (v) => signUp && (v ?? '').length < 8 ? s.t('badPassword') : ((v ?? '').isEmpty ? s.t('badPassword') : null),
                   ),
                   if (signUp)
-                    CheckboxListTile(
-                      contentPadding: EdgeInsets.zero,
-                      value: driver,
-                      onChanged: (v) => setState(() => driver = v ?? false),
-                      title: Text(s.t('iAmDriver')),
-                      secondary: const Icon(Icons.two_wheeler),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: Text(s.t('driverNote'), style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant)),
                     )
                   else
                     Padding(
