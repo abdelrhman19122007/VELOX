@@ -140,32 +140,56 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
               ),
-            // greeting
-            SliverToBoxAdapter(
-              child: FadeSlideIn(
-                index: 0,
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 10),
-                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    Text('${s.t('hello')}${s.user == null ? '' : ' ${s.user!.name.split(' ').first}'}',
-                        style: tt.titleMedium?.copyWith(color: cs.onSurfaceVariant)),
-                    Text(s.t('craving'), style: tt.headlineSmall?.copyWith(fontWeight: FontWeight.w900)),
-                    const SizedBox(height: 4),
-                    Text(s.t('heroSub'), style: tt.bodyMedium?.copyWith(color: cs.onSurfaceVariant)),
-                  ]),
-                ),
-              ),
-            ),
+            // greeting and search, with a photo promo beside them on wide screens (below them on phones)
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(14),
-                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SearchScreen())),
-                  child: IgnorePointer(
-                    child: TextField(decoration: InputDecoration(hintText: s.t('searchPh'), prefixIcon: const Icon(Icons.search))),
-                  ),
-                ),
+                child: LayoutBuilder(builder: (c, box) {
+                  final greeting = FadeSlideIn(
+                    index: 0,
+                    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                      Text('${s.t('hello')}${s.user == null ? '' : ' ${s.user!.name.split(' ').first}'}',
+                          style: tt.titleMedium?.copyWith(color: cs.onSurfaceVariant)),
+                      Text(s.t('craving'), style: tt.headlineSmall?.copyWith(fontWeight: FontWeight.w900)),
+                      const SizedBox(height: 4),
+                      Text(s.t('heroSub'), style: tt.bodyMedium?.copyWith(color: cs.onSurfaceVariant)),
+                      const SizedBox(height: 12),
+                      InkWell(
+                        borderRadius: BorderRadius.circular(14),
+                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SearchScreen())),
+                        child: IgnorePointer(
+                          child: TextField(decoration: InputDecoration(hintText: s.t('searchPh'), prefixIcon: const Icon(Icons.search))),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Wrap(spacing: 8, runSpacing: 8, children: [
+                        for (final (icon, key) in [
+                          (Icons.delivery_dining, 'chipFast'),
+                          (Icons.payments_outlined, 'chipCash'),
+                          (Icons.location_on_outlined, 'chipTrack'),
+                        ])
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                            decoration: BoxDecoration(color: cs.surfaceContainerLow, borderRadius: BorderRadius.circular(20)),
+                            child: Row(mainAxisSize: MainAxisSize.min, children: [
+                              Icon(icon, size: 16, color: cs.secondary),
+                              const SizedBox(width: 5),
+                              Text(s.t(key), style: tt.labelLarge),
+                            ]),
+                          ),
+                      ]),
+                    ]),
+                  );
+                  final promo = _HeroCard(s.stores.where((st) => st.orderable).firstOrNull);
+                  if (box.maxWidth >= 760) {
+                    return Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                      Expanded(flex: 5, child: greeting),
+                      const SizedBox(width: 20),
+                      Expanded(flex: 4, child: promo),
+                    ]);
+                  }
+                  return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [greeting, const SizedBox(height: 14), promo]);
+                }),
               ),
             ),
             // featured stores with photos
@@ -393,6 +417,58 @@ class _CuisineCircle extends StatelessWidget {
           const SizedBox(height: 6),
           Text(label, maxLines: 1, overflow: TextOverflow.ellipsis,
               style: TextStyle(fontWeight: selected ? FontWeight.w900 : FontWeight.w600, fontSize: 13)),
+        ]),
+      ),
+    );
+  }
+}
+
+/// The photo promo at the top of home: a dish photo, a headline and an "Order now" that opens the open store.
+class _HeroCard extends StatelessWidget {
+  final Store? store;
+  const _HeroCard(this.store);
+  @override
+  Widget build(BuildContext context) {
+    final s = context.watch<AppState>();
+    final cs = Theme.of(context).colorScheme;
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(22),
+      child: SizedBox(
+        height: 210,
+        child: Stack(fit: StackFit.expand, children: [
+          Image.asset('assets/images/hero_grill.jpg', fit: BoxFit.cover),
+          const DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Colors.black12, Colors.black87]),
+            ),
+          ),
+          Positioned(
+            top: 14,
+            right: 14,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(color: cs.secondary, borderRadius: BorderRadius.circular(20)),
+              child: Text('WELCOME', style: TextStyle(color: cs.onSecondary, fontWeight: FontWeight.w900, letterSpacing: 1)),
+            ),
+          ),
+          PositionedDirectional(
+            start: 18,
+            end: 18,
+            bottom: 16,
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(s.t('heroCardTitle'), style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w900)),
+              const SizedBox(height: 2),
+              Text(s.t('heroCardSub'), style: const TextStyle(color: Colors.white70)),
+              const SizedBox(height: 10),
+              if (store != null)
+                FilledButton.icon(
+                  style: FilledButton.styleFrom(minimumSize: const Size(0, 42)),
+                  icon: const Icon(Icons.restaurant_menu, size: 18),
+                  onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => StoreScreen(storeId: store!.id))),
+                  label: Text('${s.t('orderNow')} · ${s.storeName(store!)}'),
+                ),
+            ]),
+          ),
         ]),
       ),
     );
