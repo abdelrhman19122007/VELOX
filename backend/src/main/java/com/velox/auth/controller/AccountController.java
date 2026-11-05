@@ -13,7 +13,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.velox.auth.domain.Address;
+import com.velox.auth.dto.AuthDtos;
 import com.velox.auth.dto.AuthDtos.AddressRequest;
+import com.velox.auth.dto.AuthDtos.UserResponse;
 import com.velox.auth.dto.AuthDtos.PasswordChangeRequest;
 import com.velox.auth.dto.AuthDtos.SessionResponse;
 import com.velox.auth.service.AccountService;
@@ -21,6 +23,9 @@ import com.velox.security.AuthUser;
 import com.velox.security.CurrentUser;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 
 /** The signed-in user's own account: password and saved addresses. */
 @RestController
@@ -46,6 +51,16 @@ public class AccountController {
     }
 
     public record DeleteAccountRequest(String password) {
+    }
+
+    /** Edit my name and phone; the email stays (it is the sign-in). Returns the updated account. */
+    @PostMapping("/profile")
+    public UserResponse updateProfile(@CurrentUser AuthUser me, @Valid @RequestBody ProfileRequest req) {
+        return account.updateProfile(me, req.name().trim(), req.phone().trim());
+    }
+
+    public record ProfileRequest(@NotBlank @Size(min = 2, max = 60) @Pattern(regexp = AuthDtos.PLAIN_NAME) String name,
+                                 @NotBlank @Pattern(regexp = AuthDtos.EG_MOBILE, message = "Egyptian mobile number") String phone) {
     }
 
     @GetMapping("/addresses")

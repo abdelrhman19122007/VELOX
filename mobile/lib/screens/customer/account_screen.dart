@@ -20,7 +20,10 @@ class AccountScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: Text(s.t('account'))),
       body: ListView(children: [
-        Container(
+        InkWell(
+          borderRadius: BorderRadius.circular(20),
+          onTap: () => open(const EditProfileScreen()),
+          child: Container(
           margin: const EdgeInsets.fromLTRB(16, 8, 16, 8),
           padding: const EdgeInsets.all(18),
           decoration: BoxDecoration(color: cs.primaryContainer, borderRadius: BorderRadius.circular(20)),
@@ -38,7 +41,9 @@ class AccountScreen extends StatelessWidget {
                 if ((s.user!.phone ?? '').isNotEmpty) Text(s.user!.phone!, style: tt.bodyMedium?.copyWith(color: cs.onPrimaryContainer)),
               ]),
             ),
+            Icon(Icons.edit_outlined, color: cs.onPrimaryContainer),
           ]),
+        ),
         ),
         _row(Icons.account_balance_wallet_outlined, s.t('wallet'), s.t('walletSub'), () => open(const WalletScreen())),
         ListTile(
@@ -204,6 +209,11 @@ class AddressesScreen extends StatelessWidget {
     final s = context.watch<AppState>();
     return Scaffold(
       appBar: AppBar(title: Text(s.t('savedAddresses'))),
+      floatingActionButton: FloatingActionButton.extended(
+        icon: const Icon(Icons.add_location_alt_outlined),
+        label: Text(s.t('addAddress')),
+        onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AddAddressScreen())),
+      ),
       body: s.addresses.isEmpty
           ? EmptyState(Icons.location_off_outlined, s.t('empty'))
           : ListView(children: [
@@ -219,6 +229,120 @@ class AddressesScreen extends StatelessWidget {
                   ),
                 ),
             ]),
+    );
+  }
+}
+
+class EditProfileScreen extends StatefulWidget {
+  const EditProfileScreen({super.key});
+  @override
+  State<EditProfileScreen> createState() => _EditProfileScreenState();
+}
+
+class _EditProfileScreenState extends State<EditProfileScreen> {
+  final _form = GlobalKey<FormState>();
+  late final name = TextEditingController(text: context.read<AppState>().user?.name ?? '');
+  late final phone = TextEditingController(text: context.read<AppState>().user?.phone ?? '');
+
+  @override
+  Widget build(BuildContext context) {
+    final s = context.watch<AppState>();
+    return Scaffold(
+      appBar: AppBar(title: Text(s.t('editProfile'))),
+      body: Form(
+        key: _form,
+        child: ListView(padding: const EdgeInsets.all(16), children: [
+          TextFormField(
+            controller: name,
+            decoration: InputDecoration(labelText: s.t('name'), prefixIcon: const Icon(Icons.person_outline)),
+            validator: (v) => (v ?? '').trim().length < 2 ? s.t('badName') : null,
+          ),
+          const SizedBox(height: 12),
+          TextFormField(
+            controller: phone,
+            keyboardType: TextInputType.phone,
+            decoration: InputDecoration(labelText: s.t('phone'), prefixIcon: const Icon(Icons.phone_outlined)),
+            validator: (v) => RegExp(r'^01[0125]\d{8}$').hasMatch((v ?? '').trim()) ? null : s.t('badPhone'),
+          ),
+          const SizedBox(height: 12),
+          TextFormField(
+            initialValue: s.user?.email,
+            enabled: false,
+            decoration: InputDecoration(labelText: s.t('email'), prefixIcon: const Icon(Icons.mail_outline)),
+          ),
+          const SizedBox(height: 20),
+          FilledButton(
+            onPressed: () async {
+              if (!_form.currentState!.validate()) return;
+              final ok = await busy(context, () async {
+                await s.updateProfile(name.text, phone.text);
+                return true;
+              });
+              if (ok == true && context.mounted) {
+                showInfo(context, s.t('saved'));
+                Navigator.pop(context);
+              }
+            },
+            child: Text(s.t('saved') == 'Saved' ? 'Save' : 'احفظ'),
+          ),
+        ]),
+      ),
+    );
+  }
+}
+
+class AddAddressScreen extends StatefulWidget {
+  const AddAddressScreen({super.key});
+  @override
+  State<AddAddressScreen> createState() => _AddAddressScreenState();
+}
+
+class _AddAddressScreenState extends State<AddAddressScreen> {
+  final _form = GlobalKey<FormState>();
+  final label = TextEditingController(), line = TextEditingController(), mark = TextEditingController();
+  late final tel = TextEditingController(text: context.read<AppState>().user?.phone ?? '');
+  late String zone = context.read<AppState>().zone;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = context.watch<AppState>();
+    return Scaffold(
+      appBar: AppBar(title: Text(s.t('addAddress'))),
+      body: Form(
+        key: _form,
+        child: ListView(padding: const EdgeInsets.all(16), children: [
+          TextFormField(controller: label, decoration: InputDecoration(labelText: s.t('addressLabel')),
+              validator: (v) => (v ?? '').trim().isEmpty ? s.t('addressLabel') : null),
+          const SizedBox(height: 12),
+          DropdownButtonFormField<String>(
+            initialValue: s.zones.any((z) => z.code == zone) ? zone : (s.zones.isEmpty ? null : s.zones.first.code),
+            decoration: InputDecoration(labelText: s.t('area')),
+            items: [for (final z in s.zones) DropdownMenuItem(value: z.code, child: Text(s.ar ? z.nameAr : z.nameEn))],
+            onChanged: (v) => setState(() => zone = v ?? zone),
+          ),
+          const SizedBox(height: 12),
+          TextFormField(controller: line, decoration: InputDecoration(labelText: s.t('addressLine')),
+              validator: (v) => (v ?? '').trim().length < 4 ? s.t('addressLine') : null),
+          const SizedBox(height: 12),
+          TextFormField(controller: mark, decoration: InputDecoration(labelText: s.t('landmarkHint'))),
+          const SizedBox(height: 12),
+          TextFormField(controller: tel, keyboardType: TextInputType.phone, decoration: InputDecoration(labelText: s.t('phone')),
+              validator: (v) => RegExp(r'^01[0125]\d{8}$').hasMatch((v ?? '').trim()) ? null : s.t('badPhone')),
+          const SizedBox(height: 20),
+          FilledButton.icon(
+            icon: const Icon(Icons.check),
+            label: Text(s.t('saveAddress')),
+            onPressed: () async {
+              if (!_form.currentState!.validate()) return;
+              final ok = await busy(context, () async {
+                await s.addAddress(label: label.text, zoneCode: zone, line: line.text, mark: mark.text, tel: tel.text);
+                return true;
+              });
+              if (ok == true && context.mounted) Navigator.pop(context);
+            },
+          ),
+        ]),
+      ),
     );
   }
 }

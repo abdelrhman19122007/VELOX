@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>ڤيلوكس — توصيل سمنود</title>
-  <meta name="description" content="اطلب من مطاعم ومحلات وصيدليات سمنود والقرى اللي حواليها، وتابع طلبك لحد باب بيتك.">
+  <meta name="description" content="اطلب من مطاعم وكافيهات سمنود الحقيقية، وتابع المندوب على الخريطة لحد باب بيتك.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/tokens.css">
@@ -36,33 +36,56 @@
 
     <section class="hero">
       <div>
-        <span class="chip ok">سمنود والقرى اللي حواليها</span>
+        <span class="chip ok">توصيل في سمنود</span>
         <h1>طلباتك من قلب <em>سمنود</em> لحد باب بيتك</h1>
-        <p>مطاعم وسوبر ماركت وصيدليات من بلدك، بأسعار واضحة ومواعيد معروفة، وتتابع المندوب على الخريطة لحد ما يوصلك. ومش لاقي اللي عاوزه؟ اطلب "هاتلي أي حاجة".</p>
+        <p>مطاعم وكافيهات سمنود الحقيقية، بالمنيو والأسعار والصور، وتتابع المندوب على الخريطة لحد ما يوصلك. ومش لاقي اللي عاوزه؟ اطلب "هاتلي أي حاجة" والمندوب يجيبهولك.</p>
         <div class="cta">
           <a class="btn" href="/app/">اطلب من الموقع</a>
           <a class="btn outline" href="/downloads/velox.apk" id="apk">⬇ نزّل التطبيق (أندرويد)</a>
         </div>
-        <p class="small muted" style="margin-top:10px">الدفع: كاش عند الاستلام، فودافون كاش، فوري، أو محفظة ڤيلوكس.</p>
+        <p class="small muted" style="margin-top:10px">الدفع: كاش عند الاستلام أو من محفظة ڤيلوكس. التطبيق بالعربي والإنجليزي.</p>
       </div>
       <div class="phone" aria-hidden="true">
-        <div class="step"><span>📍</span> اختار منطقتك — سمنود أو قريتك</div>
-        <div class="step"><span>🍽️</span> اختار المحل والأصناف واكتب ملاحظتك</div>
-        <div class="step"><span>🏁</span> اكتب علامة مميزة جنب بيتك</div>
+        <div class="step"><span>🍽️</span> اختار المطعم من مطاعم سمنود</div>
+        <div class="step"><span>🛒</span> ضيف الأكل للسلة واكتب ملاحظتك</div>
+        <div class="step"><span>📍</span> اكتب عنوانك وعلامة مميزة جنب بيتك</div>
         <div class="step"><span>🛵</span> تابع المندوب لحد الباب</div>
       </div>
     </section>
 
+    <section style="padding-bottom:34px">
+      <h2 style="margin:0 0 4px">مطاعم على ڤيلوكس</h2>
+      <p class="muted" style="margin:0 0 14px">المنيو الحقيقي بالأسعار والصور — والمطاعم الجديدة بتنضم باستمرار.</p>
+      <div id="stores" class="features" style="padding-bottom:0"></div>
+    </section>
+
     <section class="features">
       <div class="card"><span>🧾</span><h3>السعر واضح قبل ما تطلب</h3><p class="muted">تمن الأصناف والتوصيل والخصم قدامك، والسعر بيتحسب من المنيو الحقيقي.</p></div>
-      <div class="card"><span>🛺</span><h3>أنبوبة أو كرتونة؟</h3><p class="muted">الحاجات الكبيرة بتروح لتوكتوك أو عربية بس، عشان توصلك سليمة.</p></div>
+      <div class="card"><span>🗺️</span><h3>تابع طلبك لايف</h3><p class="muted">تشوف المندوب على الخريطة وهو جايلك، من ساعة ما يستلم لحد الباب.</p></div>
       <div class="card"><span>🛒</span><h3>هاتلي أي حاجة</h3><p class="muted">اكتب اللي محتاجه والمندوب يشتريه من أي محل في البلد.</p></div>
       <div class="card"><span>🔔</span><h3>إشعار في كل خطوة</h3><p class="muted">المحل قبل، الطلب جاهز، المندوب في الطريق، وصل.</p></div>
       <div class="card"><span>🔒</span><h3>بياناتك في أمان</h3><p class="muted">عنوانك ورقمك بيظهروا للمحل والمندوب بتوع طلبك بس.</p></div>
       <div class="card"><span>🏪</span><h3>عندك محل؟</h3><p class="muted">كلّمنا ونضيفك. هتستلم الطلبات على لوحة بسيطة من الموبايل أو الكمبيوتر.</p></div>
     </section>
 
-    <footer>ڤيلوكس — مشروع فريق مبادرة رواد مصر الرقمية (DEPI)، تراك اختبار الاختراق.</footer>
+    <footer>ڤيلوكس — مشروع فريق مبادرة رواد مصر الرقمية (DEPI)، تراك اختبار الاختراق.
+      · <a href="/privacy.html">سياسة الخصوصية</a> · <a href="/delete-account.html">مسح الحساب</a></footer>
   </div>
+<script>
+  // The restaurants come from the same API the app uses, so this list is always the live one.
+  const esc = (t) => String(t ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  fetch('/api/stores').then((r) => r.json()).then((stores) => {
+    document.getElementById('stores').innerHTML = stores.map((s) => `
+      <a class="card" href="/app/" style="padding:0;overflow:hidden;text-decoration:none;color:inherit">
+        ${s.photoUrl ? `<img src="${esc(s.photoUrl)}" alt="" style="width:100%;height:150px;object-fit:cover;display:block">`
+                     : `<div style="height:150px;display:grid;place-items:center;background:var(--primary);color:var(--on-primary);font-size:48px">☕</div>`}
+        <div style="padding:12px 14px">
+          <h3 style="margin:0">${esc(s.nameAr)}</h3>
+          <p class="muted" style="margin:2px 0 6px">${esc(s.taglineAr || '')}</p>
+          <span class="chip ${s.accepting && s.openNow ? 'ok' : 'bad'}">${s.accepting && s.openNow ? 'بيستقبل طلبات' : 'قريبًا'}</span>
+        </div>
+      </a>`).join('');
+  }).catch(() => {});
+</script>
 </body>
 </html>

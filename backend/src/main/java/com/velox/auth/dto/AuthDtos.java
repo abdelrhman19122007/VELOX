@@ -19,6 +19,8 @@ public final class AuthDtos {
     }
 
     public static final String EG_MOBILE = "^01[0125]\\d{8}$";
+    /** Names are plain text: no angle brackets, so nothing can turn into HTML in the dashboard (XSS). */
+    public static final String PLAIN_NAME = "^[^<>]*$";
 
     public record RegisterRequest(@NotBlank @Size(min = 2, max = 60) String name,
                                   @NotBlank @Email @Size(max = 120) String email,

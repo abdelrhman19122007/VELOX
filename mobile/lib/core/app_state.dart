@@ -97,6 +97,7 @@ class AppState extends ChangeNotifier {
     _prefs = await SharedPreferences.getInstance();
     serverOverride = _prefs.getString('server');
     lang = _prefs.getString('lang') ?? 'en';
+    onboarded = _prefs.getBool('onboarded') ?? false;
     themeMode = ThemeMode.values[_prefs.getInt('theme') ?? ThemeMode.light.index];
     zone = _prefs.getString('zone') ?? 'SAMANNOUD';
     phone = _prefs.getString('phone') ?? '';
@@ -129,7 +130,7 @@ class AppState extends ChangeNotifier {
   }
 
   /// This build's number — keep it equal to the +N in pubspec.yaml and to downloads/version.json.
-  static const appBuild = 22;
+  static const appBuild = 23;
 
   /// Set when the server offers a newer Android build; the home screen shows an "update" card.
   String? updateUrl;
@@ -146,6 +147,15 @@ class AppState extends ChangeNotifier {
         notifyListeners();
       }
     } catch (_) {}
+  }
+
+  /// Whether this device has seen the intro slides.
+  bool onboarded = true;
+
+  void finishOnboarding() {
+    onboarded = true;
+    _prefs.setBool('onboarded', true);
+    notifyListeners();
   }
 
   bool _discovering = false;
@@ -362,6 +372,28 @@ class AppState extends ChangeNotifier {
       'phone': phone,
       'lat': lat,
       'lng': lng,
+    }) as List)
+        .map((a) => Address.fromJson(a))
+        .toList();
+    notifyListeners();
+  }
+
+  /// Edits my name and phone on the server and here.
+  Future<void> updateProfile(String name, String newPhone) async {
+    user = User.fromJson(Map<String, dynamic>.from(await api.post('/me/profile', {'name': name.trim(), 'phone': newPhone.trim()})));
+    _prefs.setString('user', jsonEncode(user!.toJson()));
+    phone = user!.phone ?? phone;
+    notifyListeners();
+  }
+
+  /// Saves a new address typed on the addresses page (checkout saves the current one with saveAddress).
+  Future<void> addAddress({required String label, required String zoneCode, required String line, String? mark, required String tel}) async {
+    addresses = (await api.post('/me/addresses', {
+      'label': label.trim(),
+      'zone': zoneCode,
+      'address': line.trim(),
+      'landmark': (mark ?? '').trim().isEmpty ? null : mark!.trim(),
+      'phone': tel.trim(),
     }) as List)
         .map((a) => Address.fromJson(a))
         .toList();

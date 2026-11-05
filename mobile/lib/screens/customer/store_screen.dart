@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/api.dart';
 import '../../core/app_state.dart';
 import '../../core/models.dart';
 import '../../widgets/common.dart';
@@ -18,52 +19,22 @@ class _StoreScreenState extends State<StoreScreen> {
   String query = '';
   String? section;
 
+  late Future<List<dynamic>> reviews;
+
   @override
   void initState() {
     super.initState();
     detail = context.read<AppState>().storeDetail(widget.storeId, fresh: true);
+    reviews = context.read<AppState>().api.get('/stores/${widget.storeId}/reviews').then((r) => r as List).catchError((_) => <dynamic>[]);
   }
 
+  /// Opens the dish page; whatever it returns (quantity, note) goes in the cart — one store per cart.
   Future<void> _add(AppState s, Store store, Product p) async {
-    final note = TextEditingController(text: s.cart[p.id]?.note ?? '');
-    var qty = 1;
-    final ok = await showModalBottomSheet<bool>(
-      context: context,
-      isScrollControlled: true,
-      builder: (c) => StatefulBuilder(
-        builder: (c, set) => Padding(
-          padding: EdgeInsets.fromLTRB(16, 0, 16, MediaQuery.of(c).viewInsets.bottom + 16),
-          child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-            Row(children: [
-              ProductImage(p.photoUrl, size: 72),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text(s.productName(p), style: Theme.of(c).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
-                  Text(s.money(p.price), style: TextStyle(color: Theme.of(c).colorScheme.primary, fontWeight: FontWeight.w800)),
-                ]),
-              ),
-            ]),
-            if (s.productDesc(p) != null) Padding(padding: const EdgeInsets.only(top: 8), child: Text(s.productDesc(p)!)),
-            if (p.large) Padding(padding: const EdgeInsets.only(top: 8), child: Text('🛺 ${s.t('large')}')),
-            const SizedBox(height: 12),
-            TextField(controller: note, maxLength: 200, decoration: InputDecoration(labelText: s.t('note'))),
-            Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-              IconButton.outlined(onPressed: qty > 1 ? () => set(() => qty--) : null, icon: const Icon(Icons.remove)),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 22),
-                child: Text('$qty', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900)),
-              ),
-              IconButton.outlined(onPressed: qty < 99 ? () => set(() => qty++) : null, icon: const Icon(Icons.add)),
-            ]),
-            const SizedBox(height: 12),
-            FilledButton(onPressed: () => Navigator.pop(c, true), child: Text('${s.t('add')} · ${s.money(p.price * qty)}')),
-          ]),
-        ),
-      ),
-    );
-    if (ok != true || !mounted) return;
-    if (!s.add(p, store, qty: qty, note: note.text.trim())) {
+    final picked = await Navigator.push<(int, String)>(
+        context, MaterialPageRoute(builder: (_) => _DishPage(product: p, store: store, note: s.cart[p.id]?.note ?? '')));
+    if (picked == null || !mounted) return;
+    final (qty, note) = picked;
+    if (!s.add(p, store, qty: qty, note: note)) {
       final fresh = await showDialog<bool>(
         context: context,
         builder: (c) => AlertDialog(
@@ -77,7 +48,7 @@ class _StoreScreenState extends State<StoreScreen> {
       );
       if (fresh == true) {
         s.clearCart();
-        s.add(p, store, qty: qty, note: note.text.trim());
+        s.add(p, store, qty: qty, note: note);
       }
     }
   }
@@ -162,6 +133,8 @@ class _StoreScreenState extends State<StoreScreen> {
                       ]),
                     ),
                   const SizedBox(height: 12),
+                  _Reviews(reviews),
+                  const SizedBox(height: 12),
                   TextField(
                     onChanged: (v) => setState(() => query = v),
                     decoration: InputDecoration(hintText: s.t('menuSearch'), prefixIcon: const Icon(Icons.search)),
@@ -233,6 +206,141 @@ class _StoreScreenState extends State<StoreScreen> {
                   ),
                 ),
         );
+      },
+    );
+  }
+}
+
+/// A dish on its own page, like the big apps: big photo, both descriptions, quantity, a note and one Add button.
+/// Returns (quantity, note) to the store page, which puts it in the cart.
+class _DishPage extends StatefulWidget {
+  final Product product;
+  final Store store;
+  final String note;
+  const _DishPage({required this.product, required this.store, required this.note});
+  @override
+  State<_DishPage> createState() => _DishPageState();
+}
+
+class _DishPageState extends State<_DishPage> {
+  int qty = 1;
+  late final note = TextEditingController(text: widget.note);
+
+  @override
+  Widget build(BuildContext context) {
+    final s = context.watch<AppState>();
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+    final p = widget.product;
+    final url = imageUrl(p.photoUrl);
+    final enabled = widget.store.orderable && p.available && s.isCustomer;
+    return Scaffold(
+      body: CustomScrollView(slivers: [
+        SliverAppBar(
+          pinned: true,
+          expandedHeight: 300,
+          flexibleSpace: FlexibleSpaceBar(
+            background: url == null
+                ? Container(color: cs.primaryContainer, child: Icon(Icons.restaurant, size: 80, color: cs.primary))
+                : Image.network(url, fit: BoxFit.cover),
+          ),
+        ),
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 18, 20, 24),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(s.productName(p), style: tt.headlineSmall?.copyWith(fontWeight: FontWeight.w900)),
+              const SizedBox(height: 4),
+              Text(s.money(p.price), style: tt.titleLarge?.copyWith(color: cs.primary, fontWeight: FontWeight.w900)),
+              const SizedBox(height: 6),
+              Text(s.storeName(widget.store), style: tt.bodyMedium?.copyWith(color: cs.onSurfaceVariant)),
+              if (s.productDesc(p) != null) ...[
+                const SizedBox(height: 18),
+                Text(s.t('aboutDish'), style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
+                const SizedBox(height: 4),
+                Text(s.productDesc(p)!, style: tt.bodyLarge),
+              ],
+              if (!p.available)
+                Padding(
+                  padding: const EdgeInsets.only(top: 12),
+                  child: Text(s.t('soldOut'), style: TextStyle(color: cs.error, fontWeight: FontWeight.w800)),
+                ),
+              const SizedBox(height: 22),
+              Text(s.t('quantity'), style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
+              const SizedBox(height: 8),
+              Row(children: [
+                IconButton.filledTonal(onPressed: qty > 1 ? () => setState(() => qty--) : null, icon: const Icon(Icons.remove)),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 22),
+                  child: Text('$qty', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900)),
+                ),
+                IconButton.filledTonal(onPressed: qty < 99 ? () => setState(() => qty++) : null, icon: const Icon(Icons.add)),
+              ]),
+              const SizedBox(height: 18),
+              TextField(controller: note, maxLength: 200, decoration: InputDecoration(labelText: s.t('note'))),
+            ]),
+          ),
+        ),
+      ]),
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
+          child: FilledButton.icon(
+            icon: const Icon(Icons.add_shopping_cart),
+            onPressed: enabled ? () => Navigator.pop(context, (qty, note.text.trim())) : null,
+            label: Text('${s.t('addToCart')} · ${s.money(p.price * qty)}'),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// The store's latest reviews in a row of cards, or a line inviting the first one.
+class _Reviews extends StatelessWidget {
+  final Future<List<dynamic>> reviews;
+  const _Reviews(this.reviews);
+  @override
+  Widget build(BuildContext context) {
+    final s = context.watch<AppState>();
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+    return FutureBuilder<List<dynamic>>(
+      future: reviews,
+      builder: (c, snap) {
+        final list = snap.data ?? const [];
+        return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text(s.t('reviewsTitle'), style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
+          const SizedBox(height: 6),
+          if (list.isEmpty)
+            Text(s.t('noReviews'), style: tt.bodyMedium?.copyWith(color: cs.onSurfaceVariant))
+          else
+            SizedBox(
+              height: 110,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: list.length,
+                separatorBuilder: (_, _) => const SizedBox(width: 10),
+                itemBuilder: (c, i) {
+                  final r = list[i];
+                  final rating = (r['rating'] as num?)?.toInt() ?? 0;
+                  return Container(
+                    width: 230,
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(color: cs.surfaceContainerLow, borderRadius: BorderRadius.circular(14)),
+                    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                      Row(children: [for (var k = 0; k < 5; k++) Icon(k < rating ? Icons.star : Icons.star_border, size: 18, color: cs.tertiary)]),
+                      const SizedBox(height: 6),
+                      Expanded(
+                        child: Text((r['comment'] ?? '').toString().isEmpty ? '—' : r['comment'],
+                            maxLines: 3, overflow: TextOverflow.ellipsis),
+                      ),
+                    ]),
+                  );
+                },
+              ),
+            ),
+        ]);
       },
     );
   }
