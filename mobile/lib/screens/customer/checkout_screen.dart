@@ -91,7 +91,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     final s = context.watch<AppState>();
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
-    final methods = errand ? ['CASH'] : ['CASH', 'VODAFONE_CASH', 'FAWRY', 'WALLET'];
+    // Vodafone Cash and Fawry come back when a merchant account is connected (the server code is ready)
+    final methods = errand ? ['CASH'] : ['CASH', 'WALLET'];
     return Scaffold(
       appBar: AppBar(title: Text(errand ? s.t('errand') : s.t('checkout'))),
       body: Form(

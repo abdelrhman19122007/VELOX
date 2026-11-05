@@ -177,14 +177,6 @@ class _WalletScreenState extends State<WalletScreen> {
               ]),
             ),
             const SizedBox(height: 10),
-            OutlinedButton.icon(
-              icon: const Icon(Icons.add),
-              label: Text(s.t('topUp')),
-              onPressed: () async {
-                final r = await busy(context, () => s.topUp(100));
-                if (r != null) setState(() => wallet = Future.value(r));
-              },
-            ),
             const SizedBox(height: 10),
             if (w.history.isEmpty) EmptyState(Icons.receipt_outlined, s.t('empty')),
             for (final t in w.history)
