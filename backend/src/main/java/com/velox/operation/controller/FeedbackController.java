@@ -42,6 +42,16 @@ public class FeedbackController {
         return feedback.complain(me, code, req.details());
     }
 
+    /** Public: a store's latest reviews for its page — stars, comment and date only, never who wrote them or the order. */
+    @GetMapping("/api/stores/{id}/reviews")
+    public List<PublicReview> storeReviews(@PathVariable String id) {
+        return feedback.publicReviews(id).stream().limit(30)
+                .map(r -> new PublicReview(r.storeRating(), r.comment(), r.at().toString())).toList();
+    }
+
+    public record PublicReview(int rating, String comment, String at) {
+    }
+
     @GetMapping("/api/me/complaints")
     public List<Complaint> mine(@CurrentUser AuthUser me) {
         return feedback.myComplaints(me);

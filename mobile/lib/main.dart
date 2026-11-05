@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'core/app_state.dart';
 import 'core/theme.dart';
 import 'screens/admin/admin_shell.dart';
+import 'screens/auth/onboarding_screen.dart';
 import 'screens/auth/welcome_screen.dart';
 import 'screens/customer/customer_shell.dart';
 import 'screens/driver/driver_shell.dart';
@@ -38,7 +39,7 @@ class VeloxApp extends StatelessWidget {
       home: !s.ready
           ? const _Splash()
           : s.user == null
-              ? const WelcomeScreen()
+              ? (s.onboarded ? const WelcomeScreen() : const OnboardingScreen())
               : switch (s.user!.role) {
                   'RESTAURANT' => const StoreShell(),
                   'DRIVER' => const DriverShell(),

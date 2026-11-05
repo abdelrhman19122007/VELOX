@@ -58,6 +58,10 @@ public class UserRepository {
         return findByPublicId(publicId).orElseThrow();
     }
 
+    public void updateProfile(long userId, String name, String phone) {
+        db.update("UPDATE users SET name = ?, phone = ? WHERE id = ?", name, phone, userId);
+    }
+
     public void updatePassword(long userId, String passwordHash) {
         db.update("UPDATE users SET password_hash = ?, token_version = token_version + 1 WHERE id = ?", passwordHash, userId);
     }

@@ -69,6 +69,13 @@ public class AccountService {
         audit.record(me, "ACCOUNT_DELETE", "user", me.publicId(), null);
     }
 
+    @Transactional
+    public UserResponse updateProfile(AuthUser me, String name, String phone) {
+        User user = users.findByPublicId(me.publicId()).orElseThrow(ApiException::unauthorized);
+        users.updateProfile(user.id(), name, phone);
+        return UserResponse.of(users.findByPublicId(me.publicId()).orElseThrow());
+    }
+
     public List<Address> addresses(AuthUser me) {
         return addresses.findByUser(me.id());
     }

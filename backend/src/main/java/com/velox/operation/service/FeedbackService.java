@@ -71,6 +71,11 @@ public class FeedbackService {
         return new ComplaintCreated(complaintCode);
     }
 
+    /** Anyone may read a store's reviews: they're shown on its page. */
+    public List<FeedbackRepository.Review> publicReviews(String storeId) {
+        return feedback.storeReviews(storeId);
+    }
+
     public List<Complaint> myComplaints(AuthUser me) {
         me.require(Role.CUSTOMER);
         return feedback.complaintsOf(me.id());
