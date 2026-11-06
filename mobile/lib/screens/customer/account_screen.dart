@@ -61,6 +61,7 @@ class AccountScreen extends StatelessWidget {
           subtitle: Text(s.ar ? 'العربية' : 'English'),
           trailing: FilledButton.tonal(onPressed: s.toggleLang, child: Text(s.t('switchLang'))),
         ),
+        _row(Icons.password, s.t('changePassword'), s.t('changePasswordSub'), () => showChangePassword(context)),
         _row(Icons.settings_outlined, s.t('settings'), s.t('settingsSub'), () => open(const SettingsScreen())),
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
