@@ -55,6 +55,35 @@ String timeText(BuildContext context, DateTime? t) {
 }
 
 /// A store's picture, or — when it has none — its type icon on a warm gradient (never a fake photo).
+/// A password box with an eye to show or hide what was typed.
+class PasswordField extends StatefulWidget {
+  final TextEditingController controller;
+  final String label;
+  final String? helper;
+  const PasswordField({super.key, required this.controller, required this.label, this.helper});
+  @override
+  State<PasswordField> createState() => _PasswordFieldState();
+}
+
+class _PasswordFieldState extends State<PasswordField> {
+  bool hidden = true;
+  @override
+  Widget build(BuildContext context) => TextField(
+        controller: widget.controller,
+        obscureText: hidden,
+        decoration: InputDecoration(
+          labelText: widget.label,
+          helperText: widget.helper,
+          prefixIcon: const Icon(Icons.lock_outline),
+          suffixIcon: IconButton(
+            tooltip: hidden ? 'Show' : 'Hide',
+            icon: Icon(hidden ? Icons.visibility_outlined : Icons.visibility_off_outlined),
+            onPressed: () => setState(() => hidden = !hidden),
+          ),
+        ),
+      );
+}
+
 /// Photos fade in when they arrive instead of popping in.
 Widget _fadeIn(BuildContext context, Widget child, int? frame, bool sync) => sync
     ? child

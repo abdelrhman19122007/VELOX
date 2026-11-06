@@ -94,12 +94,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
       builder: (c) => AlertDialog(
         title: Text(s.t('changePassword')),
         content: Column(mainAxisSize: MainAxisSize.min, children: [
-          TextField(controller: current, obscureText: true, decoration: InputDecoration(labelText: s.t('currentPassword'))),
+          PasswordField(controller: current, label: s.t('currentPassword')),
           const SizedBox(height: 10),
-          TextField(
-              controller: next,
-              obscureText: true,
-              decoration: InputDecoration(labelText: s.t('newPassword'), helperText: s.t('passwordHint'))),
+          PasswordField(controller: next, label: s.t('newPassword'), helper: s.t('passwordHint')),
         ]),
         actions: [
           TextButton(onPressed: () => Navigator.pop(c, false), child: Text(s.t('cancel'))),

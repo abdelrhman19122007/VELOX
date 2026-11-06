@@ -106,7 +106,7 @@ Future<void> _confirmDelete(BuildContext context, AppState s) async {
       content: Column(mainAxisSize: MainAxisSize.min, children: [
         Text(s.t('deleteBody')),
         const SizedBox(height: 12),
-        TextField(controller: password, obscureText: true, decoration: InputDecoration(labelText: s.t('password'))),
+        PasswordField(controller: password, label: s.t('password')),
       ]),
       actions: [
         TextButton(onPressed: () => Navigator.pop(c, false), child: Text(s.t('cancel'))),

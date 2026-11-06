@@ -130,7 +130,7 @@ class AppState extends ChangeNotifier {
   }
 
   /// This build's number — keep it equal to the +N in pubspec.yaml and to downloads/version.json.
-  static const appBuild = 26;
+  static const appBuild = 27;
 
   /// Set when the server offers a newer Android build; the home screen shows an "update" card.
   String? updateUrl;
