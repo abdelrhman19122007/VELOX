@@ -55,7 +55,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           onChanged: s.setDark,
         ),
         const Divider(),
-        ListTile(leading: const Icon(Icons.password), title: Text(s.t('changePassword')), onTap: () => _changePassword(context)),
+        ListTile(leading: const Icon(Icons.password), title: Text(s.t('changePassword')), onTap: () => showChangePassword(context)),
         ListTile(leading: const Icon(Icons.dns_outlined), title: Text(s.t('server')), subtitle: Text(apiBase), onTap: () => showServerDialog(context)),
         ListTile(
           leading: const Icon(Icons.info_outline),
@@ -85,29 +85,51 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ]),
     );
   }
+}
 
-  Future<void> _changePassword(BuildContext context) async {
-    final s = context.read<AppState>();
-    final current = TextEditingController(), next = TextEditingController();
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (c) => AlertDialog(
+/// Change password — same flow as the web dashboard: current password, new password twice, the two must match.
+Future<void> showChangePassword(BuildContext context) async {
+  final s = context.read<AppState>();
+  final current = TextEditingController(), next = TextEditingController(), again = TextEditingController();
+  String? error;
+  final ok = await showDialog<bool>(
+    context: context,
+    builder: (c) => StatefulBuilder(
+      builder: (c, setState) => AlertDialog(
         title: Text(s.t('changePassword')),
-        content: Column(mainAxisSize: MainAxisSize.min, children: [
-          PasswordField(controller: current, label: s.t('currentPassword')),
-          const SizedBox(height: 10),
-          PasswordField(controller: next, label: s.t('newPassword'), helper: s.t('passwordHint')),
-        ]),
+        content: SingleChildScrollView(
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+            PasswordField(controller: current, label: s.t('currentPassword')),
+            const SizedBox(height: 10),
+            PasswordField(controller: next, label: s.t('newPassword'), helper: s.t('passwordHint')),
+            const SizedBox(height: 10),
+            PasswordField(controller: again, label: s.t('confirmPassword')),
+            if (error != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Text(error!, style: TextStyle(color: Theme.of(c).colorScheme.error, fontWeight: FontWeight.w700)),
+              ),
+          ]),
+        ),
         actions: [
           TextButton(onPressed: () => Navigator.pop(c, false), child: Text(s.t('cancel'))),
-          FilledButton(onPressed: () => Navigator.pop(c, true), child: Text(s.t('save'))),
+          FilledButton(
+            onPressed: () {
+              if (next.text != again.text) {
+                setState(() => error = s.t('passwordsDontMatch'));
+                return;
+              }
+              Navigator.pop(c, true);
+            },
+            child: Text(s.t('save')),
+          ),
         ],
       ),
-    );
-    if (ok != true || !context.mounted) return;
-    final done = await busy(context, () => s.changePassword(current.text, next.text).then((_) => true));
-    if (done == true && context.mounted) showInfo(context, s.t('passwordChanged'));
-  }
+    ),
+  );
+  if (ok != true || !context.mounted) return;
+  final done = await busy(context, () => s.changePassword(current.text, next.text).then((_) => true));
+  if (done == true && context.mounted) showInfo(context, s.t('passwordChanged'));
 }
 
 /// Lets the user point the app at another server link (a new public tunnel, a hosted server).
