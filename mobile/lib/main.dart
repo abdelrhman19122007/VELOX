@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
@@ -25,6 +26,8 @@ class VeloxApp extends StatelessWidget {
     return MaterialApp(
       title: 'VELOX',
       debugShowCheckedModeBanner: false,
+      // on a laptop the sideways rows (dishes, offers, categories) can be dragged with the mouse too, like a phone
+      scrollBehavior: const MaterialScrollBehavior().copyWith(dragDevices: PointerDeviceKind.values.toSet()),
       locale: Locale(s.lang),
       supportedLocales: const [Locale('ar'), Locale('en')],
       localizationsDelegates: const [
