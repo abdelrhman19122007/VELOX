@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'package:latlong2/latlong.dart';
+
 import '../../core/app_state.dart';
 import '../../core/models.dart';
 import '../../widgets/common.dart';
+import 'location_picker.dart';
 import 'payment_screen.dart';
 import 'track_screen.dart';
 
@@ -86,6 +89,16 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     );
   }
 
+  Future<void> _pickSpot(AppState s) async {
+    final at = await Navigator.push<LatLng>(context, MaterialPageRoute(
+        builder: (_) => LocationPicker(start: s.lat == null || s.lng == null ? null : LatLng(s.lat!, s.lng!))));
+    if (at == null) return;
+    setState(() {
+      s.lat = at.latitude;
+      s.lng = at.longitude;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final s = context.watch<AppState>();
@@ -142,6 +155,19 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             decoration: InputDecoration(labelText: s.t('landmark'), hintText: s.t('landmarkHint'), prefixIcon: const Icon(Icons.flag_outlined)),
             validator: (v) => RegExp(r'[<>]').hasMatch(v ?? '') ? s.t('err_VALIDATION') : null,
           ),
+          const SizedBox(height: 12),
+          if (s.lat != null && s.lng != null) ...[
+            PinPreview(LatLng(s.lat!, s.lng!)),
+            Row(children: [
+              Expanded(child: Text(s.t('pinSet'), style: tt.bodySmall?.copyWith(color: Theme.of(context).colorScheme.secondary))),
+              TextButton.icon(onPressed: () => _pickSpot(s), icon: const Icon(Icons.edit_location_alt_outlined), label: Text(s.t('pinChange'))),
+            ]),
+          ] else
+            OutlinedButton.icon(
+              onPressed: () => _pickSpot(s),
+              icon: const Icon(Icons.add_location_alt_outlined),
+              label: Text(s.t('pinAdd')),
+            ),
           const SizedBox(height: 12),
           TextFormField(
             controller: phone,

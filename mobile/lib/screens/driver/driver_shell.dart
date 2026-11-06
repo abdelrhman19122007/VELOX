@@ -222,7 +222,7 @@ class _DriverShellState extends State<DriverShell> {
           Text('${s.t('from')}: ${_from(s, o)}', style: const TextStyle(fontWeight: FontWeight.w700)),
           if (o.store?.lat != null)
             TextButton.icon(
-              onPressed: () => launchUrl(Uri.parse('geo:${o.store!.lat},${o.store!.lng}?q=${o.store!.lat},${o.store!.lng}')),
+              onPressed: () => launchUrl(Uri.parse('https://www.google.com/maps/search/?api=1&query=${o.store!.lat},${o.store!.lng}'), mode: LaunchMode.externalApplication),
               icon: const Icon(Icons.map_outlined),
               label: Text(s.t('navigate')),
             ),
@@ -231,7 +231,7 @@ class _DriverShellState extends State<DriverShell> {
           AddressBlock(o, showPhone: true),
           if (o.lat != null)
             TextButton.icon(
-              onPressed: () => launchUrl(Uri.parse('geo:${o.lat},${o.lng}?q=${o.lat},${o.lng}')),
+              onPressed: () => launchUrl(Uri.parse('https://www.google.com/maps/search/?api=1&query=${o.lat},${o.lng}'), mode: LaunchMode.externalApplication),
               icon: const Icon(Icons.map_outlined),
               label: Text(s.t('navigate')),
             ),
