@@ -21,6 +21,7 @@ const STORE_NAV = [['board', '🧾', 'الطلبات'], ['menu', '📋', 'الم
   applyTheme();
   $('#login-form').addEventListener('submit', login);
   $('#logout').addEventListener('click', () => { post('/auth/logout-everywhere').catch(() => {}); session.token = null; location.reload(); });
+  $('#change-password').addEventListener('click', passwordDialog);
   $('#theme').addEventListener('click', toggleTheme);
   $('#menu-btn').addEventListener('click', () => $('#side').classList.toggle('open'));
   window.addEventListener('hashchange', route);
@@ -137,6 +138,32 @@ const field = (name, label, attrs = '', value = '') =>
 const select = (name, label, options, value = '') =>
   `<label for="f-${name}">${esc(label)}</label><select id="f-${name}" name="${name}">${Object.entries(options)
     .map(([k, v]) => `<option value="${esc(k)}" ${k === value ? 'selected' : ''}>${esc(v)}</option>`).join('')}</select>`;
+/** A password input with an eye button that shows or hides it. */
+const passwordField = (name, label, attrs = '') =>
+  `<label for="f-${name}">${esc(label)}</label><div style="position:relative"><input id="f-${name}" name="${name}" type="password" ${attrs} style="padding-inline-end:44px">
+   <button type="button" class="btn ghost sm" data-eye="f-${name}" aria-label="إظهار" style="position:absolute;inset-inline-end:4px;top:50%;transform:translateY(-50%);min-height:0;padding:4px 8px">👁</button></div>`;
+function wireEyes(form) {
+  form.querySelectorAll('[data-eye]').forEach((b) => b.addEventListener('click', () => {
+    const i = form.querySelector(`#${b.dataset.eye}`);
+    i.type = i.type === 'password' ? 'text' : 'password';
+  }));
+}
+
+/** Change my own password. The server ends my other sessions and sends a fresh token for this one. */
+function passwordDialog() {
+  const f = dialog('تغيير كلمة السر', `
+    ${passwordField('current', 'كلمة السر الحالية', 'required autocomplete="current-password"')}
+    ${passwordField('next', 'كلمة السر الجديدة (٨ حروف على الأقل)', 'required minlength="8" autocomplete="new-password"')}
+    ${passwordField('again', 'اكتب الجديدة تاني', 'required minlength="8" autocomplete="new-password"')}`,
+  async (d) => {
+    if (d.next !== d.again) throw new Error('كلمتين السر الجداد مش زي بعض');
+    const r = await post('/me/password', { current: d.current, password: d.next });
+    session.token = r.token;
+    toast('اتغيرت كلمة السر ✔');
+  });
+  wireEyes(f);
+}
+
 const num = (v) => (v === '' || v == null ? null : Number(v));
 const text = (v) => (v == null || String(v).trim() === '' ? null : String(v).trim());
 

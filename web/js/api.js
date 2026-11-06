@@ -48,7 +48,7 @@ export const when = (v) => (v ? new Date(v).toLocaleString('ar-EG', { dateStyle:
 const ERRORS = {
   NETWORK: 'مش قادرين نوصل للسيرفر', SERVER: 'مشكلة في السيرفر — جرّب تاني', SIGN_IN_REQUIRED: 'سجّل دخول الأول',
   FORBIDDEN: 'الحساب ده مش مسموحله', BAD_LOGIN: 'الإيميل أو كلمة السر غلط', TOO_MANY_LOGINS: 'محاولات كتير — استنى ١٠ دقايق',
-  BLOCKED: 'الحساب موقوف', EMAIL_TAKEN: 'الإيميل ده عليه حساب', INVALID_REQUEST: 'راجع البيانات', INVALID_HOURS: 'المواعيد مش صحيحة',
+  BLOCKED: 'الحساب موقوف', EMAIL_TAKEN: 'الإيميل ده عليه حساب', WRONG_PASSWORD: 'كلمة السر الحالية غلط', INVALID_REQUEST: 'راجع البيانات', INVALID_HOURS: 'المواعيد مش صحيحة',
   UNKNOWN_STORE: 'المحل مش موجود', UNKNOWN_PRODUCT: 'الصنف مش موجود', ZONE_EXISTS: 'الكود ده موجود', PROMO_EXISTS: 'الكود ده موجود',
   INVALID_PROMO: 'الكود مش صالح', BAD_STATUS: 'حالة الطلب اتغيرت — حدّث الصفحة', ORDER_NOT_FOUND: 'الطلب مش موجود',
   COMPLAINT_CLOSED: 'الشكوى مقفولة بالفعل', NOT_AN_IMAGE: 'الملف مش صورة (JPG أو PNG أو WEBP)', FILE_TOO_LARGE: 'الصورة أكبر من ٢ ميجا',
