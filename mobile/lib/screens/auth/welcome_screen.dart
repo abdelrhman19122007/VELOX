@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/api.dart' show serverLocked;
 import '../../core/app_state.dart';
 import '../../widgets/common.dart';
 import '../shared/settings_screen.dart';
@@ -36,6 +37,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     return Scaffold(
       appBar: AppBar(actions: [
         TextButton(onPressed: s.toggleLang, child: Text(s.t('language'))),
+        if (!serverLocked)
         IconButton(
           tooltip: s.t('server'),
           icon: const Icon(Icons.dns_outlined),

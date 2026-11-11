@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../core/api.dart' show serverLocked;
 import '../../core/app_state.dart';
 import '../../core/models.dart';
 import '../../widgets/common.dart';
@@ -80,7 +81,7 @@ class _HomeScreenState extends State<HomeScreen> {
             : EmptyState(Icons.cloud_off, s.catalogError!,
                 action: Wrap(spacing: 8, children: [
                   FilledButton(onPressed: s.loadCatalog, child: Text(s.t('retry'))),
-                  OutlinedButton(onPressed: () => showServerDialog(context), child: Text(s.t('server'))),
+                  if (!serverLocked) OutlinedButton(onPressed: () => showServerDialog(context), child: Text(s.t('server'))),
                 ])),
       );
     }
