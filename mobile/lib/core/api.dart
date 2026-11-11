@@ -11,10 +11,14 @@ import 'package:http/http.dart' as http;
 /// 4. Otherwise the PC as seen from the Android emulator (10.0.2.2) or localhost.
 String? serverOverride;
 
+/// A store build (Google Play) is built with --dart-define=API_URL=https://… and then talks ONLY to that server:
+/// no typed link and no automatic discovery, so nobody can point a phone at a fake server.
+const fixedServer = String.fromEnvironment('API_URL');
+bool get serverLocked => fixedServer.isNotEmpty;
+
 String get apiBase {
+  if (serverLocked) return fixedServer;
   if (serverOverride != null && serverOverride!.isNotEmpty) return serverOverride!;
-  const fromEnv = String.fromEnvironment('API_URL');
-  if (fromEnv.isNotEmpty) return fromEnv;
   if (kIsWeb) {
     final here = Uri.base;
     final devServer = (here.host == 'localhost' || here.host == '127.0.0.1') && here.port != 8080;
@@ -31,6 +35,7 @@ const discoveryTopic = 'velox-nabeeh-k7q2m9';
 
 /// The newest announced server link that actually answers, or null.
 Future<String?> discoverServer() async {
+  if (serverLocked) return null;
   try {
     final res = await http
         .get(Uri.parse('https://ntfy.sh/$discoveryTopic/json?poll=1&since=12h'))
@@ -41,7 +46,7 @@ Future<String?> discoverServer() async {
       if (line.trim().isEmpty) continue;
       final m = jsonDecode(line);
       final msg = '${m['message'] ?? ''}'.trim();
-      if (m['event'] == 'message' && RegExp(r'^https://[\w.-]+$').hasMatch(msg)) latest = msg;
+      if (m['event'] == 'message' && RegExp(r'^https://[a-z0-9-]+\.trycloudflare\.com$').hasMatch(msg)) latest = msg;
     }
     if (latest == null) return null;
     final check = await http.get(Uri.parse('$latest/api/zones')).timeout(const Duration(seconds: 10));

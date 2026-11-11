@@ -56,7 +56,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
         const Divider(),
         ListTile(leading: const Icon(Icons.password), title: Text(s.t('changePassword')), onTap: () => showChangePassword(context)),
-        ListTile(leading: const Icon(Icons.dns_outlined), title: Text(s.t('server')), subtitle: Text(apiBase), onTap: () => showServerDialog(context)),
+        if (!serverLocked) ListTile(leading: const Icon(Icons.dns_outlined), title: Text(s.t('server')), subtitle: Text(apiBase), onTap: () => showServerDialog(context)),
         ListTile(
           leading: const Icon(Icons.info_outline),
           title: Text(s.t('about')),

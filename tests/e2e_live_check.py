@@ -128,6 +128,8 @@ if st == 201:
     st, _, _ = req('GET', '/api/driver/offers', token=dtok)
     check('Operations', 'Driver sees offers', st == 200, f'HTTP {st}')
     req('POST', '/api/driver/status', {'online': False}, dtok)
+st, _, _ = req('POST', '/api/me/delete', {'password': dr.get('password')}, dtok)
+check('Accounts', 'Test driver removes their own account (clean-up)', st == 204, f'HTTP {st}')
 st, _, _ = req('POST', '/api/me/delete', {'password': 'wrong-password'}, cust)
 check('Accounts', 'Delete account needs the right password', st == 400, f'HTTP {st}')
 st, _, _ = req('POST', '/api/me/delete', {'password': pw}, cust)
