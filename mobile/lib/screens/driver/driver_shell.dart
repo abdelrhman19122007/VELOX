@@ -132,17 +132,8 @@ class _DriverShellState extends State<DriverShell> {
               onRefresh: _load,
               child: ListView(padding: const EdgeInsets.all(16), children: [
                 if (error != null) Text(s.errorText(error!), style: TextStyle(color: cs.error)),
-                Card(
-                  color: online ? cs.secondaryContainer : null,
-                  child: SwitchListTile(
-                    secondary: Icon(online ? Icons.wifi_tethering : Icons.wifi_tethering_off, color: online ? cs.secondary : null),
-                    title: Text(online ? s.t('online') : s.t('offline'), style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 18)),
-                    subtitle: online ? null : Text(s.t('goOnline')),
-                    value: online,
-                    onChanged: _setOnline,
-                  ),
-                ),
-                const SizedBox(height: 10),
+                _hero(s, cs),
+                const SizedBox(height: 14),
                 Text(s.t('vehicle'), style: const TextStyle(fontWeight: FontWeight.w800)),
                 const SizedBox(height: 6),
                 Wrap(spacing: 8, children: [
@@ -155,6 +146,8 @@ class _DriverShellState extends State<DriverShell> {
                     Expanded(child: StatTile(Icons.payments, s.money((earnings!['feesToday'] as num).toDouble()), s.t('earnings'))),
                     const SizedBox(width: 10),
                     Expanded(child: StatTile(Icons.check_circle, '${earnings!['deliveredToday']}', s.t('deliveries'))),
+                    const SizedBox(width: 10),
+                    Expanded(child: StatTile(Icons.route, '${history.where((o) => o.status == 'DELIVERED').length}', s.t('drvTrips'))),
                   ]),
                 ],
                 if (current.isNotEmpty) ...[
@@ -164,6 +157,12 @@ class _DriverShellState extends State<DriverShell> {
                   SectionTitle(s.t('offersTitle')),
                   if (offers.isEmpty) EmptyState(Icons.hourglass_empty, s.t('noOffers')),
                   for (final o in offers) _offerCard(s, cs, o),
+                ],
+                if (current.isEmpty && offers.isEmpty) ...[
+                  const SizedBox(height: 8),
+                  _howItWorks(s, cs),
+                  const SizedBox(height: 10),
+                  _tips(s, cs),
                 ],
                 if (history.isNotEmpty) ...[
                   SectionTitle(s.t('history')),
@@ -182,29 +181,147 @@ class _DriverShellState extends State<DriverShell> {
 
   String _from(AppState s, OrderView o) => o.store == null ? s.t('errand') : (s.ar ? o.store!.nameAr : o.store!.name);
 
+  /// Greeting + the big online switch.
+  Widget _hero(AppState s, ColorScheme cs) {
+    final name = (s.user?.name ?? '').split(' ').first;
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        gradient: LinearGradient(
+          colors: online ? [cs.secondary, cs.secondary.withValues(alpha: 0.75)] : [cs.primary, cs.primary.withValues(alpha: 0.78)],
+        ),
+      ),
+      padding: const EdgeInsets.fromLTRB(18, 16, 12, 16),
+      child: Row(children: [
+        Container(
+          width: 52,
+          height: 52,
+          decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.18), shape: BoxShape.circle),
+          child: Icon(_vehicleIcon(vehicle), color: Colors.white, size: 28),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(s.t('drvHello', {'n': name}), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 19)),
+            const SizedBox(height: 2),
+            Text(online ? s.t('drvOnlineSub') : s.t('goOnline'), style: TextStyle(color: Colors.white.withValues(alpha: 0.9), fontSize: 13)),
+          ]),
+        ),
+        Column(children: [
+          Switch(value: online, onChanged: _setOnline, activeThumbColor: cs.secondary,
+              activeTrackColor: Colors.white,
+              inactiveThumbColor: Colors.white,
+              inactiveTrackColor: Colors.white24),
+          Text(online ? s.t('online') : s.t('offline'), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 12)),
+        ]),
+      ]),
+    );
+  }
+
+  IconData _vehicleIcon(String v) => switch (v) {
+        'BICYCLE' => Icons.pedal_bike,
+        'CAR' => Icons.directions_car,
+        'TUKTUK' => Icons.electric_rickshaw,
+        _ => Icons.two_wheeler,
+      };
+
+  /// "2× Shawarma, 1× Pepsi" — what the driver will carry.
+  String _itemsLine(AppState s, OrderView o) => o.isErrand
+      ? (o.errandDetails ?? '')
+      : o.items.map((i) => '${i.qty}× ${s.itemName(i)}').join('، ');
+
+  Widget _infoRow(ColorScheme cs, IconData icon, String label, String value, {Color? color, bool bold = false}) => Padding(
+        padding: const EdgeInsets.only(top: 8),
+        child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Icon(icon, size: 20, color: color ?? cs.primary),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text.rich(TextSpan(children: [
+              TextSpan(text: '$label: ', style: TextStyle(color: cs.onSurfaceVariant, fontWeight: FontWeight.w700)),
+              TextSpan(text: value, style: TextStyle(fontWeight: bold ? FontWeight.w900 : FontWeight.w600, color: color)),
+            ])),
+          ),
+        ]),
+      );
+
   Widget _offerCard(AppState s, ColorScheme cs, OrderView o) {
+    final cash = o.paymentMethod == 'CASH';
+    final address = [s.zoneName(o.zone), o.address].where((x) => x.trim().isNotEmpty).join(' — ');
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Card(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18), side: BorderSide(color: cs.primary.withValues(alpha: 0.35), width: 1.4)),
         child: Padding(
           padding: const EdgeInsets.all(14),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Row(children: [
-              Icon(o.isErrand ? Icons.shopping_basket : Icons.storefront, color: cs.primary),
-              const SizedBox(width: 8),
-              Expanded(child: Text(_from(s, o), style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16))),
-              Text(s.money(o.deliveryFee), style: TextStyle(color: cs.secondary, fontWeight: FontWeight.w900, fontSize: 18)),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(color: cs.primaryContainer, borderRadius: BorderRadius.circular(20)),
+                child: Text(s.t('drvOrder', {'c': o.code}), style: TextStyle(fontWeight: FontWeight.w900, color: cs.onPrimaryContainer)),
+              ),
+              const Spacer(),
+              Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
+                Text(s.money(o.deliveryFee), style: TextStyle(color: cs.secondary, fontWeight: FontWeight.w900, fontSize: 20)),
+                Text(s.t('drvDeliveryFee'), style: TextStyle(color: cs.onSurfaceVariant, fontSize: 11)),
+              ]),
             ]),
-            const SizedBox(height: 4),
-            Text('${s.t('to')}: ${s.zoneName(o.zone)}${o.landmark == null ? '' : ' — ${o.landmark}'}'),
-            if (o.isErrand) Text('🛒 ${o.errandDetails ?? ''}', maxLines: 2, overflow: TextOverflow.ellipsis),
-            const SizedBox(height: 10),
-            FilledButton.icon(onPressed: () => _step(o, 'take'), icon: const Icon(Icons.check), label: Text(s.t('take'))),
+            _infoRow(cs, o.isErrand ? Icons.shopping_basket : Icons.storefront, s.t('from'), _from(s, o), bold: true),
+            _infoRow(cs, Icons.receipt_long, s.t('drvItems'), _itemsLine(s, o)),
+            if ((o.customerName ?? '').isNotEmpty) _infoRow(cs, Icons.person, s.t('drvCustomer'), o.customerName!),
+            _infoRow(cs, Icons.location_on, s.t('to'), address),
+            if ((o.landmark ?? '').isNotEmpty) _infoRow(cs, Icons.flag, s.t('landmark'), o.landmark!, color: cs.secondary, bold: true),
+            if (cash) _infoRow(cs, Icons.payments_outlined, s.t('cashToCollect'), s.money(o.total), color: cs.tertiary, bold: true),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(onPressed: () => _step(o, 'take'), icon: const Icon(Icons.check), label: Text(s.t('take'))),
+            ),
           ]),
         ),
       ),
     );
   }
+
+  Widget _howItWorks(AppState s, ColorScheme cs) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text(s.t('drvHowTitle'), style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16)),
+          for (var i = 0; i < 4; i++)
+            Padding(
+              padding: const EdgeInsets.only(top: 10),
+              child: Row(children: [
+                CircleAvatar(
+                  radius: 15,
+                  backgroundColor: cs.primary,
+                  child: Text('${i + 1}', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900)),
+                ),
+                const SizedBox(width: 10),
+                Expanded(child: Text(s.t('drvStep${i + 1}'))),
+              ]),
+            ),
+        ]),
+      ),
+    );
+  }
+
+  Widget _tips(AppState s, ColorScheme cs) => Card(
+        color: cs.tertiaryContainer.withValues(alpha: 0.5),
+        child: Padding(
+          padding: const EdgeInsets.all(14),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Row(children: [
+              Icon(Icons.lightbulb_outline, color: cs.tertiary),
+              const SizedBox(width: 6),
+              Text(s.t('drvTips'), style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16)),
+            ]),
+            for (final k in ['drvTip1', 'drvTip2', 'drvTip3'])
+              Padding(padding: const EdgeInsets.only(top: 6), child: Text('•  ${s.t(k)}')),
+          ]),
+        ),
+      );
 
   Widget _currentCard(AppState s, ColorScheme cs, OrderView o) {
     final cash = o.paymentMethod == 'CASH';
@@ -228,6 +345,15 @@ class _DriverShellState extends State<DriverShell> {
             ),
           const Divider(height: 18),
           Text(s.t('to'), style: const TextStyle(fontWeight: FontWeight.w700)),
+          if ((o.customerName ?? '').isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: Row(children: [
+                Icon(Icons.person, color: cs.primary, size: 20),
+                const SizedBox(width: 6),
+                Text(o.customerName!, style: const TextStyle(fontWeight: FontWeight.w800)),
+              ]),
+            ),
           AddressBlock(o, showPhone: true),
           if (o.lat != null)
             TextButton.icon(
@@ -250,7 +376,9 @@ class _DriverShellState extends State<DriverShell> {
                   style: TextStyle(fontWeight: FontWeight.w800, color: cash ? cs.tertiary : cs.secondary)),
             ),
           ]),
-          if (cash && o.cashChangeFor != null) Text('${s.t('changeFor')} ${s.money(o.cashChangeFor!)} → ${s.money(o.cashChangeFor! - o.total)}'),
+          if (cash && o.cashChangeFor != null)
+            Text(s.t('drvChange', {'a': s.money(o.cashChangeFor!), 'b': s.money(o.cashChangeFor! - o.total)}),
+                style: TextStyle(color: cs.onSurfaceVariant, fontWeight: FontWeight.w700)),
           const SizedBox(height: 12),
           if (canPick)
             FilledButton.icon(
