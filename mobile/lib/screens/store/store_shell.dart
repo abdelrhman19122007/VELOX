@@ -43,6 +43,7 @@ class _OrdersBoard extends StatefulWidget {
 
 class _OrdersBoardState extends State<_OrdersBoard> {
   List<OrderView> active = [], done = [];
+  Store? store;
   bool loading = true;
   Object? error;
   late final AppState _s;
@@ -77,8 +78,13 @@ class _OrdersBoardState extends State<_OrdersBoard> {
     try {
       final a = await _s.api.get('/restaurant/orders?active=true') as List;
       final d = await _s.api.get('/restaurant/orders?active=false') as List;
+      Store? st;
+      try {
+        st = StoreDetail.fromJson(await _s.api.get('/restaurant/store')).store;
+      } catch (_) {}
       if (!mounted) return;
       setState(() {
+        if (st != null) store = st;
         active = a.map((o) => OrderView.fromJson(o)).toList();
         done = d.map((o) => OrderView.fromJson(o)).toList();
         loading = false;
@@ -90,8 +96,14 @@ class _OrdersBoardState extends State<_OrdersBoard> {
   }
 
   Future<void> _act(String code, String action, [String? reason]) async {
-    final r = await busy(context, () => _s.api.post('/restaurant/orders/$code/$action', reason == null ? null : {'reason': reason}));
-    if (r != null) _load();
+    // The server may answer with an empty body, so always refresh instead of checking the result.
+    await busy(context, () => _s.api.post('/restaurant/orders/$code/$action', reason == null ? null : {'reason': reason}));
+    await _load();
+  }
+
+  Future<void> _setAccepting(bool v) async {
+    await busy(context, () => _s.api.patch('/restaurant/store', {'accepting': v}));
+    _load();
   }
 
   Future<void> _reject(OrderView o) async {
@@ -121,6 +133,7 @@ class _OrdersBoardState extends State<_OrdersBoard> {
   @override
   Widget build(BuildContext context) {
     final s = context.watch<AppState>();
+    final cs = Theme.of(context).colorScheme;
     final newOnes = active.where((o) => o.status == 'PLACED').toList();
     final preparing = active.where((o) => o.status == 'ACCEPTED').toList();
     final ready = active.where((o) => o.status == 'READY' || o.status == 'PICKED_UP').toList();
@@ -135,40 +148,169 @@ class _OrdersBoardState extends State<_OrdersBoard> {
                 icon: const Icon(Icons.settings_outlined),
                 onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsScreen()))),
           ],
-          bottom: TabBar(isScrollable: true, tabs: [
-            Tab(child: Badge(isLabelVisible: newOnes.isNotEmpty, label: Text('${newOnes.length}'), child: Text(s.t('tabNew')))),
-            Tab(text: '${s.t('tabPreparing')} (${preparing.length})'),
-            Tab(text: '${s.t('tabReady')} (${ready.length})'),
-            Tab(text: s.t('tabDone')),
-          ]),
         ),
         body: loading
             ? const Center(child: CircularProgressIndicator())
             : error != null
                 ? EmptyState(Icons.cloud_off, s.errorText(error!), action: FilledButton(onPressed: _load, child: Text(s.t('retry'))))
-                : TabBarView(children: [
-                    _list(newOnes, (o) => [
-                          FilledButton(onPressed: () => _act(o.code, 'accept'), child: Text(s.t('accept'))),
-                          OutlinedButton(onPressed: () => _reject(o), child: Text(s.t('reject'))),
-                        ]),
-                    _list(preparing, (o) => [FilledButton(onPressed: () => _act(o.code, 'ready'), child: Text(s.t('markReady')))]),
-                    _list(ready, (o) => []),
-                    _list(done, (o) => []),
+                : Column(children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                      child: _hero(s, cs, newOnes.length, preparing.length, ready.length),
+                    ),
+                    TabBar(isScrollable: true, tabAlignment: TabAlignment.start, tabs: [
+                      Tab(
+                        child: Text('${s.t('tabNew')} (${newOnes.length})',
+                            style: newOnes.isEmpty ? null : TextStyle(color: cs.error, fontWeight: FontWeight.w900)),
+                      ),
+                      Tab(text: '${s.t('tabPreparing')} (${preparing.length})'),
+                      Tab(text: '${s.t('tabReady')} (${ready.length})'),
+                      Tab(text: s.t('tabDone')),
+                    ]),
+                    Expanded(
+                      child: TabBarView(children: [
+                        _list(newOnes, (o) => [
+                              FilledButton.icon(onPressed: () => _act(o.code, 'accept'), icon: const Icon(Icons.check), label: Text(s.t('accept'))),
+                              OutlinedButton(onPressed: () => _reject(o), child: Text(s.t('reject'))),
+                            ], guide: true),
+                        _list(preparing, (o) => [
+                              FilledButton.icon(
+                                style: FilledButton.styleFrom(backgroundColor: cs.secondary),
+                                onPressed: () => _act(o.code, 'ready'),
+                                icon: const Icon(Icons.room_service),
+                                label: Text(s.t('markReady')),
+                              ),
+                            ]),
+                        _list(ready, (o) => []),
+                        _list(done, (o) => [], compact: true),
+                      ]),
+                    ),
                   ]),
       ),
     );
   }
 
-  Widget _list(List<OrderView> list, List<Widget> Function(OrderView) actions) {
+  /// Store name + the "accepting orders" switch + live counters.
+  Widget _hero(AppState s, ColorScheme cs, int waiting, int kitchen, int withDriver) {
+    final open = store?.accepting ?? true;
+    final name = store == null ? (s.user?.name ?? '') : s.storeName(store!);
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        gradient: LinearGradient(
+          colors: open ? [cs.primary, cs.primary.withValues(alpha: 0.78)] : [Colors.blueGrey, Colors.blueGrey.withValues(alpha: 0.75)],
+        ),
+      ),
+      padding: const EdgeInsets.fromLTRB(14, 10, 10, 10),
+      child: Column(children: [
+        Row(children: [
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.18), shape: BoxShape.circle),
+            child: const Icon(Icons.storefront, color: Colors.white, size: 26),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(s.t('stHello', {'n': name}),
+                  maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 18)),
+              const SizedBox(height: 2),
+              Text(open ? s.t('stOpenSub') : s.t('stClosedSub'), style: TextStyle(color: Colors.white.withValues(alpha: 0.9), fontSize: 13)),
+            ]),
+          ),
+          if (store != null)
+            Switch(
+              value: open,
+              onChanged: _setAccepting,
+              activeThumbColor: Colors.white,
+              activeTrackColor: cs.secondary,
+              inactiveThumbColor: Colors.white,
+              inactiveTrackColor: Colors.white24,
+            ),
+        ]),
+        const SizedBox(height: 8),
+        Row(children: [
+          _counter(s.t('stWaiting'), waiting),
+          _counter(s.t('stInKitchen'), kitchen),
+          _counter(s.t('stForDriver'), withDriver),
+        ]),
+      ]),
+    );
+  }
+
+  Widget _counter(String label, int n) => Expanded(
+        child: Container(
+          margin: const EdgeInsets.symmetric(horizontal: 3),
+          padding: const EdgeInsets.symmetric(vertical: 5),
+          decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.16), borderRadius: BorderRadius.circular(12)),
+          child: Column(children: [
+            Text('$n', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 18)),
+            Text(label, style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600)),
+          ]),
+        ),
+      );
+
+  /// Shown under an empty "New" tab: how an order flows + tips.
+  Widget _guide(AppState s, ColorScheme cs) => Column(children: [
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(14),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(s.t('stHowTitle'), style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16)),
+              for (var i = 0; i < 4; i++)
+                Padding(
+                  padding: const EdgeInsets.only(top: 10),
+                  child: Row(children: [
+                    CircleAvatar(
+                      radius: 15,
+                      backgroundColor: cs.primary,
+                      child: Text('${i + 1}', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900)),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(child: Text(s.t('stStep${i + 1}'))),
+                  ]),
+                ),
+            ]),
+          ),
+        ),
+        const SizedBox(height: 10),
+        Card(
+          color: cs.tertiaryContainer.withValues(alpha: 0.5),
+          child: Padding(
+            padding: const EdgeInsets.all(14),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Row(children: [
+                Icon(Icons.lightbulb_outline, color: cs.tertiary),
+                const SizedBox(width: 6),
+                Text(s.t('stTips'), style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16)),
+              ]),
+              for (final k in ['stTip1', 'stTip2', 'stTip3'])
+                Padding(padding: const EdgeInsets.only(top: 6), child: Text('•  ${s.t(k)}')),
+            ]),
+          ),
+        ),
+      ]);
+
+  Widget _list(List<OrderView> list, List<Widget> Function(OrderView) actions, {bool guide = false, bool compact = false}) {
     final s = context.read<AppState>();
-    if (list.isEmpty) return RefreshIndicator(onRefresh: _load, child: ListView(children: [const SizedBox(height: 60), EmptyState(Icons.inbox_outlined, s.t('empty'))]));
+    final cs = Theme.of(context).colorScheme;
+    if (list.isEmpty) {
+      return RefreshIndicator(
+        onRefresh: _load,
+        child: ListView(padding: const EdgeInsets.all(16), children: [
+          EmptyState(Icons.inbox_outlined, s.t('empty')),
+          if (guide) _guide(s, cs),
+        ]),
+      );
+    }
     return RefreshIndicator(
       onRefresh: _load,
       child: ListView.separated(
         padding: const EdgeInsets.all(16),
         itemCount: list.length,
         separatorBuilder: (_, _) => const SizedBox(height: 12),
-        itemBuilder: (c, i) => _StoreOrderCard(list[i], actions(list[i])),
+        itemBuilder: (c, i) => _StoreOrderCard(list[i], actions(list[i]), compact: compact),
       ),
     );
   }
@@ -177,36 +319,114 @@ class _OrdersBoardState extends State<_OrdersBoard> {
 class _StoreOrderCard extends StatelessWidget {
   final OrderView order;
   final List<Widget> actions;
-  const _StoreOrderCard(this.order, this.actions);
+  final bool compact;
+  const _StoreOrderCard(this.order, this.actions, {this.compact = false});
+
   @override
   Widget build(BuildContext context) {
     final s = context.watch<AppState>();
     final cs = Theme.of(context).colorScheme;
     final cash = order.paymentMethod == 'CASH';
+    final waiting = order.status == 'PLACED' || order.status == 'ACCEPTED';
+    final mins = order.createdAt == null ? null : DateTime.now().difference(order.createdAt!.toLocal()).inMinutes;
+    final late = waiting && mins != null && mins >= 15;
+    final count = order.items.fold<int>(0, (a, i) => a + i.qty);
+    final withDriverStage = order.status == 'READY' || order.status == 'PICKED_UP';
     return Card(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(18),
+        side: order.status == 'PLACED' ? BorderSide(color: cs.primary.withValues(alpha: 0.45), width: 1.5) : BorderSide.none,
+      ),
       child: Padding(
         padding: const EdgeInsets.all(14),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Row(children: [
-            Text(order.code, style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 17)),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(color: cs.primaryContainer, borderRadius: BorderRadius.circular(20)),
+              child: Text(order.code, style: TextStyle(fontWeight: FontWeight.w900, color: cs.onPrimaryContainer)),
+            ),
             const SizedBox(width: 8),
-            Text(timeText(context, order.createdAt).split('·').last, style: TextStyle(color: cs.onSurfaceVariant)),
-            const Spacer(),
+            Expanded(
+              child: waiting && mins != null
+                  ? Row(children: [
+                      Icon(Icons.schedule, size: 16, color: late ? cs.error : cs.onSurfaceVariant),
+                      const SizedBox(width: 3),
+                      Flexible(
+                        child: Text(
+                          late ? '${s.t('stAgo', {'m': mins})} · ${s.t('stLate')}' : s.t('stAgo', {'m': mins}),
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                              color: late ? cs.error : cs.onSurfaceVariant, fontWeight: late ? FontWeight.w800 : FontWeight.w500, fontSize: 13),
+                        ),
+                      ),
+                    ])
+                  : Text(timeText(context, order.createdAt), overflow: TextOverflow.ellipsis, style: TextStyle(color: cs.onSurfaceVariant, fontSize: 13)),
+            ),
             StatusChip(order.status),
           ]),
           if (order.scheduledFor != null)
-            Text('⏰ ${s.t('scheduledFor')}: ${timeText(context, order.scheduledFor)}', style: TextStyle(color: cs.tertiary, fontWeight: FontWeight.w700)),
-          const Divider(height: 18),
-          OrderItemsList(order),
+            Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: Text('⏰ ${s.t('scheduledFor')}: ${timeText(context, order.scheduledFor)}',
+                  style: TextStyle(color: cs.tertiary, fontWeight: FontWeight.w700)),
+            ),
+          if ((order.customerName ?? '').isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Row(children: [
+                Icon(Icons.person, size: 18, color: cs.primary),
+                const SizedBox(width: 6),
+                Text('${s.t('drvCustomer')}: ', style: TextStyle(color: cs.onSurfaceVariant, fontWeight: FontWeight.w700)),
+                Expanded(child: Text(order.customerName!, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w700))),
+                Text(s.t('stItemsCount', {'n': count}), style: TextStyle(color: cs.onSurfaceVariant, fontSize: 13)),
+              ]),
+            ),
+          if (!compact) ...[
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(color: cs.surfaceContainerHighest.withValues(alpha: 0.6), borderRadius: BorderRadius.circular(12)),
+              child: OrderItemsList(order),
+            ),
+          ],
           const Divider(height: 18),
           Row(children: [
             Icon(cash ? Icons.payments_outlined : Icons.verified, color: cash ? cs.tertiary : cs.secondary, size: 20),
             const SizedBox(width: 6),
-            Text(cash ? s.t('cashToCollect') : s.t('paidOnline'), style: TextStyle(fontWeight: FontWeight.w700, color: cash ? cs.tertiary : cs.secondary)),
+            Text(cash ? s.t('cashToCollect') : s.t('paidOnline'),
+                style: TextStyle(fontWeight: FontWeight.w700, color: cash ? cs.tertiary : cs.secondary)),
             const Spacer(),
-            Text(s.money(order.total), style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16)),
+            Text(s.money(order.total), style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 17)),
           ]),
-          if (order.driver != null) Text('🛵 ${order.driver!.name}'),
+          if (!compact && withDriverStage)
+            Padding(
+              padding: const EdgeInsets.only(top: 10),
+              child: Container(
+                padding: const EdgeInsets.fromLTRB(10, 6, 6, 6),
+                decoration: BoxDecoration(
+                  color: (order.driver != null ? cs.secondary : cs.tertiary).withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(children: [
+                  Icon(order.driver != null ? Icons.delivery_dining : Icons.hourglass_top,
+                      color: order.driver != null ? cs.secondary : cs.tertiary),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      order.driver != null ? s.t('stDriverOnWay', {'n': order.driver!.name}) : s.t('stNoDriverYet'),
+                      style: const TextStyle(fontWeight: FontWeight.w700),
+                    ),
+                  ),
+                  if ((order.driver?.phone ?? '').isNotEmpty)
+                    IconButton.filledTonal(onPressed: () => callPhone(order.driver!.phone!), icon: const Icon(Icons.call)),
+                ]),
+              ),
+            )
+          else if (order.driver != null)
+            Padding(padding: const EdgeInsets.only(top: 6), child: Text('🛵 ${order.driver!.name}')),
+          if (order.status == 'REJECTED' && (order.rejectReason ?? '').isNotEmpty)
+            Padding(padding: const EdgeInsets.only(top: 6), child: Text(order.rejectReason!, style: TextStyle(color: cs.error))),
           if (actions.isNotEmpty) ...[
             const SizedBox(height: 10),
             Row(children: [for (final a in actions) Expanded(child: Padding(padding: const EdgeInsets.symmetric(horizontal: 4), child: a))]),
@@ -339,6 +559,9 @@ class _StatsTabState extends State<_StatsTab> {
   Widget build(BuildContext context) {
     final s = context.watch<AppState>();
     final st = stats;
+    final sales = st == null ? 0.0 : (st['salesToday'] as num).toDouble();
+    final delivered = st == null ? 0 : (st['deliveredToday'] as num).toInt();
+    final avgRating = reviews.isEmpty ? null : reviews.map((r) => r.storeRating).reduce((a, b) => a + b) / reviews.length;
     return Scaffold(
       appBar: AppBar(title: Text(s.t('today')), actions: [IconButton(onPressed: _load, icon: const Icon(Icons.refresh))]),
       body: error != null
@@ -357,18 +580,22 @@ class _StatsTabState extends State<_StatsTab> {
                       childAspectRatio: 1.6,
                       children: [
                         StatTile(Icons.receipt_long, '${st['ordersToday']}', s.t('ordersCount')),
-                        StatTile(Icons.check_circle, '${st['deliveredToday']}', s.t('delivered')),
+                        StatTile(Icons.check_circle, '$delivered', s.t('delivered')),
                         StatTile(Icons.cancel, '${st['cancelledToday']}', s.t('cancelled')),
-                        StatTile(Icons.payments, s.money((st['salesToday'] as num).toDouble()), s.t('sales')),
+                        StatTile(Icons.payments, s.money(sales), s.t('sales')),
+                        StatTile(Icons.shopping_bag_outlined, delivered == 0 ? '—' : s.money(sales / delivered), s.t('stAvgOrder')),
+                        StatTile(Icons.star_rounded, avgRating == null ? '—' : '${avgRating.toStringAsFixed(1)} ★', s.t('stRating')),
                       ],
                     ),
                     SectionTitle(s.t('reviews')),
                     if (reviews.isEmpty) EmptyState(Icons.star_outline, s.t('empty')),
                     for (final r in reviews)
-                      ListTile(
-                        leading: Text('${'★' * r.storeRating}${'☆' * (5 - r.storeRating)}', style: const TextStyle(color: Color(0xFFE8A317))),
-                        title: Text(r.comment ?? r.orderCode),
-                        subtitle: Text('${r.orderCode} · ${timeText(context, r.at)}'),
+                      Card(
+                        child: ListTile(
+                          leading: Text('${'★' * r.storeRating}${'☆' * (5 - r.storeRating)}', style: const TextStyle(color: Color(0xFFE8A317))),
+                          title: Text(r.comment ?? r.orderCode),
+                          subtitle: Text('${r.orderCode} · ${timeText(context, r.at)}'),
+                        ),
                       ),
                   ]),
                 ),
