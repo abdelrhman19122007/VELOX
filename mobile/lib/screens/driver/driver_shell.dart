@@ -97,8 +97,8 @@ class _DriverShellState extends State<DriverShell> {
   }
 
   Future<void> _setOnline(bool v) async {
-    final r = await busy(context, () => _s.api.post('/driver/status', {'online': v, 'vehicle': vehicle}));
-    if (r != null) _load();
+    await busy(context, () => _s.api.post('/driver/status', {'online': v, 'vehicle': vehicle}));
+    _load();
   }
 
   Future<void> _setVehicle(String v) async {
@@ -108,8 +108,8 @@ class _DriverShellState extends State<DriverShell> {
   }
 
   Future<void> _step(OrderView o, String action) async {
-    final r = await busy(context, () => _s.api.post('/driver/orders/${o.code}/$action'));
-    if (r != null) _load();
+    await busy(context, () => _s.api.post('/driver/orders/${o.code}/$action'));
+    _load();
   }
 
   @override
