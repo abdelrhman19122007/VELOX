@@ -282,10 +282,11 @@ for business rules), personal data deleted with the account (`ON DELETE CASCADE`
 |---|---|---|---|
 | Unit | JUnit 5, Mockito | services, pricing, state transitions | every member, own module |
 | Integration | Spring Boot Test + PostgreSQL (Testcontainers/H2) | API + database | every member |
-| API | Postman/Newman, RestAssured | every endpoint, happy + error paths | Abdelrhman (@abdelrhman19122007) |
-| UI / E2E | Selenium WebDriver | main web flows UC-01…UC-05 | Hoda (@hodayasser511-stack) |
-| Mobile | Flutter widget & integration tests | sign-in, cart, checkout | Raheek (@Raheek25) |
-| Performance | Apache JMeter | NFR-PERF-01/02 | Fady (@fadyza15-collab) |
+| API | Postman/Newman, RestAssured | every endpoint, happy + error paths | Raheek (@Raheek25) |
+| UI / E2E | Selenium WebDriver | main web flows UC-01…UC-05 | Raheek (@Raheek25), Abdelrhman (@abdelrhman19122007) |
+| Mobile | Flutter widget & integration tests | sign-in, cart, checkout | Fady (@fadyza15-collab) |
+| Usability | moderated sessions with local users, design review | main customer flows, Arabic RTL | Hoda (@hodayasser511-stack) |
+| Performance | Apache JMeter | NFR-PERF-01/02 | Nabeeh (@nabosallem-svg) |
 | Security — static | SpotBugs + FindSecBugs, OWASP Dependency-Check | CI on every push | Nabeeh (@nabosallem-svg) |
 | Security — dynamic | OWASP ZAP (baseline + active scan), Burp Suite | full API and web | all (own module) |
 | Security — manual pentest | OWASP WSTG checklist | IDOR, auth, injection, business logic, file upload | all (own module) |
@@ -309,13 +310,16 @@ README.
 
 ## 9. Team and responsibilities
 
-| Member | Module | Code | Docs & tests |
+Every member owns **one backend module in Java** (code, migration, tests, SRS section, pentest) **and one
+specialty** across the whole product.
+
+| Member | Backend module (Java) | Specialty | Main deliverables |
 |---|---|---|---|
-| Nabeeh (@nabosallem-svg) — Team lead | AUTH + project setup | auth, users, security, config, CI | SRS §1–2, architecture, final report, static security scans |
-| Hoda (@hodayasser511-stack) | CATALOG | stores, products, search, uploads | ERD, Selenium tests, catalogue pentest |
-| Abdelrhman (@abdelrhman19122007) | ORDER | cart, orders, zones, lifecycle | sequence/state diagrams, Postman/Newman, order pentest |
-| Fady (@fadyza15-collab) | PAY | payments, wallet, promo, notifications | payment section, JMeter, payment pentest |
-| Raheek (@Raheek25) | OPS | store, driver, admin, reviews, complaints | test plan & report, Flutter tests, privilege pentest |
+| Nabeeh (@nabosallem-svg) — **Team lead** | AUTH + core (security layer, config, errors) | **Architecture, integration & DevOps** | SRS, architecture, database design, CI/CD, static security scans (SpotBugs/FindSecBugs, Dependency-Check), Docker, API documentation (OpenAPI), hosting, Flutter app core (API client, sign-in, live updates), performance tests, code reviews and merges, final report |
+| Hoda (@hodayasser511-stack) | CATALOG | **UI/UX design** | design system (colours, type, components), all screens for web and mobile (`design/`), real store photos, usability testing, catalogue pentest |
+| Abdelrhman (@abdelrhman19122007) | ORDER | **Web development** | web application (customer pages, store and admin dashboards) built from the design and connected to the API, delivery zones data, order pentest |
+| Fady (@fadyza15-collab) | PAY | **Mobile development** | Flutter app screens, push notifications, Flutter tests, Google Play release, payment pentest |
+| Raheek (@Raheek25) | OPS | **QA & security testing** | test plan and test report, Postman/Newman suite, Selenium tests, consolidated security report, privilege-escalation pentest |
 
 Each member owns their module's migration file, code, tests, SRS section and pentest findings, and submits them
 through their own pull requests.
