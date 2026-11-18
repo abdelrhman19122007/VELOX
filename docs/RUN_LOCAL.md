@@ -125,8 +125,9 @@ $env:DB_PASSWORD = (Get-Content $env:DB_PASSWORD_FILE -TotalCount 1).Trim()
 
 # 3) شغّل من جوه فولدر backend (عشان يلاقي ..\web و ..\mobile\build\web)
 cd backend
-java -jar target\velox-backend-2.0.0.jar
+java -XX:-UseBASE64Intrinsics -jar target\velox-backend-2.0.0.jar
 ```
+`-XX:-UseBASE64Intrinsics` ده حماية من ثغرة **CVE-2026-114938** (اسمها "Java4Shell" أو "Java2Shell") اللي في Java 17 على المعالجات اللي فيها AVX-512 VBMI. بيقفل الجزء المصاب، ومش بيأثر على حاجة غير سرعة صغيرة جداً.
 هتشوف `Started VeloxApplication in … seconds`. **سيب الشباك ده مفتوح**، ولو قفلته السيرفر يقف.
 
 ### ٤.٣ اتأكد إنه شغال (من شباك تاني)

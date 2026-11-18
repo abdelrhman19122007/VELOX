@@ -149,9 +149,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   final greeting = FadeSlideIn(
                     index: 0,
                     child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                      Text('${s.t('hello')}${s.user == null ? '' : ' ${s.user!.name.split(' ').first}'}',
-                          style: tt.titleMedium?.copyWith(color: cs.onSurfaceVariant)),
-                      Text(s.t('craving'), style: tt.headlineSmall?.copyWith(fontWeight: FontWeight.w900)),
+                      Text(_greeting(s), style: tt.titleMedium?.copyWith(color: cs.onSurfaceVariant, fontWeight: FontWeight.w700)),
+                      const SizedBox(height: 2),
+                      const _CravingHeadline(),
+                      const SizedBox(height: 2),
+                      Text(s.t(_mealKey()), style: tt.titleSmall?.copyWith(color: cs.primary, fontWeight: FontWeight.w800)),
                       const SizedBox(height: 4),
                       Text(s.t('heroSub'), style: tt.bodyMedium?.copyWith(color: cs.onSurfaceVariant)),
                       const SizedBox(height: 12),
@@ -176,6 +178,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               Icon(icon, size: 16, color: cs.secondary),
                               const SizedBox(width: 5),
                               Text(s.t(key), style: tt.labelLarge),
+                              if (key == 'chipTrack') ...[const SizedBox(width: 6), const _LiveDot()],
                             ]),
                           ),
                       ]),
@@ -196,11 +199,13 @@ class _HomeScreenState extends State<HomeScreen> {
             // featured stores with photos
             if (s.stores.any((st) => st.photoUrl != null)) ...[
               SliverToBoxAdapter(child: SectionTitle(s.t('featured'))),
+              SliverToBoxAdapter(child: _SubTitle(s.t('featuredSub'))),
               SliverToBoxAdapter(child: _Featured(s.stores.where((st) => st.photoUrl != null).toList())),
             ],
             // categories, like the big apps: a row of circles that filter the stores below
             if (s.stores.map((st) => st.cuisine).toSet().length > 1) ...[
               SliverToBoxAdapter(child: SectionTitle(s.t('categories'))),
+              SliverToBoxAdapter(child: _SubTitle(s.t('categoriesSub'))),
               SliverToBoxAdapter(
                 child: SizedBox(
                   height: 104,
@@ -283,6 +288,30 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
             ),
+            // local drivers: the thing the big apps don't have in Samannoud
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                child: Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(18),
+                    gradient: LinearGradient(colors: [cs.primary, Color.lerp(cs.primary, cs.tertiary, .55)!]),
+                  ),
+                  child: Row(children: [
+                    const Text('🛵', style: TextStyle(fontSize: 34)),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                        Text(s.t('localTitle'), style: tt.titleSmall?.copyWith(color: cs.onPrimary, fontWeight: FontWeight.w900)),
+                        const SizedBox(height: 2),
+                        Text(s.t('localSub'), style: tt.bodySmall?.copyWith(color: cs.onPrimary.withValues(alpha: .92))),
+                      ]),
+                    ),
+                  ]),
+                ),
+              ),
+            ),
             // types + filters
             if (s.stores.any((st) => st.orderable && st.photoUrl != null)) ...[
               SliverToBoxAdapter(child: SectionTitle(s.t('popularTitle'))),
@@ -337,6 +366,16 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
+
+  /// "Good morning, Mohamed ☀️" — changes with the time of day.
+  String _greeting(AppState s) {
+    final first = s.user?.name.trim().split(' ').first ?? '';
+    final n = first.isEmpty ? '' : (s.ar ? ' يا $first' : ', $first');
+    return s.t(switch (DateTime.now().hour) { >= 5 && < 12 => 'greetMorning', >= 12 && < 17 => 'greetNoon', >= 17 && < 23 => 'greetEvening', _ => 'greetLate' }, {'n': n});
+  }
+
+  String _mealKey() =>
+      switch (DateTime.now().hour) { >= 5 && < 12 => 'mealMorning', >= 12 && < 17 => 'mealNoon', >= 17 && < 23 => 'mealEvening', _ => 'mealLate' };
 
   Widget _typeChip(AppState s, String t, IconData icon) => Padding(
         padding: const EdgeInsetsDirectional.only(end: 8),
@@ -477,6 +516,80 @@ class _HeroCard extends StatelessWidget {
 }
 
 /// A grey line under a section title.
+/// "Craving [grills]?" — the coloured word changes every two seconds.
+class _CravingHeadline extends StatefulWidget {
+  const _CravingHeadline();
+  @override
+  State<_CravingHeadline> createState() => _CravingHeadlineState();
+}
+
+class _CravingHeadlineState extends State<_CravingHeadline> {
+  int i = 0;
+  Timer? timer;
+
+  @override
+  void initState() {
+    super.initState();
+    timer = Timer.periodic(const Duration(milliseconds: 2200), (_) {
+      if (mounted) setState(() => i++);
+    });
+  }
+
+  @override
+  void dispose() {
+    timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final s = context.watch<AppState>();
+    final cs = Theme.of(context).colorScheme;
+    final words = s.t('cravingWords').split('|');
+    final style = Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w900, height: 1.25);
+    final reduce = MediaQuery.of(context).disableAnimations;
+    final word = words[i % words.length];
+    return Wrap(crossAxisAlignment: WrapCrossAlignment.center, children: [
+      Text('${s.t('cravingPre')} ', style: style),
+      AnimatedSwitcher(
+        duration: reduce ? Duration.zero : const Duration(milliseconds: 380),
+        transitionBuilder: (child, a) => FadeTransition(
+          opacity: a,
+          child: SlideTransition(position: Tween(begin: const Offset(0, .35), end: Offset.zero).animate(a), child: child),
+        ),
+        child: Text(word, key: ValueKey(word), style: style?.copyWith(color: cs.primary)),
+      ),
+      Text(s.ar ? '؟' : '?', style: style),
+    ]);
+  }
+}
+
+/// A small pulsing dot next to "Live tracking".
+class _LiveDot extends StatefulWidget {
+  const _LiveDot();
+  @override
+  State<_LiveDot> createState() => _LiveDotState();
+}
+
+class _LiveDotState extends State<_LiveDot> with SingleTickerProviderStateMixin {
+  late final AnimationController c = AnimationController(vsync: this, duration: const Duration(milliseconds: 1100))..repeat(reverse: true);
+
+  @override
+  void dispose() {
+    c.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final red = Theme.of(context).colorScheme.error;
+    return FadeTransition(
+      opacity: Tween(begin: .35, end: 1.0).animate(c),
+      child: Container(width: 8, height: 8, decoration: BoxDecoration(color: red, shape: BoxShape.circle)),
+    );
+  }
+}
+
 class _SubTitle extends StatelessWidget {
   final String text;
   const _SubTitle(this.text);
