@@ -14,16 +14,19 @@ String? serverOverride;
 /// A store build (Google Play) is built with --dart-define=API_URL=https://… and then talks ONLY to that server:
 /// no typed link and no automatic discovery, so nobody can point a phone at a fake server.
 const fixedServer = String.fromEnvironment('API_URL');
-bool get serverLocked => fixedServer.isNotEmpty;
+
+/// The browser build opened from the VELOX server itself (…/app/): it always talks to that same server, whatever
+/// the host or port, and offers no "server link" setting (it would only let someone break the app).
+bool get _webFromServer => kIsWeb && Uri.base.path.startsWith('/app');
+
+/// True when the user can't (and needn't) change the server: a store build, or the browser app served by VELOX.
+bool get serverLocked => fixedServer.isNotEmpty || _webFromServer;
 
 String get apiBase {
-  if (serverLocked) return fixedServer;
+  if (fixedServer.isNotEmpty) return fixedServer;
+  if (_webFromServer) return Uri.base.origin;
   if (serverOverride != null && serverOverride!.isNotEmpty) return serverOverride!;
-  if (kIsWeb) {
-    final here = Uri.base;
-    final devServer = (here.host == 'localhost' || here.host == '127.0.0.1') && here.port != 8080;
-    return devServer ? 'http://localhost:8080' : here.origin;
-  }
+  if (kIsWeb) return 'http://localhost:8080'; // `flutter run -d chrome` dev server on another port
   if (defaultTargetPlatform == TargetPlatform.android) return 'http://10.0.2.2:8080';
   return 'http://localhost:8080';
 }
