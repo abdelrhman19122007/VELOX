@@ -78,7 +78,7 @@ velox.app.dir=<b>&lt;SITE&gt;</b>/app</pre>
 <tr><td>Run user</td><td><code>www</code></td></tr>
 <tr><td>Startup command / Project command</td><td>السطر اللي تحت بالظبط</td></tr>
 </table>
-<pre>java -Xmx512m -jar /www/velox/velox.jar --spring.config.import=file:/www/velox/velox.env[.properties]</pre>
+<pre>java -Xmx512m -XX:-UseBASE64Intrinsics -jar /www/velox/velox.jar --spring.config.import=file:/www/velox/velox.env[.properties]</pre>
 لو اللوحة طلبت مكان <b>Domain</b>، سيبه فاضي أو حط الدومين، لأن الخطوة 6 هي اللي بتوصّل الموقع.<br>
 دوس <b>Start</b>، واستنى حوالي 30 ثانية.
 </div></div>

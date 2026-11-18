@@ -14,7 +14,9 @@ RUN addgroup -S velox && adduser -S velox -G velox && mkdir -p /app/uploads && c
 WORKDIR /app
 COPY --from=build /src/app.jar app.jar
 USER velox
-ENV PORT=8080 VELOX_API_DOCS=false JAVA_OPTS="-XX:MaxRAMPercentage=75"
+# -XX:-UseBASE64Intrinsics: mitigation for CVE-2026-114938 ("Java4Shell"/"Java2Shell", HotSpot Base64 intrinsic on
+# AVX-512 VBMI CPUs) until a fixed Temurin 17 image is confirmed. Costs a little Base64 speed, nothing else.
+ENV PORT=8080 VELOX_API_DOCS=false JAVA_OPTS="-XX:MaxRAMPercentage=75 -XX:-UseBASE64Intrinsics"
 EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=5s --retries=3 CMD wget -qO- http://localhost:8080/api/zones >/dev/null || exit 1
 ENTRYPOINT ["sh", "-c", "exec java $JAVA_OPTS -jar app.jar"]
