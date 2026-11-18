@@ -208,9 +208,10 @@ class _DriverShellState extends State<DriverShell> {
           ]),
         ),
         Column(children: [
-          Switch(value: online, onChanged: _setOnline, activeThumbColor: cs.secondary,
-              activeTrackColor: Colors.white,
-              inactiveThumbColor: Colors.white,
+          // on: a white knob on a dark track (clearly "on" over the green card); off: a pale knob on a faint track
+          Switch(value: online, onChanged: _setOnline, activeThumbColor: Colors.white,
+              activeTrackColor: Colors.black.withValues(alpha: .28),
+              inactiveThumbColor: Colors.white70,
               inactiveTrackColor: Colors.white24),
           Text(online ? s.t('online') : s.t('offline'), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 12)),
         ]),
