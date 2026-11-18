@@ -48,6 +48,39 @@ Future<bool> confirmDialog(BuildContext context, String text) async {
 
 void callPhone(String phone) => launchUrl(Uri.parse('tel:$phone'));
 
+/// The VELOX admin's WhatsApp (team lead). Shown in the app wherever someone has to "ask the admin".
+const adminPhone = '01287654219';
+const _adminWhatsApp = '201287654219'; // international form for wa.me
+
+/// Opens a WhatsApp chat with the admin, with [message] already typed.
+void openAdminWhatsApp(String message) =>
+    launchUrl(Uri.parse('https://wa.me/$_adminWhatsApp?text=${Uri.encodeComponent(message)}'), mode: LaunchMode.externalApplication);
+
+/// "Ask the admin …" note with a WhatsApp button; the number is also shown so it can be copied or dialled.
+class AdminContact extends StatelessWidget {
+  final String note, message;
+  const AdminContact({super.key, required this.note, required this.message});
+  @override
+  Widget build(BuildContext context) {
+    final s = context.watch<AppState>();
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Text(note, style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant)),
+      const SizedBox(height: 4),
+      Wrap(crossAxisAlignment: WrapCrossAlignment.center, spacing: 8, children: [
+        TextButton.icon(
+          style: TextButton.styleFrom(foregroundColor: const Color(0xFF1E8E4E), padding: const EdgeInsets.symmetric(horizontal: 8)),
+          onPressed: () => openAdminWhatsApp(message),
+          icon: const Icon(Icons.chat),
+          label: Text(s.t('waAdmin')),
+        ),
+        SelectableText(adminPhone, style: tt.bodyMedium?.copyWith(fontWeight: FontWeight.w800, letterSpacing: .5)),
+      ]),
+    ]);
+  }
+}
+
 String timeText(BuildContext context, DateTime? t) {
   if (t == null) return '';
   final s = context.read<AppState>();
