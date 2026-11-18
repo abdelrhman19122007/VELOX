@@ -35,3 +35,6 @@ web/downloads/
 # Deployment secrets and logs (never commit)
 deploy/.env
 deploy/logs/
+
+# demo script state (holds a throwaway test login)
+tests/demo/demo_state.json

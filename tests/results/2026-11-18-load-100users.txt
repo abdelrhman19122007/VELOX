@@ -1,0 +1,2 @@
+requests 4000 in 215.0s (19/s), errors 21
+p50 981 ms · p95 3051 ms · max 162101 ms · mean 5300 ms

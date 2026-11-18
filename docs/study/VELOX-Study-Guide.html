@@ -1,0 +1,734 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VELOX — ملف المذاكرة الكامل</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+:root { --b:#9a3412; --l:#f1d5c7; --s:#fff7f2; --c:#f4efec; --m:#6b6b6b; --g:#15803d; --t:#1d4ed8; }
+@page { size:A4; margin:14mm 13mm; }
+body { font-family:'Cairo',Tahoma,sans-serif; color:#1f1f1f; font-size:10.6pt; line-height:1.75; margin:0; background:#fff; }
+main { max-width:900px; margin:auto; padding:0 6px; }
+.hero { background:linear-gradient(135deg,#9a3412,#c2410c); color:#fff; border-radius:16px; padding:18px 22px; margin:6px 0 12px; }
+.hero h1 { margin:0; font-size:25pt; } .hero p { margin:4px 0 0; }
+h2 { color:var(--b); font-size:16pt; margin:22px 0 6px; border-bottom:2px solid var(--l); padding-bottom:3px; }
+h3 { margin:14px 0 4px; font-size:12pt; color:#7c2d12; }
+.card { background:var(--s); border:1px solid var(--l); border-radius:12px; padding:9px 12px; margin:7px 0; }
+.note { background:#eef6ff; border:1px solid #c9defc; border-radius:12px; padding:9px 12px; margin:7px 0; }
+.warn { background:#fff8e6; border:1px solid #f3dc9c; border-radius:12px; padding:9px 12px; margin:7px 0; }
+table { width:100%; border-collapse:collapse; font-size:9.6pt; margin:5px 0; }
+th,td { border-bottom:1px solid var(--l); padding:4px 5px; text-align:start; vertical-align:top; }
+th { color:var(--b); background:var(--s); }
+code { font-family:Consolas,monospace; background:var(--c); border-radius:4px; padding:0 4px; direction:ltr; unicode-bidi:embed; font-size:9pt; }
+pre { direction:ltr; text-align:left; background:#1e1e1e; color:#e8e8e8; border-radius:10px; padding:10px 12px; font-family:Consolas,monospace; font-size:8.6pt; line-height:1.5; white-space:pre-wrap; word-break:break-word; page-break-inside:avoid; }
+pre .c { color:#8fbc8f; } pre .k { color:#f0a868; }
+.flow { display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin:8px 0; }
+.flow span { background:var(--s); border:1.5px solid var(--b); border-radius:10px; padding:4px 10px; font-weight:700; }
+.flow b { color:var(--b); font-size:13pt; }
+.toc { columns:2; } .toc a { color:var(--b); text-decoration:none; }
+.pb { page-break-before:always; }
+ul,ol { margin:3px 0; padding-inline-start:22px; }
+.q { font-weight:900; color:#7c2d12; }
+.ltr { direction:ltr; text-align:left; }
+</style>
+</head>
+<body>
+<main>
+
+<div class="hero">
+  <h1>VELOX — ملف المذاكرة الكامل</h1>
+  <p>كل حاجة عملناها في المشروع، من الصفر، بالترتيب اللي الدكتور بيشرح بيه: Java وMaven وقاعدة البيانات وJDBC والسيرفر والأمان واختبارات JUnit وJMeter والواجهة والتشغيل.<br>
+  الأمثلة كلها من الكود الحقيقي بتاعنا. الفريق: نبيه (القائد) — هدى — عبد الرحمن — فادي — رحيق.</p>
+</div>
+
+<h2>الفهرس</h2>
+<div class="toc card">
+<a href="#s0">٠. إزاي تذاكر الملف ده</a><br>
+<a href="#s1">١. المشروع في دقيقة</a><br>
+<a href="#s2">٢. الصورة الكبيرة: Client و Server</a><br>
+<a href="#s3">٣. كل الأدوات وليه اخترناها</a><br>
+<a href="#s4">٤. Java اللي استخدمناها</a><br>
+<a href="#s5">٥. Maven (Apache Maven)</a><br>
+<a href="#s6">٦. قاعدة البيانات</a><br>
+<a href="#s7">٧. JDBC — طريقة الدكتور وطريقتنا</a><br>
+<a href="#s8">٨. السيرفر بـ Spring Boot</a><br>
+<a href="#s9">٩. رحلة الطلب (State Machine)</a><br>
+<a href="#s10">١٠. التحديث المباشر والإشعارات</a><br>
+<a href="#s11">١١. الأمان</a><br>
+<a href="#s12">١٢. الاختبارات: JUnit وSelenium وPostman وJMeter</a><br>
+<a href="#s13">١٣. الواجهة: تطبيق Flutter والموقع</a><br>
+<a href="#s14">١٤. السيرفر اشتغل إزاي (التشغيل والنشر)</a><br>
+<a href="#s15">١٥. تطبيق الأندرويد والتحديثات</a><br>
+<a href="#s16">١٦. مين عمل إيه</a><br>
+<a href="#s17">١٧. قاموس الكلمات</a><br>
+<a href="#s18">١٨. أسئلة الدكتور المتوقعة بالإجابات</a><br>
+<a href="#s19">١٩. معمل: شغّل المشروع بإيدك</a>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="s0">٠. إزاي تذاكر الملف ده</h2>
+<table>
+<tr><th>اليوم</th><th>تذاكر إيه</th><th>هتعرف تعمل إيه في الآخر</th></tr>
+<tr><td>١</td><td>الأجزاء ١ لـ ٥</td><td>تشرح المشروع وتقول كل أداة بتعمل إيه وليه</td></tr>
+<tr><td>٢</td><td>الأجزاء ٦ و٧</td><td>ترسم الجداول وتكتب كود JDBC من دماغك (زي اللي الدكتور شرحه)</td></tr>
+<tr><td>٣</td><td>الأجزاء ٨ و٩ و١٠</td><td>تمشّي طلب HTTP من أوله لآخره جوه السيرفر</td></tr>
+<tr><td>٤</td><td>الأجزاء ١١ و١٢</td><td>تكتب اختبار JUnit وتشرح الأمان واختبار الاختراق</td></tr>
+<tr><td>٥</td><td>الأجزاء ١٣ لـ ١٥</td><td>تشرح الواجهة والتشغيل والنشر</td></tr>
+<tr><td>٦</td><td>الجزء ١٨ و١٩</td><td>تجاوب أسئلة الدكتور وتشغّل المشروع قدامه</td></tr>
+</table>
+<div class="note"><b>نصيحة:</b> كل واحد يذاكر الملف كله، وبعدين يركّز على الجزء بتاعه في جدول "مين عمل إيه" (الجزء ١٦). الدكتور ممكن يسأل أي حد في أي حاجة.</div>
+
+<!-- ============================================================ -->
+<h2 id="s1">١. المشروع في دقيقة</h2>
+<div class="card">
+<b>VELOX</b> منصة توصيل لمدينة <b>سمنود</b>: العميل يطلب أكل من مطعم، أو "مشوار" (يشتري له حاجة من أي مكان). المطعم يجهّز، والمندوب يوصّل، والأدمن يتابع كل حاجة.
+</div>
+<table>
+<tr><th>المستخدم</th><th>بيعمل إيه</th><th>الشاشة بتاعته</th></tr>
+<tr><td>العميل (CUSTOMER)</td><td>يتصفح المطاعم، يطلب، يدفع كاش أو أونلاين، يتابع المندوب على الخريطة، يقيّم</td><td>التطبيق + الموقع</td></tr>
+<tr><td>المطعم (RESTAURANT)</td><td>يستقبل الطلب بصوت، يقبل أو يرفض، يقول "جاهز"، يعدّل المنيو والأسعار</td><td>صفحة المطعم في التطبيق</td></tr>
+<tr><td>المندوب (DRIVER)</td><td>يبقى أونلاين، ياخد الطلب، يستلمه، يسلّمه، يشوف أرباحه</td><td>صفحة المندوب في التطبيق</td></tr>
+<tr><td>الأدمن (ADMIN)</td><td>يدير المستخدمين والمطاعم والمناطق والكوبونات والشكاوى ويشوف الإحصائيات</td><td>لوحة التحكم</td></tr>
+</table>
+<h3>رحلة طلب واحد (اتجربت فعلاً: الطلب ORD-1009)</h3>
+<div class="flow"><span>العميل يطلب</span><b>←</b><span>المطعم يسمع صوت ويقبل</span><b>←</b><span>المطعم: جاهز</span><b>←</b><span>المندوب: خد الطلب</span><b>←</b><span>استلمت</span><b>←</b><span>سلّمت</span><b>←</b><span>العميل يقيّم</span></div>
+
+<!-- ============================================================ -->
+<h2 id="s2">٢. الصورة الكبيرة: Client و Server</h2>
+<div class="card">
+أي نظام زي ده عبارة عن حاجتين:<br>
+• <b>Client (العميل/الواجهة):</b> اللي المستخدم بيلمسه: تطبيق الموبايل والموقع. مبيخزنش داتا مهمة، هو بيسأل السيرفر بس.<br>
+• <b>Server (السيرفر/الباك إند):</b> برنامج Java شغال على جهاز، بيستقبل الطلبات، يتأكد من الصلاحيات، يكلم قاعدة البيانات، ويرجّع الرد.
+</div>
+<div class="flow"><span>تطبيق Flutter / الموقع</span><b>⇄ HTTP + JSON ⇄</b><span>سيرفر Spring Boot (Java)</span><b>⇄ JDBC ⇄</b><span>PostgreSQL</span></div>
+<h3>يعني إيه HTTP وREST وJSON؟</h3>
+<ul>
+<li><b>HTTP</b>: اللغة اللي الواجهة والسيرفر بيتكلموا بيها. كل طلب ليه <b>Method</b> و<b>عنوان</b>: <code>GET /api/zones</code> = "هاتلي المناطق".</li>
+<li><b>REST</b>: طريقة تنظيم العناوين: <code>GET</code> قراءة، <code>POST</code> إنشاء، <code>PUT/PATCH</code> تعديل، <code>DELETE</code> مسح.</li>
+<li><b>JSON</b>: شكل الداتا اللي بتتبعت: <code>{"code":"SAMANNOUD","fee":15}</code>.</li>
+<li><b>Status codes</b>: <code>200</code> تمام، <code>201</code> اتعمل، <code>204</code> تمام من غير رد، <code>400</code> بيانات غلط، <code>401</code> مش مسجّل دخول، <code>403</code> مش مسموحلك، <code>404</code> مش موجود، <code>429</code> محاولات كتير، <code>500</code> خطأ في السيرفر.</li>
+</ul>
+<h3>السيرفر نفسه متقسّم ٣ طبقات (Layered Architecture)</h3>
+<div class="flow"><span>Controller<br><small>يستقبل الطلب</small></span><b>←</b><span>Service<br><small>القواعد والصلاحيات</small></span><b>←</b><span>Repository<br><small>SQL عن طريق JDBC</small></span><b>←</b><span>Database</span></div>
+<div class="note">ليه نقسّم؟ عشان كل طبقة ليها شغلانة واحدة. لو غيّرنا قاعدة البيانات نغيّر الـ Repository بس. ولو عايزين نختبر القواعد نختبر الـ Service من غير HTTP.</div>
+<p>والمشروع متقسّم كمان بالـ <b>Feature</b> (كل واحد في الفريق ليه جزء):</p>
+<table>
+<tr><th>الفولدر في <code>backend/src/main/java/com/velox</code></th><th>بيعمل إيه</th></tr>
+<tr><td><code>auth</code></td><td>التسجيل والدخول والحسابات والعناوين وإدارة المستخدمين</td></tr>
+<tr><td><code>security</code></td><td>تشفير الباسورد، التوكن، الصلاحيات، منع التخمين، سجل الأحداث</td></tr>
+<tr><td><code>catalog</code></td><td>المطاعم والمنيو والصور والمفضلة والبحث</td></tr>
+<tr><td><code>order</code></td><td>الطلبات والمناطق والأسعار والتحديث المباشر</td></tr>
+<tr><td><code>payment</code></td><td>الدفع (كاش، محفظة، فوري/فودافون كاش تجريبي) والكوبونات والنقاط</td></tr>
+<tr><td><code>notification</code></td><td>الإشعارات جوه التطبيق وإشعارات الموبايل (Firebase)</td></tr>
+<tr><td><code>operation</code></td><td>شغل المطعم والمندوب والأدمن والتقييمات والشكاوى</td></tr>
+<tr><td><code>config</code> و<code>common</code></td><td>الإعدادات، Swagger، رؤوس الأمان، معالجة الأخطاء</td></tr>
+</table>
+
+<!-- ============================================================ -->
+<div class="pb"></div>
+<h2 id="s3">٣. كل الأدوات وليه اخترناها</h2>
+<table>
+<tr><th>الأداة</th><th>بنستخدمها في إيه</th><th>ليه هي</th></tr>
+<tr><td><b>Java 17</b></td><td>لغة السيرفر</td><td>اللغة اللي اتعلمناها في الكورس، قوية وآمنة، ونسخة LTS</td></tr>
+<tr><td><b>Spring Boot 3.3</b></td><td>إطار عمل السيرفر</td><td>بيدّينا سيرفر ويب جاهز (Tomcat جواه) و Dependency Injection و Validation</td></tr>
+<tr><td><b>Apache Maven</b></td><td>بناء المشروع وتنزيل المكتبات وتشغيل الاختبارات</td><td>نفس اللي الدكتور بعته (Apache.rar). ملف واحد <code>pom.xml</code> فيه كل حاجة</td></tr>
+<tr><td><b>PostgreSQL 16</b></td><td>قاعدة البيانات</td><td>مجانية وقوية. الدكتور استخدم SQL Server، والفكرة واحدة (SQL + JDBC)</td></tr>
+<tr><td><b>Supabase</b></td><td>استضافة PostgreSQL على الإنترنت</td><td>مجاني، وقاعدة البيانات شغالة حتى لو جهازنا مقفول</td></tr>
+<tr><td><b>JDBC + JdbcTemplate</b></td><td>كلام Java مع قاعدة البيانات</td><td>SQL صريح نفهمه ونتحكم فيه (من غير ORM مخبّي)</td></tr>
+<tr><td><b>Flyway</b></td><td>إنشاء الجداول بترتيب (V1…V7)</td><td>أي جهاز جديد بيعمل نفس الجداول أوتوماتيك</td></tr>
+<tr><td><b>JUnit 5</b></td><td>اختبارات الكود (97 اختبار)</td><td>زي JUnit_Project اللي الدكتور شرحه</td></tr>
+<tr><td><b>Testcontainers</b></td><td>بيشغّل PostgreSQL حقيقي جوه Docker أثناء الاختبار</td><td>الاختبار يبقى على نفس قاعدة البيانات الحقيقية</td></tr>
+<tr><td><b>Selenium</b></td><td>اختبار الموقع كأن حد بيدوس</td><td>اختبار End-to-End</td></tr>
+<tr><td><b>Postman / Newman</b></td><td>اختبار الـ API</td><td>نجرّب كل عنوان ونشوف الرد</td></tr>
+<tr><td><b>Apache JMeter</b></td><td>اختبار الأداء (100 مستخدم في نفس الوقت)</td><td>الأداة المشهورة لاختبار الحِمل</td></tr>
+<tr><td><b>Swagger (springdoc)</b></td><td>صفحة فيها كل عناوين الـ API وتجرّبها</td><td>توثيق أوتوماتيك من الكود</td></tr>
+<tr><td><b>Flutter (Dart)</b></td><td>التطبيق (أندرويد + ويب) من كود واحد</td><td>كود واحد لكل الأجهزة، وشكل حلو بسرعة</td></tr>
+<tr><td><b>Firebase Cloud Messaging</b></td><td>إشعارات الموبايل</td><td>مجاني والطريقة الرسمية على أندرويد</td></tr>
+<tr><td><b>Docker</b></td><td>تغليف السيرفر في "كونتينر" يشتغل على أي جهاز</td><td>نفس البيئة على جهازنا وعلى السيرفر</td></tr>
+<tr><td><b>Cloudflare Tunnel</b></td><td>لينك عام للسيرفر اللي على جهاز نبيه</td><td>مجاني ومن غير ما نفتح بورتات في الراوتر</td></tr>
+<tr><td><b>Git + GitHub</b></td><td>حفظ الكود وتاريخه وشغل الفريق</td><td>كل واحد يشتغل على جزئه من غير ما يبوّظ شغل التاني</td></tr>
+<tr><td><b>Burp Suite / ZAP</b></td><td>اختبار الاختراق (Pentest track)</td><td>نهاجم السيستم بنفسنا ونقفل الثغرات</td></tr>
+</table>
+
+<!-- ============================================================ -->
+<h2 id="s4">٤. Java اللي استخدمناها (مفاهيم الكورس جوه مشروعنا)</h2>
+<table>
+<tr><th>المفهوم</th><th>يعني إيه</th><th>مثال من المشروع</th></tr>
+<tr><td><b>Class و Object</b></td><td>الكلاس هو القالب، والأوبجكت نسخة منه</td><td><code>PasswordHasher hasher = new PasswordHasher();</code></td></tr>
+<tr><td><b>Encapsulation</b></td><td>الداتا <code>private</code> والوصول من خلال methods</td><td><code>private final JdbcTemplate db;</code> في كل Repository</td></tr>
+<tr><td><b>Interface + Polymorphism</b></td><td>عقد واحد وأكتر من تنفيذ</td><td><code>PaymentGateway</code> ليها تنفيذين: <code>SandboxFawry</code> و<code>SandboxVodafoneCash</code></td></tr>
+<tr><td><b>enum</b></td><td>قيم ثابتة محددة</td><td><code>OrderStatus</code>: PLACED, ACCEPTED, READY, PICKED_UP, DELIVERED… و<code>Role</code>: CUSTOMER, RESTAURANT, DRIVER, ADMIN</td></tr>
+<tr><td><b>record</b> (Java 16+)</td><td>كلاس للداتا بس، من غير getters/setters يدوي</td><td><code>record DeliveryZone(String code, String nameAr, ...)</code></td></tr>
+<tr><td><b>Exceptions</b></td><td>نرمي خطأ واضح بدل ما البرنامج يقع</td><td><code>ApiException</code> + <code>GlobalExceptionHandler</code> بيحوّلها لرد JSON مفهوم</td></tr>
+<tr><td><b>Collections</b></td><td>List وMap وSet</td><td><code>Map&lt;OrderStatus, Map&lt;OrderStatus, Set&lt;Actor&gt;&gt;&gt;</code> قواعد الطلب</td></tr>
+<tr><td><b>Lambda + Streams</b></td><td>كود أقصر للتعامل مع القوائم</td><td><code>zones.active().stream().map(ZoneView::of).toList()</code></td></tr>
+<tr><td><b>Optional</b></td><td>بدل ما نرجّع null</td><td><code>Optional&lt;DeliveryZone&gt; findActive(String code)</code></td></tr>
+<tr><td><b>Annotations</b></td><td>علامات بتقول لـ Spring يعمل إيه</td><td><code>@RestController</code>, <code>@GetMapping</code>, <code>@Repository</code>, <code>@Test</code></td></tr>
+<tr><td><b>Dependency Injection</b></td><td>الكلاس مبيعملش <code>new</code> للحاجات اللي محتاجها، Spring بيديهاله في الـ Constructor</td><td><code>public ZoneRepository(JdbcTemplate db) { this.db = db; }</code></td></tr>
+<tr><td><b>Multithreading</b></td><td>شغل بيحصل في نفس الوقت</td><td><code>ConcurrentHashMap</code> في <code>EventHub</code> و<code>@Scheduled</code> في <code>StaleOrderCloser</code></td></tr>
+</table>
+
+<!-- ============================================================ -->
+<div class="pb"></div>
+<h2 id="s5">٥. Maven (Apache Maven) — نفس اللي الدكتور بعته</h2>
+<div class="card">
+Maven بيعمل ٣ حاجات: (١) <b>ينزّل المكتبات</b> لوحده بدل ما نضيف JAR بإيدنا (زي ما الدكتور عمل مع JDBC driver في NetBeans: Add JAR/Folder)، (٢) <b>يبني المشروع</b> لملف JAR واحد، (٣) <b>يشغّل الاختبارات</b>.
+</div>
+<h3>ملف pom.xml (الجزء المهم منه)</h3>
+<pre><span class="c">&lt;!-- بدل ما ننزّل JDBC driver بإيدنا ونضيفه في Libraries، بنكتب السطرين دول --&gt;</span>
+&lt;dependency&gt;
+    &lt;groupId&gt;org.postgresql&lt;/groupId&gt;
+    &lt;artifactId&gt;<span class="k">postgresql</span>&lt;/artifactId&gt;          <span class="c">&lt;!-- JDBC driver --&gt;</span>
+&lt;/dependency&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;<span class="k">spring-boot-starter-jdbc</span>&lt;/artifactId&gt;   <span class="c">&lt;!-- JdbcTemplate + connection pool --&gt;</span>
+&lt;/dependency&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;<span class="k">spring-boot-starter-test</span>&lt;/artifactId&gt;   <span class="c">&lt;!-- JUnit 5 + Assertions --&gt;</span>
+    &lt;scope&gt;test&lt;/scope&gt;
+&lt;/dependency&gt;</pre>
+<p>المكتبات اللي في المشروع: <code>spring-boot-starter-web</code> (السيرفر)، <code>-validation</code> (التحقق من البيانات)، <code>-jdbc</code>، <code>postgresql</code>، <code>flyway-core</code>، <code>springdoc-openapi</code> (Swagger)، و للاختبارات: <code>spring-boot-starter-test</code> و<code>testcontainers</code> و<code>junit-jupiter</code>، وأدوات فحص: <code>jacoco</code> (نسبة تغطية الاختبارات) و<code>spotbugs + findsecbugs</code> (يدوّر على ثغرات في الكود).</p>
+<h3>أوامر Maven</h3>
+<table>
+<tr><th>الأمر</th><th>بيعمل إيه</th></tr>
+<tr><td><code>mvnw compile</code></td><td>يحوّل الكود لـ bytecode</td></tr>
+<tr><td><code>mvnw test</code></td><td>يشغّل كل اختبارات JUnit (97 اختبار)</td></tr>
+<tr><td><code>mvnw package</code></td><td>يطلّع <code>target/velox-backend-2.0.0.jar</code></td></tr>
+<tr><td><code>mvnw spring-boot:run</code></td><td>يشغّل السيرفر مباشرة</td></tr>
+</table>
+<div class="note"><code>mvnw</code> = Maven Wrapper: بينزّل النسخة الصح من Maven لوحده، فمش لازم كل واحد يسطّب Maven. وفي <b>NetBeans</b> تقدر تفتح فولدر <code>backend</code> كـ Maven project على طول (File ← Open Project) وتدوس Build أو Test.</div>
+
+<!-- ============================================================ -->
+<h2 id="s6">٦. قاعدة البيانات</h2>
+<p>عندنا <b>22 جدول</b>، متقسمين بالـ Feature، وبيتعملوا بـ Flyway من ملفات في <code>database/migrations</code>:</p>
+<table>
+<tr><th>الملف</th><th>الجداول</th></tr>
+<tr><td><code>V1__accounts.sql</code></td><td>users, addresses, push_devices, login_attempts, audit_log</td></tr>
+<tr><td><code>V2__catalog.sql</code></td><td>stores, products, favorites</td></tr>
+<tr><td><code>V3__orders.sql</code></td><td>delivery_zones, orders, order_items, order_attachments, order_events</td></tr>
+<tr><td><code>V4__payments.sql</code></td><td>payments, wallet_transactions, promo_codes, loyalty_points</td></tr>
+<tr><td><code>V5__operations.sql</code></td><td>driver_status, reviews, complaints, notifications</td></tr>
+<tr><td><code>V6__seed.sql</code></td><td>البيانات الأولية: المناطق والمطاعم والمنيو</td></tr>
+<tr><td><code>V7__product_description_en.sql</code></td><td>إضافة وصف إنجليزي للمنتجات (مثال على تعديل جدول موجود)</td></tr>
+</table>
+<h3>العلاقات الأساسية (ERD مختصر)</h3>
+<div class="card ltr" style="font-family:Consolas,monospace;font-size:9pt">
+users (1) ───&lt; (N) orders  ── customer_id / driver_id<br>
+stores (1) ───&lt; (N) products<br>
+stores (1) ───&lt; (N) orders<br>
+orders (1) ───&lt; (N) order_items &gt;─── (1) products<br>
+orders (1) ───&lt; (N) order_events   (timeline: PLACED → ACCEPTED → …)<br>
+orders (1) ─── (1) payments, reviews<br>
+delivery_zones (1) ───&lt; (N) orders<br>
+users (1) ───&lt; (N) addresses, notifications, wallet_transactions
+</div>
+<h3>مفاهيم لازم تعرفها</h3>
+<ul>
+<li><b>Primary Key</b>: رقم مميز لكل صف (<code>id</code>). و<b>Foreign Key</b>: عمود بيشاور على صف في جدول تاني (<code>orders.store_id → stores.id</code>).</li>
+<li><b>Normalization</b>: أصناف الطلب في جدول لوحدها (<code>order_items</code>) بدل ما نكررها في <code>orders</code>.</li>
+<li><b>Transaction</b>: كذا عملية تنجح مع بعض أو تتلغي مع بعض. مثلاً إنشاء الطلب + أصنافه + خصم المحفظة.</li>
+<li><b>Index</b>: بيسرّع البحث (زي فهرس الكتاب).</li>
+<li><b>Migration</b>: كل تعديل على الجداول في ملف جديد برقم أكبر. Flyway بيشغّل اللي لسه ماتشغلش بس، وبيسجّل ده في جدول <code>flyway_schema_history</code>.</li>
+<li>الأسعار متخزنة <code>NUMERIC</code> وفي Java <code>BigDecimal</code> (مش double) عشان الفلوس متتلخبطش في الكسور.</li>
+</ul>
+
+<!-- ============================================================ -->
+<div class="pb"></div>
+<h2 id="s7">٧. JDBC — طريقة الدكتور وطريقتنا</h2>
+<div class="card">
+<b>JDBC</b> (Java Database Connectivity) هي الطريقة اللي Java بتكلم بيها أي قاعدة بيانات. كل قاعدة بيانات ليها <b>Driver</b> (SQL Server ليه <code>sqljdbc</code> اللي الدكتور بعته، وPostgreSQL ليه <code>postgresql</code>).
+</div>
+<h3>١) جملة الاتصال (Connection String)</h3>
+<table>
+<tr><th></th><th>اللي الدكتور شرحه (SQL Server)</th><th>اللي عندنا (PostgreSQL)</th></tr>
+<tr><td>البروتوكول</td><td><code>jdbc:sqlserver://</code></td><td><code>jdbc:postgresql://</code></td></tr>
+<tr><td>السيرفر</td><td><code>localhost\SQLEXPRESS</code></td><td><code>aws-0-eu-north-1.pooler.supabase.com:5432</code> (أو <code>localhost:5432</code> على جهازك)</td></tr>
+<tr><td>قاعدة البيانات</td><td><code>databaseName=DEPI_Library</code></td><td><code>/postgres</code> (أو <code>/velox</code> محلياً)</td></tr>
+<tr><td>التشفير</td><td><code>encrypt=true; trustServerCertificate=true</code></td><td><code>sslmode=require</code></td></tr>
+<tr><td>اليوزر والباسورد</td><td>جوه الكود</td><td><b>برّه الكود</b> في متغيرات بيئة <code>DB_USER</code> و<code>DB_PASSWORD</code> (عشان الباسورد ميترفعش على GitHub)</td></tr>
+</table>
+<p>في <code>application.properties</code>:</p>
+<pre>spring.datasource.url=${DB_URL:jdbc:postgresql://localhost:5432/velox}
+spring.datasource.username=${DB_USER:velox}
+<span class="c"># ${DB_URL:...} = خد القيمة من متغير البيئة DB_URL، ولو مش موجود استخدم اللي بعد النقطتين</span></pre>
+
+<h3>٢) نفس الاستعلام بالطريقتين</h3>
+<p><b>الطريقة الخام (زي الكورس):</b></p>
+<pre>String url = "jdbc:postgresql://localhost:5432/velox";
+<span class="k">try</span> (Connection con = DriverManager.getConnection(url, user, password);
+     PreparedStatement ps = con.prepareStatement(
+         "SELECT * FROM delivery_zones WHERE code = ? AND active")) {
+    ps.setString(1, code);                       <span class="c">// ? بتتملي بأمان — ده بيمنع SQL Injection</span>
+    <span class="k">try</span> (ResultSet rs = ps.executeQuery()) {
+        <span class="k">while</span> (rs.next()) {
+            String name = rs.getString("name_ar");
+            BigDecimal fee = rs.getBigDecimal("fee");
+        }
+    }
+}   <span class="c">// try-with-resources بيقفل الاتصال لوحده</span></pre>
+<p><b>طريقتنا بـ JdbcTemplate (من <code>ZoneRepository.java</code> الحقيقي):</b></p>
+<pre><span class="k">@Repository</span>
+<span class="k">public class</span> ZoneRepository {
+
+    <span class="c">// RowMapper: بيحوّل كل صف من ResultSet لأوبجكت Java</span>
+    <span class="k">private static final</span> RowMapper&lt;DeliveryZone&gt; ZONE = (rs, n) -&gt; <span class="k">new</span> DeliveryZone(
+            rs.getString("code"), rs.getString("name_ar"), rs.getString("name_en"),
+            rs.getString("kind"), rs.getBigDecimal("fee"), rs.getInt("eta_min"),
+            rs.getBoolean("active"), rs.getInt("sort_order"));
+
+    <span class="k">private final</span> JdbcTemplate db;
+
+    <span class="k">public</span> ZoneRepository(JdbcTemplate db) { <span class="k">this</span>.db = db; }   <span class="c">// Dependency Injection</span>
+
+    <span class="k">public</span> Optional&lt;DeliveryZone&gt; findActive(String code) {
+        <span class="k">return</span> db.query("SELECT * FROM delivery_zones WHERE code = ? AND active", ZONE, code)
+                 .stream().findFirst();
+    }
+
+    <span class="k">public void</span> insert(DeliveryZone z) {
+        db.update("INSERT INTO delivery_zones (code, name_ar, name_en, kind, fee, eta_min, active, sort_order) "
+                + "VALUES (?,?,?,?,?,?,?,?)", z.code(), z.nameAr(), z.nameEn(), z.kind(), z.fee(),
+                z.etaMinutes(), z.active(), z.sortOrder());
+    }
+}</pre>
+<div class="note">
+<b>الفرق:</b> JdbcTemplate بيعمل نفس خطوات JDBC بالظبط (Connection ← PreparedStatement ← ResultSet ← close) بس هو اللي بيفتح ويقفل، ومعاه <b>Connection Pool</b> (HikariCP) يعني بيحتفظ باتصالات مفتوحة جاهزة بدل ما يفتح اتصال جديد مع كل طلب، فالسيرفر بيبقى أسرع.<br>
+<b>أهم حاجة أمنياً:</b> إحنا <u>مبنلزقش</u> كلام المستخدم جوه الـ SQL أبداً. دايماً <code>?</code>. لو كتبنا <code>"... WHERE code = '" + code + "'"</code> حد ممكن يكتب <code>' OR 1=1 --</code> ويقرا كل الجدول. ده اسمه <b>SQL Injection</b>، وجرّبناه في اختبار الاختراق ومنفعش.
+</div>
+
+<!-- ============================================================ -->
+<div class="pb"></div>
+<h2 id="s8">٨. السيرفر بـ Spring Boot</h2>
+<h3>نقطة البداية</h3>
+<pre><span class="k">@SpringBootApplication</span>
+<span class="k">public class</span> VeloxApplication {
+    <span class="k">public static void</span> main(String[] args) {
+        SpringApplication.run(VeloxApplication.class, args);   <span class="c">// بيشغّل Tomcat على بورت 8080 + Flyway + كل الكلاسات</span>
+    }
+}</pre>
+<h3>طلب واحد من أوله لآخره: <code>GET /api/zones</code></h3>
+<ol>
+<li>التطبيق يبعت <code>GET https://.../api/zones</code>.</li>
+<li><b>Filters</b> الأول: <code>SecurityHeadersFilter</code> بيحط رؤوس الأمان، و CORS بيتأكد إن الطلب جاي من موقع مسموح.</li>
+<li><b>Controller</b> (<code>ZoneController</code>) يستقبله:
+<pre><span class="k">@RestController</span>
+<span class="k">public class</span> ZoneController {
+    <span class="k">private final</span> ZoneService zones;
+    <span class="k">public</span> ZoneController(ZoneService zones) { <span class="k">this</span>.zones = zones; }
+
+    <span class="k">@GetMapping</span>("/api/zones")
+    <span class="k">public</span> List&lt;ZoneView&gt; zones() {
+        <span class="k">return</span> zones.active().stream().map(ZoneView::of).toList();
+    }
+
+    <span class="k">@PostMapping</span>("/api/admin/zones")
+    <span class="k">@ResponseStatus</span>(HttpStatus.CREATED)
+    <span class="k">public void</span> create(<span class="k">@CurrentUser</span> AuthUser me, <span class="k">@Valid @RequestBody</span> ZoneRequest req) {
+        zones.create(me, req.toZone());     <span class="c">// الـ Service بيتأكد إن me أدمن</span>
+    }
+}</pre></li>
+<li><b>Service</b> (<code>ZoneService</code>) فيه القواعد: مين مسموحله، والبيانات صح ولا لأ.</li>
+<li><b>Repository</b> (<code>ZoneRepository</code>) يعمل الـ SQL (شفناه فوق).</li>
+<li>Spring يحوّل الـ <code>List&lt;ZoneView&gt;</code> لـ JSON أوتوماتيك (مكتبة Jackson) ويرجّعه بـ <code>200</code>.</li>
+</ol>
+<h3>أهم الـ Annotations</h3>
+<table>
+<tr><th>Annotation</th><th>معناها</th></tr>
+<tr><td><code>@RestController</code></td><td>الكلاس ده بيستقبل طلبات HTTP ويرجّع JSON</td></tr>
+<tr><td><code>@GetMapping / @PostMapping / @PutMapping / @PatchMapping / @DeleteMapping</code></td><td>العنوان والـ Method</td></tr>
+<tr><td><code>@PathVariable</code></td><td>جزء من العنوان: <code>/api/orders/{code}</code></td></tr>
+<tr><td><code>@RequestBody</code> + <code>@Valid</code></td><td>الـ JSON اللي جاي يتحوّل لأوبجكت ويتراجع (مثلاً <code>@NotBlank</code>, <code>@Email</code>, <code>@Size</code>)</td></tr>
+<tr><td><code>@Service / @Repository / @Component</code></td><td>Spring يعمل منه نسخة واحدة ويديها لأي حد محتاجها (Bean)</td></tr>
+<tr><td><code>@Transactional</code></td><td>كل اللي جوه الميثود ينجح مع بعض أو يتلغي مع بعض</td></tr>
+<tr><td><code>@Scheduled</code></td><td>ميثود بتشتغل لوحدها كل فترة</td></tr>
+<tr><td><code>@CurrentUser</code></td><td>Annotation إحنا عاملينها: بتجيب المستخدم من التوكن (<code>CurrentUserResolver</code>)</td></tr>
+</table>
+<h3>الأخطاء</h3>
+<p>أي مشكلة بنرمي <code>ApiException</code> بكود ورسالة، و<code>GlobalExceptionHandler</code> (<code>@RestControllerAdvice</code>) بيحوّلها لرد JSON ثابت الشكل. ومبنرجعش أبداً تفاصيل الخطأ الداخلية (<code>server.error.include-stacktrace=never</code>) عشان المهاجم ميعرفش حاجة عن الكود.</p>
+<h3>Swagger</h3>
+<p>لو شغّلت السيرفر محلياً افتح <code>http://localhost:8080/swagger-ui.html</code>: هتلاقي كل العناوين وتقدر تجرّبها. في السيرفر الحقيقي مقفولة (<code>VELOX_API_DOCS=false</code>) عشان الأمان.</p>
+
+<!-- ============================================================ -->
+<div class="pb"></div>
+<h2 id="s9">٩. رحلة الطلب (State Machine)</h2>
+<p>حالة الطلب <code>enum OrderStatus</code>، وكل انتقال مسموح لنوع حساب معيّن بس:</p>
+<table>
+<tr><th>من</th><th>إلى</th><th>مين يقدر</th></tr>
+<tr><td>PENDING_PAYMENT</td><td>PLACED</td><td>السيستم (لما الدفع الأونلاين يتأكد)</td></tr>
+<tr><td>PLACED</td><td>ACCEPTED / REJECTED</td><td>المطعم</td></tr>
+<tr><td>PLACED</td><td>CANCELLED</td><td>العميل (قبل ما المطعم يقبل بس)</td></tr>
+<tr><td>ACCEPTED</td><td>READY</td><td>المطعم</td></tr>
+<tr><td>READY</td><td>PICKED_UP</td><td>المندوب</td></tr>
+<tr><td>PICKED_UP</td><td>DELIVERED</td><td>المندوب</td></tr>
+<tr><td>DELIVERED</td><td>RETURNED</td><td>العميل (مرتجع)</td></tr>
+</table>
+<pre><span class="k">public boolean</span> canMoveTo(OrderStatus next, Actor actor) {
+    <span class="k">return</span> RULES.getOrDefault(<span class="k">this</span>, Map.of()).getOrDefault(next, Set.of()).contains(actor);
+}</pre>
+<ul>
+<li>كل انتقال بيتسجّل في <code>order_events</code>، وده الـ Timeline اللي العميل بيشوفه.</li>
+<li><b>StaleOrderCloser</b> (<code>@Scheduled</code>): لو المطعم مردّش في <b>15 دقيقة</b> الطلب بيتلغي لوحده والفلوس بترجع (لو كان دفع أونلاين). ده حصل فعلاً في التجربة: "The store didn't answer".</li>
+<li>الأسعار بيحسبها السيرفر بس (<code>PricingService</code>): سعر الأصناف من قاعدة البيانات + رسوم المنطقة − الكوبون. التطبيق مبيبعتش سعر، عشان محدش يغيّره.</li>
+</ul>
+
+<!-- ============================================================ -->
+<h2 id="s10">١٠. التحديث المباشر والإشعارات</h2>
+<table>
+<tr><th>الطريقة</th><th>بتشتغل إزاي</th><th>بنستخدمها في</th></tr>
+<tr><td><b>SSE</b> (Server-Sent Events)</td><td>التطبيق بيفتح اتصال واحد مفتوح على <code>/api/events</code> والسيرفر يبعت فيه أي تغيير فوراً (<code>EventHub</code> + <code>SseEmitter</code>)</td><td>الطلب الجديد يظهر عند المطعم بصوت، وحالة الطلب تتحدث عند العميل، ومكان المندوب</td></tr>
+<tr><td><b>Push (FCM)</b></td><td>السيرفر يبعت لـ Firebase، وFirebase يوصّل الإشعار للموبايل حتى لو التطبيق مقفول</td><td>"طلبك اتقبل" و"المندوب وصل"</td></tr>
+<tr><td><b>Inbox</b></td><td>جدول <code>notifications</code></td><td>صفحة الإشعارات جوه التطبيق</td></tr>
+</table>
+<div class="note">ليه SSE مش إن التطبيق يسأل كل ثانية (Polling)؟ عشان Polling بيضيّع نت وبطارية وبيتقل السيرفر. وSSE أبسط من WebSocket لأن الداتا رايحة في اتجاه واحد (من السيرفر للتطبيق).</div>
+
+<!-- ============================================================ -->
+<div class="pb"></div>
+<h2 id="s11">١١. الأمان (إحنا Pentest track — الجزء ده مهم جداً)</h2>
+<h3>١) الباسوردات</h3>
+<pre><span class="c">// PasswordHasher.java — PBKDF2-HMAC-SHA256، 210,000 لفة، و salt عشوائي 16 بايت لكل باسورد</span>
+<span class="k">static final int</span> ROUNDS = 210_000;
+<span class="k">public</span> String hash(String password) {
+    ...
+    <span class="k">return</span> "pbkdf2$" + ROUNDS + "$" + b64(salt) + "$" + b64(pbkdf2(password, salt, ROUNDS));
+}</pre>
+<ul>
+<li>الباسورد <b>مش متخزن أبداً</b>، بنخزن الـ hash بس. و Hash ده اتجاه واحد: مينفعش يرجع باسورد.</li>
+<li><b>Salt</b>: نفس الباسورد لاتنين بيطلع hash مختلف، فالـ Rainbow tables مبتنفعش.</li>
+<li><b>210,000 لفة</b>: بتخلي تخمين كل باسورد بطيء جداً على المهاجم.</li>
+</ul>
+<h3>٢) تسجيل الدخول (Token)</h3>
+<pre><span class="c">// TokenService.java — توكن موقّع بـ HMAC-SHA256</span>
+<span class="c">// شكله:  base64(publicId) . version . expiry . signature</span></pre>
+<ul>
+<li>بعد الدخول السيرفر يدّي التطبيق <b>توكن</b>، والتطبيق يبعته مع كل طلب: <code>Authorization: Bearer &lt;token&gt;</code>.</li>
+<li>التوكن <b>موقّع</b> بمفتاح سري على السيرفر (<code>VELOX_TOKEN_SECRET</code>). لو حد غيّر حرف واحد التوقيع يبوظ والطلب يترفض <code>401</code>.</li>
+<li>ليه <b>version</b>؟ لما المستخدم يغيّر الباسورد أو الأدمن يقفل حسابه، الـ version يزيد، فكل التوكنات القديمة تبطل فوراً.</li>
+<li>التوكن ليه تاريخ انتهاء (expiry).</li>
+</ul>
+<h3>٣) الصلاحيات (Authorization)</h3>
+<ul>
+<li>كل مستخدم ليه <code>Role</code>. الـ Service بيتأكد قبل أي عملية: المطعم يشوف طلباته هو بس، والمندوب ميقدرش يقبل طلب مكان المطعم.</li>
+<li>كل الأرقام اللي في العناوين <code>publicId</code> عشوائي أو كود (<code>ORD-1009</code>)، و دايماً بنتأكد إن الطلب ده بتاعك. ده بيمنع <b>IDOR</b> (إنك تغيّر رقم في اللينك وتشوف داتا حد تاني).</li>
+</ul>
+<h3>٤) حمايات تانية</h3>
+<table>
+<tr><th>الحماية</th><th>بتمنع إيه</th><th>فين</th></tr>
+<tr><td>Login throttle: محاولات كتير غلط = قفل مؤقت (نافذة 10 دقايق)</td><td>Brute force (تخمين الباسورد)</td><td><code>LoginThrottle</code> + جدول <code>login_attempts</code></td></tr>
+<tr><td>PreparedStatement (<code>?</code>)</td><td>SQL Injection</td><td>كل الـ Repositories</td></tr>
+<tr><td>Bean Validation (<code>@Valid</code>, <code>@Size</code>)</td><td>بيانات غلط أو طويلة جداً</td><td>الـ DTOs</td></tr>
+<tr><td>CORS</td><td>موقع غريب يكلم الـ API بتاعنا من متصفح الضحية</td><td><code>WebConfig</code></td></tr>
+<tr><td>Security headers (X-Frame-Options, nosniff, HSTS…)</td><td>Clickjacking ومشاكل المتصفح</td><td><code>SecurityHeadersFilter</code></td></tr>
+<tr><td>Audit log</td><td>نعرف مين عمل إيه (تغيير صلاحية، قفل حساب)</td><td><code>AuditLog</code> + <code>audit_log</code></td></tr>
+<tr><td>فحص الصور المرفوعة (النوع والحجم)</td><td>رفع ملف خبيث</td><td><code>ImageStorage</code></td></tr>
+<tr><td>Docker بيشتغل بيوزر عادي مش root</td><td>لو حد اخترق السيرفر ميبقاش admin على الجهاز</td><td><code>Dockerfile</code></td></tr>
+<tr><td>الأسرار في متغيرات بيئة مش في الكود</td><td>تسريب الباسوردات على GitHub</td><td><code>deploy/.env</code> (مش بيترفع)</td></tr>
+</table>
+<h3>٥) الثغرات اللي لقيناها بنفسنا وقفلناها (اختبار ما قبل الرفع)</h3>
+<table>
+<tr><th>الثغرة</th><th>الخطورة</th><th>الحل</th></tr>
+<tr><td>التطبيق بيقبل أي لينك سيرفر من قناة ntfy، فحد ممكن يبعت لينك بتاعه ويسرق الباسوردات</td><td>عالية جداً</td><td>التطبيق يقبل لينكات <code>https://…trycloudflare.com</code> بس، والنسخة النهائية لينكها ثابت جوه الكود (<code>API_URL</code>)</td></tr>
+<tr><td>التطبيق بيسمح بـ HTTP من غير تشفير</td><td>عالية</td><td><code>usesCleartextTraffic="false"</code> في نسخة الـ Release</td></tr>
+<tr><td>Android backup بيطلّع التوكن</td><td>متوسطة</td><td><code>allowBackup="false"</code></td></tr>
+<tr><td>حسابات مندوب تجريبية فاضلة على السيرفر</td><td>متوسطة</td><td>اتقفلت، والاختبار بقى يمسح الحساب بتاعه في الآخر</td></tr>
+</table>
+<p>وكمان اتأكدنا إن <code>/actuator</code> و<code>/swagger</code> و<code>/.env</code> بيرجعوا <code>404</code> على السيرفر الحقيقي. التقارير الكاملة لكل جزء في فولدر <code>security/</code> (catalog, orders, payments, operations).</p>
+
+<!-- ============================================================ -->
+<div class="pb"></div>
+<h2 id="s12">١٢. الاختبارات (Testing)</h2>
+<h3>هرم الاختبارات عندنا</h3>
+<table>
+<tr><th>النوع</th><th>الأداة</th><th>العدد / النتيجة</th><th>بيختبر إيه</th></tr>
+<tr><td>Unit tests</td><td>JUnit 5</td><td rowspan="2">97 اختبار في 25 ملف</td><td>كلاس واحد لوحده (الباسورد، التوكن، حالات الطلب، الأسعار)</td></tr>
+<tr><td>Integration tests</td><td>JUnit 5 + Spring Boot Test + Testcontainers</td><td>السيرفر كله شغال + PostgreSQL حقيقي، وبنبعتله طلبات HTTP</td></tr>
+<tr><td>Live end-to-end</td><td>Python (<code>tests/e2e_live_check.py</code>)</td><td>45/45 نجحوا</td><td>رحلة كاملة على السيرفر الحقيقي: تسجيل، طلب، مطعم، مندوب، توصيل، مسح</td></tr>
+<tr><td>Website E2E</td><td>Selenium (<code>tests/e2e</code>, Maven + JUnit)</td><td>—</td><td>الموقع كأن حد بيدوس بالماوس</td></tr>
+<tr><td>API tests</td><td>Postman / Newman</td><td>—</td><td>كل عنوان والرد بتاعه</td></tr>
+<tr><td>Performance</td><td>Apache JMeter (<code>velox-browse.jmx</code>)</td><td>100 مستخدم × 10 لفات: 4000 طلب، 0 أخطاء، p95 = 116ms</td><td>المتطلب: 95% من الطلبات أقل من 500ms</td></tr>
+<tr><td>Flutter tests</td><td><code>flutter test</code></td><td>6/6</td><td>شاشات التطبيق</td></tr>
+<tr><td>Static analysis</td><td>SpotBugs + FindSecBugs، و<code>flutter analyze</code></td><td>0 مشاكل</td><td>أخطاء وثغرات في الكود نفسه</td></tr>
+<tr><td>Coverage</td><td>JaCoCo</td><td>تقرير</td><td>نسبة الكود اللي الاختبارات بتعدي عليه</td></tr>
+</table>
+
+<h3>JUnit 5 — نفس اللي في JUnit_Project بتاع الدكتور</h3>
+<p><b>مثال Unit test حقيقي</b> (<code>PasswordHasherTest.java</code>):</p>
+<pre><span class="k">import static</span> org.junit.jupiter.api.Assertions.*;
+<span class="k">import</span> org.junit.jupiter.api.Test;
+
+<span class="k">class</span> PasswordHasherTest {
+
+    <span class="k">private final</span> PasswordHasher hasher = <span class="k">new</span> PasswordHasher();
+
+    <span class="k">@Test</span>
+    <span class="k">void</span> hashMatchesOnlyTheRightPassword() {
+        String hash = hasher.hash("correct horse");
+        assertTrue(hasher.matches("correct horse", hash));     <span class="c">// الباسورد الصح يدخل</span>
+        assertFalse(hasher.matches("correct horsE", hash));    <span class="c">// حرف واحد غلط = مرفوض</span>
+        assertFalse(hasher.matches(null, hash));
+    }
+
+    <span class="k">@Test</span>
+    <span class="k">void</span> samePasswordGivesDifferentHashesAndNoClearText() {
+        String a = hasher.hash("velox12345");
+        String b = hasher.hash("velox12345");
+        assertNotEquals(a, b, "random salt");                   <span class="c">// الـ salt شغال</span>
+        assertFalse(a.contains("velox12345"));                  <span class="c">// الباسورد مش ظاهر</span>
+    }
+}</pre>
+<p><b>مثال تاني</b> (<code>OrderStatusTest.java</code>) بيختبر قواعد الطلب:</p>
+<pre><span class="k">@Test</span>
+<span class="k">void</span> wrongActorsAreRefused() {
+    assertFalse(OrderStatus.PLACED.canMoveTo(OrderStatus.ACCEPTED, Actor.CUSTOMER),
+                "customer can't accept own order");
+    assertFalse(OrderStatus.READY.canMoveTo(OrderStatus.PICKED_UP, Actor.RESTAURANT));
+}</pre>
+<h3>أهم حاجات JUnit</h3>
+<table>
+<tr><th>الحاجة</th><th>معناها</th></tr>
+<tr><td><code>@Test</code></td><td>الميثود دي اختبار</td></tr>
+<tr><td><code>@BeforeEach / @AfterEach</code></td><td>تتنفذ قبل/بعد كل اختبار (تجهيز/تنضيف)</td></tr>
+<tr><td><code>@BeforeAll / @AfterAll</code></td><td>مرة واحدة قبل/بعد كل اختبارات الكلاس</td></tr>
+<tr><td><code>@DisplayName</code></td><td>اسم مقروء للاختبار</td></tr>
+<tr><td><code>@ParameterizedTest</code> + <code>@ValueSource</code></td><td>نفس الاختبار بأكتر من قيمة</td></tr>
+<tr><td><code>assertEquals(expected, actual)</code></td><td>القيمتين متساويين</td></tr>
+<tr><td><code>assertTrue / assertFalse</code></td><td>الشرط صح / غلط</td></tr>
+<tr><td><code>assertNotNull / assertNull</code></td><td>القيمة موجودة / مش موجودة</td></tr>
+<tr><td><code>assertThrows(Ex.class, () -&gt; ...)</code></td><td>الكود ده لازم يرمي Exception</td></tr>
+<tr><td><b>AAA pattern</b></td><td>Arrange (جهّز) ← Act (نفّذ) ← Assert (اتأكد)</td></tr>
+</table>
+<h3>Integration test (السيرفر كله + قاعدة بيانات حقيقية)</h3>
+<pre><span class="k">@SpringBootTest</span>(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+<span class="k">public abstract class</span> IntegrationTest {
+    <span class="k">static final</span> PostgreSQLContainer&lt;?&gt; POSTGRES = <span class="k">new</span> PostgreSQLContainer&lt;&gt;("postgres:16-alpine");
+    <span class="k">static</span> { POSTGRES.start(); }        <span class="c">// Docker بيشغّل PostgreSQL حقيقي للاختبار</span>
+
+    <span class="k">@DynamicPropertySource</span>
+    <span class="k">static void</span> database(DynamicPropertyRegistry r) {
+        r.add("spring.datasource.url", POSTGRES::getJdbcUrl);   <span class="c">// JDBC URL بتاع الكونتينر</span>
+        ...
+    }
+    <span class="k">@Autowired protected</span> TestRestTemplate http;   <span class="c">// بنبعت بيه طلبات HTTP للسيرفر</span>
+}</pre>
+<p>كل كلاسات الـ API tests (زي <code>OrderApiTest</code>, <code>AuthApiTest</code>, <code>DriverApiTest</code>) بتورث من الكلاس ده (Inheritance).</p>
+<h3>JMeter (Apache JMeter)</h3>
+<ul>
+<li>الملف <code>tests/performance/velox-browse.jmx</code>: <b>Thread Group</b> فيه 100 مستخدم، كل واحد يعمل 10 لفات على: المناطق ← المطاعم ← منيو مطعم ← البحث.</li>
+<li>فيه <b>Assertions</b>: الرد لازم يبقى <code>200</code> وأقل من 500ms.</li>
+<li>التشغيل: <code>jmeter -n -t tests/performance/velox-browse.jmx -Jhost=localhost -Jport=8080 -l results.jtl -e -o report/</code></li>
+<li>النتيجة: 4000 طلب في 3.5 ثانية (حوالي 1150 طلب/ثانية)، صفر أخطاء، p50 = 53ms، p95 = 116ms.</li>
+</ul>
+<div class="note"><b>Test Plan و Test Report:</b> في <code>tests/TEST_PLAN.md</code> (النطاق، الأدوات، البيئات، شروط البداية والنهاية، الحالات، التعامل مع الـ bugs، الجدول الزمني) و<code>tests/TEST_REPORT.md</code>.</div>
+
+<!-- ============================================================ -->
+<div class="pb"></div>
+<h2 id="s13">١٣. الواجهة: تطبيق Flutter والموقع</h2>
+<div class="card"><b>Flutter</b> إطار من Google بلغة <b>Dart</b>. كتبنا الكود مرة واحدة وطلع منه <b>تطبيق أندرويد</b> و<b>نسخة ويب</b> (<code>/app/</code>). كل حاجة في Flutter عبارة عن <b>Widget</b> (زرار، نص، صفحة).</div>
+<h3>شكل الكود (<code>mobile/lib</code>)</h3>
+<table>
+<tr><th>الملف</th><th>بيعمل إيه</th></tr>
+<tr><td><code>main.dart</code></td><td>نقطة البداية: بيشغّل التطبيق ويختار الشاشة حسب نوع الحساب</td></tr>
+<tr><td><code>core/api.dart</code></td><td>كل الكلام مع السيرفر (GET/POST + التوكن + اكتشاف لينك السيرفر)</td></tr>
+<tr><td><code>core/app_state.dart</code></td><td>حالة التطبيق كلها (المستخدم، السلة، اللغة، الإشعارات المباشرة) باستخدام <b>Provider</b></td></tr>
+<tr><td><code>core/models.dart</code></td><td>كلاسات الداتا (Store, Product, OrderView…) وتحويلها من JSON</td></tr>
+<tr><td><code>core/strings.dart</code></td><td>كل الكلام بالعربي والإنجليزي (التطبيق بلغتين)</td></tr>
+<tr><td><code>core/theme.dart</code></td><td>الألوان والخطوط (التصميم)</td></tr>
+<tr><td><code>core/push.dart</code></td><td>إشعارات Firebase</td></tr>
+<tr><td><code>screens/auth</code></td><td>الترحيب، التسجيل، الدخول</td></tr>
+<tr><td><code>screens/customer</code></td><td>الرئيسية، المطعم، البحث، السلة، الدفع، التتبع على الخريطة، الطلبات، المشاوير، الحساب</td></tr>
+<tr><td><code>screens/store/store_shell.dart</code></td><td>صفحة المطعم: الطلبات (جديدة/بتتجهز/جاهزة/خلصت)، المنيو، إحصائيات النهارده</td></tr>
+<tr><td><code>screens/driver/driver_shell.dart</code></td><td>صفحة المندوب: أونلاين، الطلبات المتاحة، التوصيلة الحالية، الأرباح</td></tr>
+<tr><td><code>screens/admin/admin_shell.dart</code></td><td>شاشة الأدمن</td></tr>
+<tr><td><code>widgets/common.dart</code></td><td>حاجات بنستخدمها في كل مكان (كارت الطلب، حالة الطلب، العنوان)</td></tr>
+</table>
+<h3>مفاهيم Flutter</h3>
+<ul>
+<li><b>StatelessWidget</b>: شاشة أو جزء مبيتغيرش. <b>StatefulWidget</b>: بيتغير، و<code>setState()</code> بيعيد رسمه.</li>
+<li><b>Provider</b> (State management): <code>AppState</code> بيتشاف من أي شاشة بـ <code>context.watch&lt;AppState&gt;()</code>، ولما يتغير كل الشاشات اللي بتتفرج عليه تتحدث.</li>
+<li><b>async / await</b>: الكلام مع السيرفر بياخد وقت، فالتطبيق مبيقفش وهو مستني.</li>
+<li><b>i18n</b>: <code>s.t('key')</code> بترجّع الكلام باللغة اللي المستخدم اختارها، والاتجاه (RTL/LTR) بيتظبط لوحده.</li>
+<li>الخرايط: <code>flutter_map</code> (OpenStreetMap) ومكان الموبايل: <code>geolocator</code>.</li>
+</ul>
+<h3>مثال: صفحة المطعم الجديدة</h3>
+<ul>
+<li>كارت فوق: اسم المطعم + زرار "بنستقبل طلبات" + ٣ عدّادات (مستني / بيتجهز / مع المندوب).</li>
+<li>كارت الطلب: رقم الطلب، "من كام دقيقة" (يحمرّ بعد 15 دقيقة)، اسم العميل، الأصناف وملاحظاتها، المبلغ، والمندوب اللي جاي مع زرار اتصال.</li>
+<li>الطلب الجديد بيوصل بصوت واهتزاز (SSE).</li>
+</ul>
+<h3>الموقع ولوحة التحكم</h3>
+<p><code>web/index.html</code> الموقع اللي بيعرض المطاعم الحقيقية من الـ API، و<code>web/admin/</code> لوحة التحكم، و<code>web/downloads/</code> فيه ملف الـ APK و<code>version.json</code>. السيرفر نفسه هو اللي بيعرض الصفحات دي (<code>StaticSiteConfig</code>).</p>
+<h3>التصميم</h3>
+<p>في <code>design/</code>: <code>DESIGN_SYSTEM.md</code> (الألوان والخطوط والمسافات) و<code>COMPETITOR_ANALYSIS.md</code> (تحليل طلبات وطلبات ومرسول وغيرهم). الخط Cairo، واللون الأساسي برتقالي محروق.</p>
+
+<!-- ============================================================ -->
+<div class="pb"></div>
+<h2 id="s14">١٤. السيرفر اشتغل إزاي (التشغيل والنشر)</h2>
+<h3>المرحلة ١ — دلوقتي: السيرفر على جهاز نبيه</h3>
+<div class="flow"><span>الموبايل</span><b>⇄</b><span>Cloudflare Tunnel<br><small>لينك https مؤقت</small></span><b>⇄</b><span>java -jar على جهاز نبيه<br><small>بورت 8080</small></span><b>⇄</b><span>Supabase<br><small>PostgreSQL على النت</small></span></div>
+<ol>
+<li><b>بناء:</b> <code>mvnw package</code> يطلّع <code>velox-backend-2.0.0.jar</code>.</li>
+<li><b>الإعدادات:</b> متغيرات البيئة (<code>DB_URL</code>, <code>DB_USER</code>, <code>DB_PASSWORD</code>, <code>VELOX_TOKEN_SECRET</code>…) من ملف <code>deploy/.env</code> اللي مش بيترفع.</li>
+<li><b>تشغيل:</b> <code>java -jar target/velox-backend-2.0.0.jar</code>. أول ما يقوم Flyway بيتأكد إن الجداول كلها موجودة.</li>
+<li><b>لينك عام:</b> <code>cloudflared tunnel --url http://localhost:8080</code> بيدّي لينك زي <code>https://xxxx.trycloudflare.com</code>. اللينك ده بيتغير كل مرة الجهاز يقفل.</li>
+<li><b>التطبيق بيلاقي اللينك الجديد لوحده:</b> السكريبت بيبعت اللينك على قناة ntfy، والتطبيق بيقراها (وبيقبل لينكات Cloudflare بس، عشان الأمان).</li>
+</ol>
+<div class="warn"><b>عيب المرحلة دي:</b> لو جهاز نبيه اتقفل التطبيق يقف، واللينك بيتغير. وده اللي حصل أكتر من مرة، وعشان كده هننقل لسيرفر حقيقي.</div>
+
+<h3>المرحلة ٢ — السيرفر الحقيقي (Hetzner Cloud)</h3>
+<table>
+<tr><th>الحاجة</th><th>الاختيار</th></tr>
+<tr><td>السيرفر</td><td>Hetzner Cloud — Shared vCPU x86 — 2 معالج و4 GB رام (CX22/CX23)، حوالي 5 يورو في الشهر</td></tr>
+<tr><td>المكان</td><td>Helsinki (قريب من قاعدة البيانات في Stockholm)</td></tr>
+<tr><td>نظام التشغيل</td><td>Ubuntu 24.04</td></tr>
+<tr><td>الدخول</td><td>SSH بمفتاح (مش باسورد)</td></tr>
+</table>
+<p><b>خطوات النشر:</b></p>
+<ol>
+<li>ندخل السيرفر بـ SSH، نحدّثه، ونقفل الدخول بالباسورد.</li>
+<li><b>Firewall</b>: نفتح بورتات 22 (SSH) و80 و443 (الويب) بس.</li>
+<li>نسطّب <b>Docker</b>.</li>
+<li>نبني الـ image من <code>backend/Dockerfile</code> (شرحه تحت) ونشغّله بـ <code>docker compose</code>، مع <code>restart: always</code> عشان يقوم لوحده لو السيرفر عمل restart.</li>
+<li><b>Caddy</b> قدامه كـ Reverse proxy: بياخد شهادة <b>HTTPS</b> مجانية من Let's Encrypt لوحده ويوصّل الطلبات للـ API على 8080.</li>
+<li>لينك ثابت (دومين أو IP)، ونبني التطبيق بـ <code>--dart-define=API_URL=https://...</code> فاللينك يبقى جوه التطبيق وميتغيرش.</li>
+</ol>
+<h3>الـ Dockerfile (مرحلتين — Multi-stage build)</h3>
+<pre><span class="c"># المرحلة 1: نبني بـ JDK كامل</span>
+<span class="k">FROM</span> eclipse-temurin:17-jdk-alpine <span class="k">AS</span> build
+WORKDIR /src
+COPY backend/mvnw backend/pom.xml ./backend/
+RUN cd backend &amp;&amp; ./mvnw -q -B dependency:go-offline     <span class="c"># ينزّل المكتبات (cache)</span>
+COPY backend/src ./backend/src
+RUN cd backend &amp;&amp; ./mvnw -q -B -DskipTests package &amp;&amp; cp target/velox-backend-*.jar /src/app.jar
+
+<span class="c"># المرحلة 2: نشغّل على JRE صغير بيوزر عادي (مش root)</span>
+<span class="k">FROM</span> eclipse-temurin:17-jre-alpine
+RUN addgroup -S velox &amp;&amp; adduser -S velox -G velox
+COPY --from=build /src/app.jar app.jar
+<span class="k">USER</span> velox
+ENV PORT=8080 VELOX_API_DOCS=false
+HEALTHCHECK CMD wget -qO- http://localhost:8080/api/zones || exit 1
+ENTRYPOINT ["sh", "-c", "exec java $JAVA_OPTS -jar app.jar"]</pre>
+<div class="note">ليه مرحلتين؟ الـ image النهائي فيه الـ JAR والـ JRE بس، من غير JDK وMaven والكود. فبيبقى أصغر وأأمن. و<code>HEALTHCHECK</code> بيخلّي Docker يعرف لو السيرفر وقع.</div>
+<h3>docker-compose.yml</h3>
+<p>للتطوير على جهازك: <code>docker compose up -d db</code> بيشغّل PostgreSQL بس. ولو عايز السيستم كله: <code>docker compose --profile app up -d --build</code> بيشغّل قاعدة البيانات والـ API مع بعض.</p>
+<h3>هل السيرفر ده كفاية؟</h3>
+<p>آه. السيرفر بياخد حوالي 0.5 لـ 1 جيجا رام، وقاعدة البيانات على Supabase مش على السيرفر. واختبار JMeter (100 مستخدم في نفس الوقت) عدّى على جهاز عادي بـ p95 = 116ms، وده أكتر بكتير من اللي مدينة زي سمنود محتاجاه في البداية.</p>
+
+<!-- ============================================================ -->
+<h2 id="s15">١٥. تطبيق الأندرويد والتحديثات</h2>
+<ul>
+<li>البناء: <code>flutter build apk --release --split-per-abi</code>: نسخة لكل نوع معالج (arm64 للموبايلات الحديثة) + نسخة universal.</li>
+<li>الـ APK بيتحط في <code>web/downloads/velox.apk</code>، وجنبه <code>version.json</code> فيه رقم النسخة (build).</li>
+<li><b>التحديث جوه التطبيق:</b> التطبيق بيقارن رقمه (<code>AppState.appBuild</code>) بالرقم اللي في <code>version.json</code>. لو أقل يظهر "فيه نسخة جديدة" وينزّلها.</li>
+<li>النسخة النهائية مقفولة على لينك السيرفر الثابت (<code>--dart-define=API_URL</code>)، وزراير تغيير السيرفر بتختفي (<code>serverLocked</code>).</li>
+<li>الأمان في <code>AndroidManifest.xml</code>: <code>usesCleartextTraffic="false"</code> و<code>allowBackup="false"</code>.</li>
+<li>Google Play: مأجّل. ملف <code>.aab</code> جاهز لو قررنا نرفع.</li>
+</ul>
+
+<!-- ============================================================ -->
+<div class="pb"></div>
+<h2 id="s16">١٦. مين عمل إيه</h2>
+<table>
+<tr><th>العضو</th><th>السيرفر</th><th>غير كده</th></tr>
+<tr><td><b>نبيه</b> (القائد)</td><td><code>auth</code>, <code>security</code>, <code>config</code>, <code>common</code>: الحسابات والأمان والصلاحيات والإعدادات + قاعدة البيانات</td><td>Docker والتشغيل والنشر، أساس التطبيق (الرئيسية، الدخول، صفحة المطعم)، اختبار الأداء JMeter</td></tr>
+<tr><td><b>هدى</b></td><td><code>catalog</code>: المطاعم والمنيو والصور والبحث</td><td>التصميم (Design System) والتوثيق (SRS، ERD، التقرير النهائي)</td></tr>
+<tr><td><b>عبد الرحمن</b></td><td><code>order</code>: الطلبات والمناطق والأسعار والتحديث المباشر</td><td>الموقع ولوحة التحكم</td></tr>
+<tr><td><b>فادي</b></td><td><code>payment</code>, <code>notification</code>: الدفع والمحفظة والكوبونات والإشعارات</td><td>شاشات التطبيق: السلة والدفع والتتبع والحساب</td></tr>
+<tr><td><b>رحيق</b></td><td><code>operation</code>: المطعم والمندوب والأدمن والتقييمات والشكاوى</td><td>كل الاختبارات (JUnit, Selenium, Postman) والفحص الأوتوماتيك</td></tr>
+</table>
+<div class="note">واختبار الاختراق: كل واحد اختبر الجزء بتاعه، والتقارير في <code>security/&lt;الجزء&gt;.md</code>.</div>
+
+<!-- ============================================================ -->
+<h2 id="s17">١٧. قاموس الكلمات</h2>
+<table>
+<tr><th>الكلمة</th><th>معناها ببساطة</th></tr>
+<tr><td>API</td><td>العناوين اللي التطبيق بيكلم بيها السيرفر</td></tr>
+<tr><td>Endpoint</td><td>عنوان واحد، زي <code>POST /api/orders</code></td></tr>
+<tr><td>DTO</td><td>كلاس شكل الداتا اللي داخلة أو خارجة من الـ API (مش نفس جدول قاعدة البيانات)</td></tr>
+<tr><td>Bean</td><td>أوبجكت Spring عامله وبيديه لأي حد محتاجه</td></tr>
+<tr><td>Dependency Injection</td><td>الكلاس بياخد اللي محتاجه في الـ Constructor بدل ما يعمل <code>new</code></td></tr>
+<tr><td>Connection Pool</td><td>اتصالات مفتوحة جاهزة بقاعدة البيانات بتتعاد في كل طلب</td></tr>
+<tr><td>Migration</td><td>ملف SQL بيعدّل شكل قاعدة البيانات بالترتيب</td></tr>
+<tr><td>Hash / Salt</td><td>تحويل الباسورد لشكل مينفعش يرجع / إضافة عشوائية عشان كل hash يبقى مختلف</td></tr>
+<tr><td>Token</td><td>"كارنيه" بيثبت إنك مسجّل دخول</td></tr>
+<tr><td>Authentication / Authorization</td><td>إنت مين؟ / مسموحلك تعمل إيه؟</td></tr>
+<tr><td>CORS</td><td>قاعدة المتصفح اللي بتحدد مين المواقع اللي تقدر تكلم الـ API</td></tr>
+<tr><td>IDOR</td><td>ثغرة إنك تغيّر رقم في الطلب وتوصل لداتا حد تاني</td></tr>
+<tr><td>SSE</td><td>اتصال مفتوح السيرفر بيبعت فيه تحديثات للتطبيق</td></tr>
+<tr><td>Container / Image</td><td>البرنامج + كل اللي محتاجه متغلفين مع بعض / القالب اللي بيطلع منه الكونتينر</td></tr>
+<tr><td>Reverse proxy</td><td>برنامج (Caddy) قاعد قدام السيرفر بيعمل HTTPS ويوصّل الطلبات</td></tr>
+<tr><td>Tunnel</td><td>طريق آمن بيدّي جهاز في البيت لينك عام</td></tr>
+<tr><td>JAR</td><td>ملف Java واحد فيه البرنامج كله وبيشتغل بـ <code>java -jar</code></td></tr>
+<tr><td>APK / AAB</td><td>ملف تطبيق الأندرويد للتسطيب المباشر / للرفع على Google Play</td></tr>
+<tr><td>p95</td><td>95% من الطلبات ردها أسرع من الرقم ده</td></tr>
+<tr><td>Testcontainers</td><td>مكتبة بتشغّل قاعدة بيانات حقيقية في Docker للاختبار</td></tr>
+</table>
+
+<!-- ============================================================ -->
+<div class="pb"></div>
+<h2 id="s18">١٨. أسئلة الدكتور المتوقعة بالإجابات</h2>
+<div class="card"><span class="q">س: اشرح المشروع في دقيقة.</span><br>منصة توصيل لسمنود فيها ٤ أنواع مستخدمين: عميل ومطعم ومندوب وأدمن. السيرفر Java Spring Boot وقاعدة البيانات PostgreSQL والتطبيق Flutter. الطلب بيمشي من العميل للمطعم للمندوب لحد ما يتسلّم، وكل ده بيتحدث مباشر.</div>
+<div class="card"><span class="q">س: إزاي السيرفر بيكلم قاعدة البيانات؟</span><br>بـ JDBC عن طريق JdbcTemplate من Spring. جملة الاتصال <code>jdbc:postgresql://host:5432/db</code> في <code>application.properties</code>، واليوزر والباسورد من متغيرات البيئة. وكل استعلام <code>PreparedStatement</code> بـ <code>?</code>.</div>
+<div class="card"><span class="q">س: إيه الفرق بين اللي عملتوه وبين DriverManager.getConnection اللي شرحناه؟</span><br>نفس الفكرة. JdbcTemplate جوّاه بيعمل Connection وPreparedStatement وResultSet وclose، بس بيستخدم Connection Pool بدل ما يفتح اتصال جديد كل مرة، وبيقلل الكود المكرر.</div>
+<div class="card"><span class="q">س: إيه هو SQL Injection وإزاي منعتوه؟</span><br>إن المستخدم يكتب SQL جوه خانة إدخال فيتنفذ. منعناه بإن كل القيم بتتبعت كـ parameters (<code>?</code>) مش بنلزقها في النص. وجرّبنا الهجوم في الـ Pentest ومنجحش.</div>
+<div class="card"><span class="q">س: الباسورد متخزن إزاي؟</span><br>PBKDF2-HMAC-SHA256 بـ 210,000 لفة وsalt عشوائي لكل باسورد. مش بنخزن الباسورد نفسه أبداً، وعليها اختبار JUnit (<code>PasswordHasherTest</code>).</div>
+<div class="card"><span class="q">س: الدخول بيشتغل إزاي؟</span><br>بعد ما الباسورد يتأكد، السيرفر يدّي توكن موقّع بـ HMAC-SHA256 فيه رقم المستخدم والـ version وتاريخ الانتهاء. التطبيق يبعته مع كل طلب، والسيرفر يتأكد من التوقيع. ولو الباسورد اتغير الـ version بيزيد فالتوكنات القديمة تبطل.</div>
+<div class="card"><span class="q">س: عندكم كام اختبار وأنواعهم إيه؟</span><br>97 اختبار JUnit (unit + integration بـ Testcontainers)، و45 فحص على السيرفر الحقيقي، وSelenium للموقع، وPostman للـ API، وJMeter للأداء (100 مستخدم، p95 = 116ms)، و6 اختبارات Flutter.</div>
+<div class="card"><span class="q">س: إيه الفرق بين Unit test وIntegration test؟</span><br>Unit بيختبر كلاس واحد لوحده من غير قاعدة بيانات ولا سيرفر (زي <code>OrderStatusTest</code>). Integration بيشغّل التطبيق كله مع PostgreSQL حقيقي وبيبعت طلبات HTTP (زي <code>OrderApiTest</code>).</div>
+<div class="card"><span class="q">س: اكتب اختبار JUnit دلوقتي.</span><br><code>@Test void accepted() { assertTrue(OrderStatus.PLACED.canMoveTo(OrderStatus.ACCEPTED, Actor.RESTAURANT)); }</code>: Arrange/Act/Assert.</div>
+<div class="card"><span class="q">س: إيه لازمة Maven؟</span><br>بينزّل المكتبات لوحده من <code>pom.xml</code> (بدل Add JAR/Folder)، وبيبني المشروع لـ JAR، وبيشغّل الاختبارات بـ <code>mvn test</code>.</div>
+<div class="card"><span class="q">س: لو المطعم مردّش على الطلب؟</span><br><code>StaleOrderCloser</code> بيشتغل كل شوية (<code>@Scheduled</code>)، ولو عدّى 15 دقيقة بيلغي الطلب ويرجّع الفلوس ويبلّغ العميل.</div>
+<div class="card"><span class="q">س: المطعم بيعرف بالطلب الجديد إزاي؟</span><br>SSE: التطبيق فاتح اتصال مع <code>/api/events</code>، فالسيرفر يبعت الطلب فوراً والتطبيق يعمل صوت واهتزاز. ولو التطبيق مقفول يوصل Push من Firebase.</div>
+<div class="card"><span class="q">س: إيه يمنع العميل يغيّر سعر الطلب؟</span><br>التطبيق بيبعت المنتجات والكميات بس، والسيرفر بيحسب السعر من قاعدة البيانات (<code>PricingService</code>).</div>
+<div class="card"><span class="q">س: إيه يمنع المندوب يشوف طلبات مطعم مش بتاعه أو عميل يشوف طلب حد تاني؟</span><br>كل Service بيتأكد من الـ Role ومن إن الطلب ده يخص المستخدم ده (منع IDOR). ولو مش بتاعك الرد <code>403</code> أو <code>404</code>.</div>
+<div class="card"><span class="q">س: الجداول اتعملت إزاي؟</span><br>بـ Flyway: ملفات <code>V1</code> لـ <code>V7</code>. أول ما السيرفر يشتغل بيشغّل اللي لسه ماتشغلش بالترتيب، فأي جهاز جديد بيطلع بنفس الجداول.</div>
+<div class="card"><span class="q">س: ليه Docker؟ والـ Dockerfile فيه مرحلتين ليه؟</span><br>عشان السيرفر يشتغل بنفس الشكل على أي جهاز. المرحلة الأولى بتبني بـ JDK وMaven، والتانية بتشغّل الـ JAR بس على JRE صغير بيوزر مش root، فالـ image أصغر وأأمن.</div>
+<div class="card"><span class="q">س: السيرفر مستضاف فين؟</span><br>دلوقتي على جهاز نبيه مع Cloudflare Tunnel وقاعدة البيانات على Supabase. وبننقله لسيرفر Hetzner (2 vCPU / 4GB / Ubuntu) بـ Docker وCaddy للـ HTTPS ولينك ثابت.</div>
+<div class="card"><span class="q">س: إيه أخطر ثغرة لقيتوها؟</span><br>التطبيق كان بيقبل أي لينك سيرفر من قناة عامة، فمهاجم ممكن يحوّل التطبيق لسيرفر بتاعه ويسرق الباسوردات. قفلناها بإن التطبيق يقبل لينكات Cloudflare بس، والنسخة النهائية لينكها ثابت جوه الكود.</div>
+<div class="card"><span class="q">س: ليه Flutter؟</span><br>كود واحد طلع منه أندرويد وويب. والتطبيق بلغتين عربي وإنجليزي، والاتجاه بيتظبط لوحده.</div>
+<div class="card"><span class="q">س: إيه الـ Layers في السيرفر؟</span><br>Controller (يستقبل HTTP) ← Service (القواعد والصلاحيات) ← Repository (SQL) ← Database.</div>
+<div class="card"><span class="q">س: ليه BigDecimal مش double في الفلوس؟</span><br>double بيعمل أخطاء كسور (0.1 + 0.2 ≠ 0.3). BigDecimal دقيق، والعمود في قاعدة البيانات NUMERIC.</div>
+<div class="card"><span class="q">س: لو 100 واحد طلبوا في نفس الوقت؟</span><br>جرّبناها بـ JMeter: 4000 طلب، صفر أخطاء، و95% أسرع من 116ms. والـ Connection Pool والـ ConcurrentHashMap بيخلّوا السيرفر يستحمل الطلبات اللي جاية مع بعض.</div>
+
+<!-- ============================================================ -->
+<div class="pb"></div>
+<h2 id="s19">١٩. معمل: شغّل المشروع بإيدك (قدام الدكتور)</h2>
+<h3>أ) السيرفر في NetBeans أو من الترمينال</h3>
+<ol>
+<li>سطّب <b>JDK 17</b> و<b>Docker Desktop</b>.</li>
+<li>هات الكود: <code>git clone</code> (اطلب اللينك من نبيه).</li>
+<li>شغّل قاعدة بيانات محلية: <code>docker compose up -d db</code> (PostgreSQL على 5432، يوزر وباسورد <code>velox</code>).</li>
+<li>في NetBeans: <b>File ← Open Project</b> واختار فولدر <code>backend</code> (هيعرف إنه Maven project لوحده).</li>
+<li>اعمل متغير بيئة <code>VELOX_TOKEN_SECRET</code> بأي كلام طوله 32 حرف أو أكتر (في NetBeans: Project Properties ← Run ← Environment). أو من الترمينال:
+<pre>cd backend
+set VELOX_TOKEN_SECRET=local-dev-secret-change-me-at-least-32-chars
+mvnw spring-boot:run</pre></li>
+<li>افتح <code>http://localhost:8080/swagger-ui.html</code> وجرّب <code>GET /api/zones</code>.</li>
+<li>الاختبارات: كليك يمين على المشروع ← <b>Test</b>، أو <code>mvnw test</code> (لازم Docker يكون شغال عشان Testcontainers).</li>
+</ol>
+<h3>ب) شوف الداتا بإيدك (SQL)</h3>
+<pre>docker exec -it velox-db psql -U velox -d velox
+SELECT code, name_ar, fee FROM delivery_zones;
+SELECT code, status, total FROM orders ORDER BY id DESC LIMIT 5;
+\dt              -- كل الجداول</pre>
+<h3>ج) التطبيق</h3>
+<ol>
+<li>سطّب Flutter، وبعدين <code>cd mobile</code> و<code>flutter pub get</code>.</li>
+<li><code>flutter run -d chrome</code> للويب، أو وصّل موبايل وشغّل <code>flutter run</code>.</li>
+<li>من الإعدادات حط لينك السيرفر <code>http://localhost:8080</code> (في الويب) أو IP جهازك (في الموبايل).</li>
+</ol>
+<h3>د) ديمو قدام الدكتور (5 دقايق)</h3>
+<ol>
+<li>افتح ٣ شاشات: عميل، ومطعم، ومندوب.</li>
+<li>العميل يطلب ← المطعم يسمع صوت ويقبل ثم "جاهز" ← المندوب "خد الطلب" ثم "استلمت" ثم "سلّمت" ← العميل يشوف التتبع ويقيّم.</li>
+<li>افتح Swagger ووريه العناوين، وشغّل <code>mvnw test</code> ووريه الاختبارات بتعدّي.</li>
+<li>جرّب قدامه SQL Injection في خانة الدخول (<code>' OR 1=1 --</code>) ووريه إنها اترفضت.</li>
+</ol>
+
+<div class="card" style="text-align:center;margin-top:18px"><b>بالتوفيق يا فريق VELOX 🚀</b><br><span style="color:var(--m)">الملف ده اتعمل من الكود الحقيقي للمشروع — نوفمبر 2026</span></div>
+
+</main>
+</body>
+</html>
