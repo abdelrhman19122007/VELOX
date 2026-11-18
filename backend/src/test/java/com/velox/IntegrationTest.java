@@ -24,7 +24,9 @@ import com.fasterxml.jackson.databind.JsonNode;
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
         properties = {"velox.security.token-secret=test-secret-that-is-at-least-32-chars-long",
-                "velox.bootstrap.admin-email=admin@velox.test", "velox.bootstrap.admin-password=admin-password-123"})
+                "velox.bootstrap.admin-email=admin@velox.test", "velox.bootstrap.admin-password=admin-password-123",
+                // never pick up a real Firebase set-up from the machine running the tests (backend/.firebase)
+                "velox.firebase.dir=target/no-firebase-in-tests"})
 public abstract class IntegrationTest {
 
     protected static final String ADMIN_EMAIL = "admin@velox.test";
