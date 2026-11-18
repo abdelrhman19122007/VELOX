@@ -4,6 +4,12 @@
 
 **مشروع مبادرة رواد مصر الرقمية (DEPI) — تراك Penetration Testing.**
 
+> **ابدأ من هنا:**
+> - 🛠️ **تشغيل المشروع على جهازك خطوة بخطوة:** [docs/RUN_LOCAL.md](docs/RUN_LOCAL.md)
+> - ✅ **نتايج الاختبارات:** [tests/TEST_REPORT.md](tests/TEST_REPORT.md) — والملفات الخام في [tests/results/](tests/results/)
+> - 📚 **ملف المذاكرة الكامل:** [docs/study/VELOX-Study-Guide.pdf](docs/study/VELOX-Study-Guide.pdf) — و**الخريطة التفاعلية:** [docs/study/velox-map.html](docs/study/velox-map.html) (نزّلها وافتحها في المتصفح)
+> - 🖥️ **تشغيله على سيرفر (VPS / aaPanel):** [docs/deploy-vps/](docs/deploy-vps/)
+
 | | |
 |---|---|
 | Backend | Java 17 · Spring Boot 3 · PostgreSQL 16 · Flyway · OpenAPI (Swagger) |

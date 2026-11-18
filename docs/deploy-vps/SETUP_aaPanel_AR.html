@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>VELOX — خطوات تشغيل السيرفر</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+@page { size: A4; margin: 14mm 13mm; }
+body { font-family: 'Cairo', Tahoma, sans-serif; color: #1f1f1f; font-size: 11pt; line-height: 1.75; margin: 0; background: #fff; }
+main { max-width: 860px; margin: auto; padding: 0 6px; }
+.hero { background: linear-gradient(135deg, #9a3412, #c2410c); color: #fff; border-radius: 14px; padding: 16px 20px; margin: 6px 0 12px; }
+.hero h1 { margin: 0; font-size: 22pt; } .hero p { margin: 4px 0 0; }
+h2 { color: #9a3412; font-size: 14.5pt; margin: 18px 0 6px; border-bottom: 2px solid #f1d5c7; padding-bottom: 2px; }
+.step { display: flex; gap: 10px; align-items: flex-start; margin: 8px 0; }
+.n { flex: none; width: 28px; height: 28px; border-radius: 50%; background: #9a3412; color: #fff; display: grid; place-items: center; font-weight: 900; }
+.card { background: #fff7f2; border: 1px solid #f1d5c7; border-radius: 12px; padding: 9px 12px; margin: 7px 0; }
+.warn { background: #fff8e6; border: 1px solid #f3dc9c; border-radius: 12px; padding: 9px 12px; margin: 7px 0; }
+.ok { background: #effaf0; border: 1px solid #bfe3c4; border-radius: 12px; padding: 9px 12px; margin: 7px 0; }
+code { font-family: Consolas, monospace; background: #f4efec; border-radius: 4px; padding: 0 4px; direction: ltr; unicode-bidi: isolate; font-size: 9.6pt; }
+pre { direction: ltr; text-align: left; background: #1e1e1e; color: #e8e8e8; border-radius: 10px; padding: 10px 12px; font-family: Consolas, monospace; font-size: 9pt; white-space: pre-wrap; word-break: break-all; page-break-inside: avoid; }
+table { width: 100%; border-collapse: collapse; font-size: 10pt; } th, td { border-bottom: 1px solid #f1d5c7; padding: 4px 6px; text-align: start; vertical-align: top; } th { color: #9a3412; }
+.pb { page-break-before: always; }
+b.k { background: #f4efec; border-radius: 4px; padding: 0 5px; }
+</style>
+</head>
+<body><main>
+
+<div class="hero">
+  <h1>تشغيل VELOX على السيرفر</h1>
+  <p>الورقة دي لصاحب السيرفر <code>169.58.19.62</code>. الوقت المتوقع: حوالي ١٥ دقيقة من لوحة التحكم (aaPanel)، ومش محتاج تدّي حد أي دخول.</p>
+</div>
+
+<div class="card">
+<b>VELOX</b> تطبيق توصيل (مشروع تخرج DEPI). عبارة عن برنامج Java واحد (<code>velox.jar</code>) بيشتغل على بورت 8080 جوه السيرفر، وnginx بيوصّل الزوار ليه. قاعدة البيانات <b>مش</b> على السيرفر ده (هي على Supabase)، فمفيش داتابيز تتسطّب.<br>
+<b>الاستهلاك:</b> حوالي 300 لـ 600 ميجا رام، ومعالج قليل جداً.
+</div>
+
+<h2>الحاجات اللي هتوصلك</h2>
+<table>
+<tr><th>الملف</th><th>إيه ده</th></tr>
+<tr><td><code>velox.jar</code></td><td>البرنامج نفسه (حوالي 29 ميجا)</td></tr>
+<tr><td><code>velox.env</code></td><td>الإعدادات: بيانات قاعدة البيانات ومفتاح الأمان. <b>نبيه هيبعتهولك لوحده</b>، ودي ملف سري</td></tr>
+<tr><td>ملفات الموقع</td><td>نبيه هيرفعها بنفسه بحساب الـ FTP <code>nabeeh_abosalem</code> (فولدرين <code>web</code> و<code>app</code>). مش مطلوب منك حاجة فيها</td></tr>
+</table>
+
+<h2>الخطوات</h2>
+
+<div class="step"><span class="n">1</span><div>
+<b>شغّل الموقع.</b> من <b class="k">Website</b>، الموقع المربوط بحساب الـ FTP <code>nabeeh_abosalem</code> حالته دلوقتي <b>Stopped</b>. دوس عليها عشان تبقى <b>Running</b>.<br>
+وابعت لنبيه <b>مسار فولدر الموقع</b> (Root directory)، زي <code>/www/wwwroot/169.58.19.62</code>.
+</div></div>
+
+<div class="step"><span class="n">2</span><div>
+<b>اعمل فولدرين</b> من <b class="k">Files</b>:
+<pre>/www/velox                  ← هنا velox.jar و velox.env
+/www/velox-data/uploads     ← الصور اللي المطاعم بترفعها</pre>
+ارفع <code>velox.jar</code> و<code>velox.env</code> جوه <code>/www/velox</code>.
+</div></div>
+
+<div class="step"><span class="n">3</span><div>
+<b>كمّل ملف الإعدادات.</b> افتح <code>/www/velox/velox.env</code> وغيّر الكلمة <code>&lt;SITE&gt;</code> في السطرين دول للمسار اللي في الخطوة 1:
+<pre>velox.web.dir=<b>&lt;SITE&gt;</b>/web
+velox.app.dir=<b>&lt;SITE&gt;</b>/app</pre>
+وبعدين خلّي صلاحيات الملف <b>600</b> (Permission)، عشان محدش غير البرنامج يقراه.
+</div></div>
+
+<div class="step"><span class="n">4</span><div>
+<b>سطّب Java 17.</b> من <b class="k">Website ← Java Project</b> (أو <b class="k">App Store</b>)، سطّب <b>JDK 17</b> لو مش موجود.
+</div></div>
+
+<div class="step"><span class="n">5</span><div>
+<b>ضيف المشروع.</b> <b class="k">Website ← Java Project ← Add Java project</b>:
+<table>
+<tr><td>Project type</td><td>Spring Boot / Jar</td></tr>
+<tr><td>Project jar</td><td><code>/www/velox/velox.jar</code></td></tr>
+<tr><td>JDK</td><td>17</td></tr>
+<tr><td>Port</td><td><code>8080</code> — <b>من غير</b> ما تفتحه في الـ Firewall</td></tr>
+<tr><td>Run user</td><td><code>www</code></td></tr>
+<tr><td>Startup command / Project command</td><td>السطر اللي تحت بالظبط</td></tr>
+</table>
+<pre>java -Xmx512m -jar /www/velox/velox.jar --spring.config.import=file:/www/velox/velox.env[.properties]</pre>
+لو اللوحة طلبت مكان <b>Domain</b>، سيبه فاضي أو حط الدومين، لأن الخطوة 6 هي اللي بتوصّل الموقع.<br>
+دوس <b>Start</b>، واستنى حوالي 30 ثانية.
+</div></div>
+
+<div class="step"><span class="n">6</span><div>
+<b>وصّل الموقع بالبرنامج (Reverse Proxy).</b> من الموقع بتاع الخطوة 1 ← <b class="k">Reverse proxy ← Add</b>:
+<table>
+<tr><td>Proxy name</td><td><code>velox</code></td></tr>
+<tr><td>Proxy dir</td><td><code>/</code></td></tr>
+<tr><td>Target URL</td><td><code>http://127.0.0.1:8080</code></td></tr>
+<tr><td>Send domain</td><td><code>$host</code></td></tr>
+</table>
+بعد ما تحفظ، افتح <b>Config file</b> بتاع الـ proxy وضيف السطور دي جوه <code>location /</code>. دي عشان الطلبات الجديدة توصل للمطعم فوراً (Live updates):
+<pre>proxy_http_version 1.1;
+proxy_set_header Connection "";
+proxy_buffering off;
+proxy_cache off;
+proxy_read_timeout 3600s;
+proxy_set_header X-Forwarded-Proto $scheme;
+proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+client_max_body_size 5m;</pre>
+</div></div>
+
+<div class="step"><span class="n">7</span><div>
+<b>HTTPS (لو فيه دومين).</b> اربط الدومين بالموقع، ومن <b class="k">SSL ← Let's Encrypt</b> اعمل شهادة، وفعّل <b>Force HTTPS</b>. وبعدها غيّر السطر ده في <code>velox.env</code> واعمل Restart للمشروع:
+<pre>VELOX_CORS=https://الدومين</pre>
+</div></div>
+
+<h2>اتأكد إنه شغال</h2>
+<div class="ok">
+افتح من المتصفح:<br>
+• <code>http://169.58.19.62/api/zones</code> ← لازم تظهر بيانات بالشكل ده <code>[{"code":...</code><br>
+• <code>http://169.58.19.62/</code> ← هيظهر موقع VELOX، بعد ما نبيه يرفع الملفات<br>
+وابعت لنبيه "اشتغل" عشان يعمل الاختبار الكامل.
+</div>
+
+<div class="pb"></div>
+<h2>لو حصلت مشكلة</h2>
+<table>
+<tr><th>اللي ظاهر</th><th>السبب غالباً</th><th>الحل</th></tr>
+<tr><td>المشروع بيقف لوحده بعد ما يشتغل</td><td>غلط في <code>velox.env</code> (باسورد قاعدة البيانات)</td><td>افتح <b>Logs</b> بتاعة المشروع وابعت لنبيه آخر 30 سطر. اتأكد إن مفيش أي سرّ ظاهر فيهم قبل ما تبعت</td></tr>
+<tr><td><code>502 Bad Gateway</code></td><td>البرنامج مش شغال أو لسه بيقوم</td><td>استنى 30 ثانية، أو اعمل <b>Restart</b> للمشروع</td></tr>
+<tr><td><code>/api/zones</code> شغال بس <code>/</code> فاضي</td><td>ملفات الموقع لسه مترفعتش، أو <code>&lt;SITE&gt;</code> غلط</td><td>راجع الخطوة 3</td></tr>
+<tr><td><code>Unsupported class file version</code></td><td>Java قديمة</td><td>اختار JDK 17 في الخطوة 5</td></tr>
+</table>
+
+<h2>التحديث بعد كده</h2>
+<div class="card">نبيه هيبعت <code>velox.jar</code> جديد. حطه مكان القديم في <code>/www/velox</code>، واعمل <b>Restart</b> للمشروع، وخلاص. ملفات الموقع نبيه بيحدّثها بنفسه بالـ FTP.</div>
+
+<h2>الأمان</h2>
+<div class="warn">
+• <b>متفتحش بورت 8080</b> في الـ Firewall. الزوار بيدخلوا من 80/443 بس، وnginx هو اللي بيوصّلهم.<br>
+• <code>velox.env</code> فيه باسورد قاعدة البيانات، فخليه <b>600</b> ومتبعتهوش لحد.<br>
+• البرنامج بيشتغل كيوزر <code>www</code> مش root، ومش بيكتب غير في <code>/www/velox-data/uploads</code>.<br>
+• صفحات الـ API docs (Swagger) مقفولة.
+</div>
+
+<p style="color:#777;font-size:9pt;margin-top:18px">أسماء القوائم ممكن تختلف شوية حسب نسخة aaPanel. لو أي خطوة مش واضحة، كلّم نبيه.</p>
+</main></body></html>

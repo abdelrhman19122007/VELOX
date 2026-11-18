@@ -1,0 +1,276 @@
+{
+ "url": "https://cat-quarterly-collar-surname.trycloudflare.com",
+ "at": "2026-11-18 07:46",
+ "results": [
+  {
+   "area": "Pages",
+   "name": "Website",
+   "ok": true,
+   "detail": "HTTP 200, 0.6s"
+  },
+  {
+   "area": "Pages",
+   "name": "App (browser)",
+   "ok": true,
+   "detail": "HTTP 200, 0.3s"
+  },
+  {
+   "area": "Pages",
+   "name": "Dashboard",
+   "ok": true,
+   "detail": "HTTP 200, 0.4s"
+  },
+  {
+   "area": "Pages",
+   "name": "Privacy policy",
+   "ok": true,
+   "detail": "HTTP 200, 0.4s"
+  },
+  {
+   "area": "Pages",
+   "name": "Delete-account page",
+   "ok": true,
+   "detail": "HTTP 200, 0.3s"
+  },
+  {
+   "area": "Pages",
+   "name": "Browser push worker",
+   "ok": true,
+   "detail": "HTTP 200, 0.4s"
+  },
+  {
+   "area": "Pages",
+   "name": "App update info",
+   "ok": true,
+   "detail": "HTTP 200, 0.3s"
+  },
+  {
+   "area": "Pages",
+   "name": "Android app download (20 MB)",
+   "ok": true,
+   "detail": "HTTP 200, 55.8s"
+  },
+  {
+   "area": "Catalog",
+   "name": "Delivery zones",
+   "ok": true,
+   "detail": "1 zone(s)"
+  },
+  {
+   "area": "Catalog",
+   "name": "Stores list",
+   "ok": true,
+   "detail": "Nasef Restaurant, Point One Cafe, Ours Cafe, United Cafe"
+  },
+  {
+   "area": "Catalog",
+   "name": "Nasef menu with photos",
+   "ok": true,
+   "detail": "111 dishes"
+  },
+  {
+   "area": "Catalog",
+   "name": "English descriptions",
+   "ok": true,
+   "detail": "every dish"
+  },
+  {
+   "area": "Catalog",
+   "name": "Store photo loads",
+   "ok": true,
+   "detail": "HTTP 200"
+  },
+  {
+   "area": "Catalog",
+   "name": "Public reviews endpoint",
+   "ok": true,
+   "detail": "0 review(s)"
+  },
+  {
+   "area": "Catalog",
+   "name": "Search (\"كفتة\")",
+   "ok": true,
+   "detail": "8 dish(es)"
+  },
+  {
+   "area": "Notifications",
+   "name": "Firebase config served",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "area": "Accounts",
+   "name": "Admin sign-in",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "area": "Accounts",
+   "name": "Restaurant (Nasef) sign-in",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "area": "Accounts",
+   "name": "Customer sign-up",
+   "ok": true,
+   "detail": "HTTP 201"
+  },
+  {
+   "area": "Accounts",
+   "name": "Edit my name and phone",
+   "ok": true,
+   "detail": "HTTP 200"
+  },
+  {
+   "area": "Accounts",
+   "name": "Add an address",
+   "ok": true,
+   "detail": "HTTP 200"
+  },
+  {
+   "area": "Security",
+   "name": "Nobody can sign up as a driver (privilege escalation)",
+   "ok": true,
+   "detail": "HTTP 400"
+  },
+  {
+   "area": "Security",
+   "name": "Nobody can sign up as an admin",
+   "ok": true,
+   "detail": "HTTP 400"
+  },
+  {
+   "area": "Security",
+   "name": "Customer blocked from admin API",
+   "ok": true,
+   "detail": "HTTP 403"
+  },
+  {
+   "area": "Security",
+   "name": "No token = no access",
+   "ok": true,
+   "detail": "HTTP 401"
+  },
+  {
+   "area": "Security",
+   "name": "SQL injection in sign-in is harmless",
+   "ok": true,
+   "detail": "HTTP 401"
+  },
+  {
+   "area": "Security",
+   "name": "HTML/script in a name is refused (XSS)",
+   "ok": true,
+   "detail": "HTTP 400"
+  },
+  {
+   "area": "Security",
+   "name": "HTTPS link (Cloudflare)",
+   "ok": true,
+   "detail": "cat-quarterly-collar-surname.trycloudflare.com"
+  },
+  {
+   "area": "Orders",
+   "name": "Price quote (server computes the price)",
+   "ok": true,
+   "detail": "subtotal 50.0, total 65.0"
+  },
+  {
+   "area": "Security",
+   "name": "Price tampering ignored",
+   "ok": true,
+   "detail": "subtotal stays 50.0"
+  },
+  {
+   "area": "Payments",
+   "name": "VODAFONE_CASH switched off",
+   "ok": true,
+   "detail": "HTTP 400 PAYMENTS_UNAVAILABLE"
+  },
+  {
+   "area": "Payments",
+   "name": "FAWRY switched off",
+   "ok": true,
+   "detail": "HTTP 400 PAYMENTS_UNAVAILABLE"
+  },
+  {
+   "area": "Payments",
+   "name": "Test wallet top-up switched off",
+   "ok": true,
+   "detail": "HTTP 404"
+  },
+  {
+   "area": "Orders",
+   "name": "Cash order placed",
+   "ok": true,
+   "detail": "ORD-1016, status PLACED"
+  },
+  {
+   "area": "Orders",
+   "name": "Order reaches the restaurant",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "area": "Security",
+   "name": "Another customer can't see this order (IDOR)",
+   "ok": true,
+   "detail": "HTTP 404"
+  },
+  {
+   "area": "Security",
+   "name": "Another customer can't cancel it",
+   "ok": true,
+   "detail": "HTTP 404"
+  },
+  {
+   "area": "Orders",
+   "name": "Customer cancels own order",
+   "ok": true,
+   "detail": "HTTP 200"
+  },
+  {
+   "area": "Accounts",
+   "name": "Admin creates a driver account",
+   "ok": true,
+   "detail": "HTTP 201"
+  },
+  {
+   "area": "Operations",
+   "name": "Driver goes online",
+   "ok": true,
+   "detail": "HTTP 200"
+  },
+  {
+   "area": "Operations",
+   "name": "Driver sees offers",
+   "ok": true,
+   "detail": "HTTP 200"
+  },
+  {
+   "area": "Accounts",
+   "name": "Test driver removes their own account (clean-up)",
+   "ok": true,
+   "detail": "HTTP 204"
+  },
+  {
+   "area": "Accounts",
+   "name": "Delete account needs the right password",
+   "ok": true,
+   "detail": "HTTP 400"
+  },
+  {
+   "area": "Accounts",
+   "name": "Customer deletes their account",
+   "ok": true,
+   "detail": "HTTP 204"
+  },
+  {
+   "area": "Accounts",
+   "name": "Deleted account is signed out",
+   "ok": true,
+   "detail": "HTTP 401"
+  }
+ ]
+}
