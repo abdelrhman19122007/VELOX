@@ -28,6 +28,7 @@ How to run each suite: [docs/RUN_LOCAL.md](../docs/RUN_LOCAL.md) §8. Raw output
 | Flutter tests + `flutter analyze` | **6 / 6 passed**, no issues | `results/2026-11-18-flutter.txt` |
 | Load — 100 users × 10 rounds (`quick_load.py`) | **4 000 requests, 21 errors, p50 981 ms, p95 3 051 ms** — **fails** NFR-PERF-01 (p95 < 500 ms) | `results/2026-11-18-load-100users.txt` |
 | Server package (`velox.jar` reading its settings from a file only, website served from the upload folder) | **44 / 45** — the only miss is the HTTPS check, which cannot pass on `localhost` | run on port 8091, 15 Nov |
+| One-click local setup (`START-VELOX.bat`, fresh Docker database): `.env` with random secrets → db + api healthy → demo loader (4 stores, 111/111 dishes, store/driver/customer accounts) → pages, photos and phone link (LAN IP) answer → order ORD-1001 placed → accepted → ready → taken → picked up → **DELIVERED** → reviewed; admin API without token **401**, with a customer token **403**, SQL-injection login **401** | **passed** — except the Maven build inside Docker, which could not download on the test PC because Avast scans HTTPS (the test used the same runtime image with a JAR built on the host) | 18 Nov |
 | Manual — driver screen (ORD-1009) | order → store accepts and marks ready → driver takes, picks up, delivers; earnings 15 EGP: **passed** | 12 Nov |
 | Manual — store screen (ORD-1011) | new order rings and shows without refresh → Accept → Ready from the UI: **passed**; no driver online overnight, so `StaleOrderCloser` cancelled it — expected behaviour | 13 Nov |
 
