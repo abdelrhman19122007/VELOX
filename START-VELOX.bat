@@ -26,7 +26,10 @@ if not exist ".env" (
   powershell -NoProfile -Command ^
     "$r=[Security.Cryptography.RandomNumberGenerator]::Create(); function k($n){$b=New-Object byte[] $n; $r.GetBytes($b); ([Convert]::ToBase64String($b)) -replace '[^A-Za-z0-9]',''};" ^
     "$lines=@('# VELOX local settings - made by START-VELOX.bat, this PC only (git-ignored). Do not share.'," ^
-    "'VELOX_ADMIN_EMAIL=admin@velox.local',('VELOX_ADMIN_PASSWORD=Admin-'+(k 18)),('VELOX_TOKEN_SECRET='+(k 48)),'VELOX_PORT=8080','VELOX_DB_PORT=55432');" ^
+    "$port=8080; foreach($c in 8080,8090,8091,8092,8093){ if(-not (Get-NetTCPConnection -LocalPort $c -State Listen -ErrorAction SilentlyContinue)){ $port=$c; break } };" ^
+    "'VELOX_ADMIN_EMAIL=admin@velox.local',('VELOX_ADMIN_PASSWORD=Admin-'+(k 18)),('VELOX_TOKEN_SECRET='+(k 48)),('VELOX_PORT='+$port),'VELOX_DB_PORT=55432');" ^
+    "$names=@(docker ps -a --format '{{.Names}}' 2>$null); if($names -contains 'velox-db' -or $names -contains 'velox-api'){ $lines+='VELOX_DB_CONTAINER=velox-db-2'; $lines+='VELOX_API_CONTAINER=velox-api-2'; Write-Host '       (another copy of VELOX is on this PC - using different container names)' };" ^
+    "if($port -ne 8080){ Write-Host \"       (port 8080 is busy - using $port)\" };" ^
     "[IO.File]::WriteAllLines((Join-Path (Get-Location) '.env'), $lines)"
   echo        made .env with a random admin password and token key
 ) else (
