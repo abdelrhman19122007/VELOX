@@ -65,7 +65,17 @@ powershell -NoProfile -Command ^
   "Write-Host \"    Dashboard (admin / store)         http://localhost:$p/admin/\" -ForegroundColor Yellow;" ^
   "Write-Host \"    API docs (Swagger)                http://localhost:$p/swagger-ui.html\" -ForegroundColor Yellow;" ^
   "if($ip){ Write-Host \"    Phones on the same Wi-Fi          http://${ip}:$p/app/\" -ForegroundColor Cyan };" ^
-  "Write-Host ''; Write-Host '  Logins: demo-data\local-accounts.txt  (admin password: VELOX_ADMIN_PASSWORD in .env)';" ^
+  "Write-Host ''; Write-Host '  ONE app link for everyone - the page you get depends on the account you sign in with.' -ForegroundColor Green;" ^
+  "Write-Host '  Each browser remembers ONE account, so use a different browser (or Incognito) per role:' -ForegroundColor Green;" ^
+  "$acc=''; if(Test-Path 'demo-data\local-accounts.txt'){ $acc=Get-Content 'demo-data\local-accounts.txt' -Raw -Encoding UTF8 };" ^
+  "$rows=@(); foreach($m in [regex]::Matches($acc,'email:\s+(\S+)\s+password:\s+(\S+)')){ $e=$m.Groups[1].Value; $w=$m.Groups[2].Value;" ^
+  "  if($e -like 'customer1@*'){ $rows+=,@('CUSTOMER ','Chrome          ',\"http://localhost:$p/app/\",$e,$w) }" ^
+  "  elseif($e -like 'r1@*'){ $rows+=,@('RESTAURANT','Chrome Incognito',\"http://127.0.0.1:$p/app/\",$e,$w) }" ^
+  "  elseif($e -like 'driver1@*'){ $rows+=,@('DRIVER   ','Edge            ',\"http://localhost:$p/app/\",$e,$w) } };" ^
+  "$ae=((Get-Content .env | ? {$_ -match '^VELOX_ADMIN_EMAIL='}) -replace 'VELOX_ADMIN_EMAIL=',''); $ap=((Get-Content .env | ? {$_ -match '^VELOX_ADMIN_PASSWORD='}) -replace 'VELOX_ADMIN_PASSWORD=','');" ^
+  "$rows+=,@('ADMIN    ','any browser     ',\"http://localhost:$p/admin/\",$ae,$ap);" ^
+  "foreach($r in $rows){ Write-Host ''; Write-Host ('    '+$r[0]+'  open in '+$r[1]+'  '+$r[2]) -ForegroundColor Yellow; Write-Host ('               email:    '+$r[3]); Write-Host ('               password: '+$r[4]) };" ^
+  "Write-Host ''; Write-Host '  (these logins exist only on this PC - also saved in demo-data\local-accounts.txt; do not share them)' -ForegroundColor DarkGray;" ^
   "Write-Host '  Stop: double-click STOP-VELOX.bat   (your data stays)'; Write-Host '';" ^
   "Start-Process \"http://localhost:$p/app/\""
 echo.

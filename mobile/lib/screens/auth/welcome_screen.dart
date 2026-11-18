@@ -145,16 +145,13 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                     ),
                     validator: (v) => signUp && (v ?? '').length < 8 ? s.t('badPassword') : ((v ?? '').isEmpty ? s.t('badPassword') : null),
                   ),
-                  if (signUp)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 8),
-                      child: Text(s.t('driverNote'), style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant)),
-                    )
-                  else
-                    Padding(
-                      padding: const EdgeInsets.only(top: 8),
-                      child: Text(s.t('forgot'), style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant)),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: AdminContact(
+                      note: s.t(signUp ? 'driverNote' : 'forgot'),
+                      message: s.t(signUp ? 'waDriver' : 'waForgot'),
                     ),
+                  ),
                   const SizedBox(height: 20),
                   FilledButton(
                     onPressed: loading ? null : submit,
