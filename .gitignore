@@ -38,3 +38,6 @@ deploy/logs/
 
 # demo script state (holds a throwaway test login)
 tests/demo/demo_state.json
+
+# local demo (START-VELOX.bat)
+demo-data/local-accounts.txt

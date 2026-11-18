@@ -1,9 +1,12 @@
 # Local development:      docker compose up -d db          (PostgreSQL only; run the API with ./mvnw spring-boot:run)
-# Whole stack in Docker:  docker compose --profile app up -d --build   → API on http://localhost:8080
+# Whole stack in Docker:  docker compose --profile app up -d --build   → everything on http://localhost:8080
+#   (START-VELOX.bat does this for you, makes the .env with random secrets, and loads the demo menus.)
+#   /        website        /admin/   dashboard        /app/   the app (prebuilt in demo-data/app)
 services:
   db:
     image: postgres:16-alpine
-    container_name: velox-db
+    # names can be changed in .env when another copy of VELOX already uses them on this PC
+    container_name: ${VELOX_DB_CONTAINER:-velox-db}
     environment:
       POSTGRES_DB: velox
       POSTGRES_USER: velox
@@ -22,7 +25,7 @@ services:
     build:
       context: .
       dockerfile: backend/Dockerfile
-    container_name: velox-api
+    container_name: ${VELOX_API_CONTAINER:-velox-api}
     depends_on:
       db:
         condition: service_healthy
@@ -31,14 +34,35 @@ services:
       DB_USER: velox
       DB_PASSWORD: velox
       VELOX_TOKEN_SECRET: ${VELOX_TOKEN_SECRET:-local-dev-secret-change-me-at-least-32-chars}
-      VELOX_ADMIN_EMAIL: ${VELOX_ADMIN_EMAIL:-}
+      VELOX_ADMIN_EMAIL: ${VELOX_ADMIN_EMAIL:-admin@velox.local}
       VELOX_ADMIN_PASSWORD: ${VELOX_ADMIN_PASSWORD:-}
       VELOX_API_DOCS: "true"
+      # the website, dashboard and app are served by the API from these folders
+      VELOX_WEB_DIR: /site/web
+      VELOX_APP_DIR: /site/app
     ports:
-      - "8080:8080"
+      - "${VELOX_PORT:-8080}:8080"
     volumes:
-      - velox-uploads:/app/uploads
+      - ./web:/site/web:ro
+      - ./demo-data/app:/site/app:ro
+      - ./demo-data/uploads:/app/uploads   # menu photos (and any new uploads)
+
+  # Runs once after the API is healthy: loads the real menus and makes demo accounts (demo-data/load_demo.py).
+  demo-loader:
+    profiles: ["app"]
+    image: python:3.12-alpine
+    depends_on:
+      api:
+        condition: service_healthy
+    environment:
+      VELOX_URL: http://api:8080
+      VELOX_ADMIN_EMAIL: ${VELOX_ADMIN_EMAIL:-admin@velox.local}
+      VELOX_ADMIN_PASSWORD: ${VELOX_ADMIN_PASSWORD:-}
+      PYTHONUNBUFFERED: "1"
+    volumes:
+      - ./demo-data:/data
+    command: ["python", "/data/load_demo.py"]
+    restart: "no"
 
 volumes:
   velox-db:
-  velox-uploads:
