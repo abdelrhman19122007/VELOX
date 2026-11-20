@@ -1,0 +1,17 @@
+<section id="testing" class="alt">
+<div class="head">
+<p class="eyebrow">Testing &amp; quality</p>
+<h2>Manual, automated, API and load testing</h2>
+</div>
+<div class="grid3 stats">
+<div class="card go rise" style="--i:1"><p class="num ok">97/97</p><h3>JUnit tests</h3></div>
+<div class="card go rise" style="--i:2"><p class="num ok">45/45</p><h3>Live end-to-end checks</h3></div>
+<div class="card rise" style="--i:3"><p class="num">30</p><h3>API requests (Postman)</h3></div>
+<div class="card rise" style="--i:4"><p class="num">47</p><h3>Manual test cases</h3></div>
+<div class="card rise" style="--i:5"><p class="num">100</p><h3>Users at once (JMeter)</h3></div>
+<div class="card rise" style="--i:6"><p class="num">4/4</p><h3>Selenium UI tests</h3></div>
+</div>
+<div class="banner fadein" style="--i:8"><p><b>Found by our own tests:</b> slow responses with a remote database, and one test that wasn’t isolated. Both documented.</p></div>
+<div class="foot"><p>VELOX</p><p class="pg"></p></div>
+<aside>Presenter: Raheek. 97/97 JUnit: unit tests plus integration tests that start a real PostgreSQL in Docker (Testcontainers). 45/45: a script runs sign-up to delivery on the real server over HTTPS and deletes its test accounts. 30 Postman requests include IDOR, XSS and price-tampering attacks. 47 manual cases in an Excel sheet, split across the team with screenshots and bug reports. JMeter: 100 users at once. Selenium: website and dashboard, plus 6/6 Flutter tests. Be honest about the two findings: the load test was slower with the database on Supabase than locally, and one test read the developer machine’s Firebase settings, so we isolated it.</aside>
+</section>

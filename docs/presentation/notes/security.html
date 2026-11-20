@@ -1,0 +1,30 @@
+<section id="security" class="dark">
+<div class="head">
+<p class="eyebrow">Security · Penetration Testing track</p>
+<h2>Secure by design, then attacked by us</h2>
+</div>
+<div class="grid2">
+<div class="card sec rise" style="--i:1">
+<p class="k">BUILT IN</p>
+<ul class="ticks">
+<li>Passwords: PBKDF2-SHA256, 210,000 rounds + salt</li>
+<li>Signed sign-in tokens, revoked on password change</li>
+<li>Role and ownership check on every action (no IDOR)</li>
+<li>Locked after 5 wrong passwords (HTTP 429)</li>
+<li>Only parameterized SQL: no injection</li>
+<li>SpotBugs + FindSecBugs, CodeQL, OWASP ZAP</li>
+</ul>
+</div>
+<div class="card sec rise" style="--i:2">
+<p class="k">WE ATTACKED OUR OWN SYSTEM</p>
+<ul class="ticks">
+<li><b>Critical:</b> server-link hijack in the app, fixed</li>
+<li><b>High:</b> cleartext HTTP and token in backups, fixed</li>
+<li><b>High:</b> unlimited payment-code guessing, fixed</li>
+<li><b>Java2Shell</b> (CVE-2026-114938): checked and mitigated the day it was published</li>
+</ul>
+</div>
+</div>
+<div class="foot"><p>VELOX</p><p class="pg"></p></div>
+<aside>Presenter: Nabeeh. Each member ran Burp Suite attacks on their own module (IDOR, missing auth, wrong role, price tampering, XSS, SQL injection) and wrote it up in security/. Explain one finding in detail: the app accepted any server link from a public channel, so an attacker could redirect phones and steal passwords; now only Cloudflare links are accepted and release builds are locked to one server.</aside>
+</section>
