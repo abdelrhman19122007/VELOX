@@ -1,0 +1,901 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VELOX — الدليل الشامل</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+:root { --b:#9a3412; --l:#f1d5c7; --s:#fff7f2; --c:#f4efec; --m:#6b6b6b; --g:#15803d; --t:#1d4ed8; }
+@page { size:A4; margin:14mm 13mm; }
+body { font-family:'Cairo',Tahoma,sans-serif; color:#1f1f1f; font-size:10.6pt; line-height:1.75; margin:0; background:#fff; }
+main { max-width:900px; margin:auto; padding:0 6px; }
+.hero { background:linear-gradient(135deg,#9a3412,#c2410c); color:#fff; border-radius:16px; padding:18px 22px; margin:6px 0 12px; }
+.hero h1 { margin:0; font-size:25pt; } .hero p { margin:4px 0 0; }
+h2 { color:var(--b); font-size:16pt; margin:22px 0 6px; border-bottom:2px solid var(--l); padding-bottom:3px; }
+h3 { margin:14px 0 4px; font-size:12pt; color:#7c2d12; }
+.card { background:var(--s); border:1px solid var(--l); border-radius:12px; padding:9px 12px; margin:7px 0; }
+.note { background:#eef6ff; border:1px solid #c9defc; border-radius:12px; padding:9px 12px; margin:7px 0; }
+.warn { background:#fff8e6; border:1px solid #f3dc9c; border-radius:12px; padding:9px 12px; margin:7px 0; }
+table { width:100%; border-collapse:collapse; font-size:9.6pt; margin:5px 0; }
+th,td { border-bottom:1px solid var(--l); padding:4px 5px; text-align:start; vertical-align:top; }
+th { color:var(--b); background:var(--s); }
+code { font-family:Consolas,monospace; background:var(--c); border-radius:4px; padding:0 4px; direction:ltr; unicode-bidi:embed; font-size:9pt; }
+pre { direction:ltr; text-align:left; background:#1e1e1e; color:#e8e8e8; border-radius:10px; padding:10px 12px; font-family:Consolas,monospace; font-size:8.6pt; line-height:1.5; white-space:pre-wrap; word-break:break-word; page-break-inside:avoid; }
+pre .c { color:#8fbc8f; } pre .k { color:#f0a868; }
+.flow { display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin:8px 0; }
+.flow span { background:var(--s); border:1.5px solid var(--b); border-radius:10px; padding:4px 10px; font-weight:700; }
+.flow b { color:var(--b); font-size:13pt; }
+.toc { columns:2; } .toc a { color:var(--b); text-decoration:none; }
+.pb { page-break-before:always; }
+ul,ol { margin:3px 0; padding-inline-start:22px; }
+.q { font-weight:900; color:#7c2d12; }
+.ltr { direction:ltr; text-align:left; }
+.ok { background:#effaf0; border:1px solid #bfe3c4; border-radius:12px; padding:9px 12px; margin:7px 0; }
+.ver { display:inline-block; background:#fff; color:#9a3412; border-radius:999px; padding:0 10px; font-weight:800; font-size:10pt; }
+</style>
+</head>
+<body>
+<main>
+<div class="hero">
+  <h1>VELOX — الدليل الشامل</h1>
+  <p><span class="ver">آخر تحديث: 19 نوفمبر 2026 · نسخة 2.1.10</span></p>
+  <p>كل حاجة في ملف واحد: التشغيل، وGitHub، والكود جزء جزء، والأمان، وكل أنواع الاختبارات بآخر نتايجها، والواجهة، ويوم المناقشة.<br>
+  الأمثلة كلها من الكود الحقيقي. الفريق: نبيه (القائد) — هدى — عبد الرحمن — فادي — رحيق.</p>
+</div>
+<h2>الفهرس</h2>
+
+<div class="toc card">
+<a href="#u">أ. آخر التحديثات</a><br>
+<a href="#run">ب. تشغيل المشروع على جهازك</a><br>
+<a href="#s1">١. المشروع في دقيقة</a><br>
+<a href="#s2">٢. Client و Server</a><br>
+<a href="#s3">٣. الأدوات وليه</a><br>
+<a href="#s4">٤. Java اللي استخدمناها</a><br>
+<a href="#s5">٥. Maven</a><br>
+<a href="#gh">ج. GitHub: كل حاجة</a><br>
+<a href="#s6">٦. قاعدة البيانات</a><br>
+<a href="#s7">٧. JDBC</a><br>
+<a href="#s8">٨. السيرفر بـ Spring Boot</a><br>
+<a href="#s9">٩. رحلة الطلب</a><br>
+<a href="#s10">١٠. التحديث المباشر والإشعارات</a><br>
+<a href="#s11">١١. الأمان</a><br>
+<a href="#s12">١٢. الاختبارات (كلها)</a><br>
+<a href="#s13">١٣. الواجهة</a><br>
+<a href="#s14">١٤. طرق التشغيل والـ APK</a><br>
+<a href="#s16">١٦. مين عمل إيه</a><br>
+<a href="#s17">١٧. قاموس الكلمات</a><br>
+<a href="#s18">١٨. أسئلة الدكتور</a><br>
+<a href="#demo">د. يوم المناقشة والبريزنتيشن</a>
+</div>
+
+<h2 id="s0">٠. إزاي تذاكر الملف ده</h2>
+<table>
+<tr><th>اليوم</th><th>تذاكر إيه</th><th>هتعرف تعمل إيه في الآخر</th></tr>
+<tr><td>١</td><td>الأجزاء ١ لـ ٥</td><td>تشرح المشروع وتقول كل أداة بتعمل إيه وليه</td></tr>
+<tr><td>٢</td><td>الأجزاء ٦ و٧</td><td>ترسم الجداول وتكتب كود JDBC من دماغك (زي اللي الدكتور شرحه)</td></tr>
+<tr><td>٣</td><td>الأجزاء ٨ و٩ و١٠</td><td>تمشّي طلب HTTP من أوله لآخره جوه السيرفر</td></tr>
+<tr><td>٤</td><td>الأجزاء ١١ و١٢</td><td>تكتب اختبار JUnit وتشرح الأمان واختبار الاختراق</td></tr>
+<tr><td>٥</td><td>الأجزاء ١٣ لـ ١٥</td><td>تشرح الواجهة والتشغيل والنشر</td></tr>
+<tr><td>٦</td><td>الجزء ١٨ و١٩</td><td>تجاوب أسئلة الدكتور وتشغّل المشروع قدامه</td></tr>
+</table>
+<div class="note"><b>نصيحة:</b> كل واحد يذاكر الملف كله، وبعدين يركّز على الجزء بتاعه في جدول "مين عمل إيه" (الجزء ١٦). الدكتور ممكن يسأل أي حد في أي حاجة.</div>
+
+<!-- ============================================================ -->
+
+<h2 id="u">أ. آخر التحديثات (12 لـ 19 نوفمبر)</h2>
+<table>
+<tr><th>التحديث</th><th>يعني إيه</th></tr>
+<tr><td><b>تشغيل بدبل كليك</b> (<code>START-VELOX.bat</code>)</td><td>أي حد في التيم يشغّل المشروع كامل على جهازه بـ Docker بس، من غير سيرفر ومن غير باسوردات من حد</td></tr>
+<tr><td><b>بيانات حقيقية للتجربة</b> (<code>demo-data/</code>)</td><td>مطعم ناصف بـ 111 صنف بالصور + 3 كافيهات، وحسابات مطعم ومندوب وعميل وأدمن بباسوردات عشوائية لكل جهاز</td></tr>
+<tr><td><b>صفحة المندوب</b> (2.1.9)</td><td>كارت الطلب فيه الأصناف واسم العميل والعنوان والعلامة المميزة والكاش، وفيه خطوات ونصايح</td></tr>
+<tr><td><b>صفحة المطعم</b> (2.1.10)</td><td>كارت فوق فيه "بنستقبل طلبات" و3 عدّادات، ووقت انتظار كل طلب (بيحمرّ بعد 15 دقيقة)، والمندوب اللي جاي وزرار اتصال</td></tr>
+<tr><td><b>الرئيسية بقت حية</b></td><td>تحية حسب الوقت، و"نفسك في <b>مشويات</b>؟" والكلمة بتتغير، ونقطة "لايف" بتنبض، وكارت "المندوب ابن البلد"</td></tr>
+<tr><td><b>شاشة تحميل</b> + اسم التطبيق</td><td>اللوجو بدل الشاشة البيضا، والتطبيق ينفع يتحط على شاشة الموبايل الرئيسية باسم VELOX</td></tr>
+<tr><td><b>واتساب الإدارة</b></td><td>"نسيت كلمة السر" و"عايز تشتغل مندوب" بقى تحتهم زرار واتساب على 01287654219</td></tr>
+<tr><td><b>شيلنا زرار "رابط السيرفر"</b> من نسخة المتصفح</td><td>كان ممكن حد يكتب لينك غلط ويبوّظ التطبيق</td></tr>
+<tr><td><b>ثغرة Java2Shell</b> (CVE-2026-114938)</td><td>اتأكدنا إن جهازنا مش متأثر، وحطينا الحماية في كل طرق التشغيل في نفس اليوم</td></tr>
+<tr><td><b>تقرير اختبارات جديد</b></td><td>45/45 على السيرفر الحقيقي، واكتشفنا بنفسنا مشكلة أداء (D-10)</td></tr>
+</table>
+
+<div class="pb"></div>
+<h2 id="run">ب. تشغيل المشروع على جهازك: خطوة بخطوة</h2>
+<div class="card"><b>الفكرة:</b> كل واحد يشغّل VELOX <b>كامل</b> على جهازه: قاعدة بيانات، وسيرفر، وموقع، وتطبيق، ومطاعم، وحسابات. <b>محتاج Docker Desktop بس</b>، لا Java ولا Flutter ولا Visual Studio.</div>
+
+<h3>١) مرة واحدة بس</h3>
+<ol>
+<li>نزّل <b>Docker Desktop</b> من <code>docker.com/products/docker-desktop</code> وسطّبه عادي (WSL 2)، ولو طلب Restart اعمله.</li>
+<li>نزّل المشروع: افتح <code>github.com/abdelrhman19122007/VELOX/tree/velox-v2-integration</code> ← الزرار الأخضر <b>Code</b> ← <b>Download ZIP</b>.</li>
+<li>كليك يمين على الملف ← <b>Extract All</b> ← اختار <code>C:\VELOX</code> (مكان قصير من غير مسافات).</li>
+</ol>
+
+<h3>٢) التشغيل</h3>
+<ol>
+<li>افتح <b>Docker Desktop</b> واستنى لحد ما يكتب تحت <b>Engine running</b>.</li>
+<li>افتح فولدر المشروع ودوس <b>دبل كليك على <code>START-VELOX.bat</code></b>.</li>
+</ol>
+<p>هيفتح شباك أسود وتعدّي فيه 5 خطوات:</p>
+<table>
+<tr><th>اللي بيظهر</th><th>بيعمل إيه</th><th>الوقت</th></tr>
+<tr><td><code>[1/5] Checking Docker</code></td><td>بيتأكد إن Docker شغال</td><td>ثانية</td></tr>
+<tr><td><code>[2/5] Settings</code></td><td>أول مرة بس: بيعمل ملف <code>.env</code> فيه باسورد أدمن ومفتاح توكن <b>عشوائيين لجهازك</b>. ولو البورت 8080 مشغول بيختار 8090، ولو فيه نسخة قديمة من المشروع بيستخدم أسامي تانية</td><td>ثانية</td></tr>
+<tr><td><code>[3/5] Starting database + server</code></td><td>بينزّل PostgreSQL، ويبني السيرفر (Java) جوه Docker، ويشغّلهم</td><td><b>أول مرة 5-10 دقايق</b>، بعد كده ثواني</td></tr>
+<tr><td><code>[4/5] Waiting for VELOX</code></td><td>بيستنى السيرفر يرد</td><td>30 ثانية</td></tr>
+<tr><td><code>[5/5] Loading the menus</code></td><td>أول مرة بس: بيحمّل المطاعم والمنيو والصور، ويعمل الحسابات</td><td>ثواني</td></tr>
+</table>
+<p>وفي الآخر بيكتب اللينكات و<b>كل حساب بالإيميل والباسورد وتفتحه في أنهي متصفح</b>، ويفتح المتصفح لوحده.</p>
+
+<h3>٣) اللينكات</h3>
+<table>
+<tr><th>اللينك</th><th>إيه ده</th></tr>
+<tr><td><code>http://localhost:8080/app/</code></td><td><b>التطبيق</b> (العميل والمطعم والمندوب، كلهم من هنا)</td></tr>
+<tr><td><code>http://localhost:8080/</code></td><td>الموقع</td></tr>
+<tr><td><code>http://localhost:8080/admin/</code></td><td>لوحة الأدمن</td></tr>
+<tr><td><code>http://localhost:8080/swagger-ui.html</code></td><td>كل عناوين الـ API، وتقدر تجرّبها</td></tr>
+</table>
+<div class="note"><b>يعني إيه localhost:8080؟</b> <code>localhost</code> = "الجهاز ده نفسه"، و<code>8080</code> = رقم "الباب" اللي السيرفر فاتحه. اللينك <b>مش على النت</b>، بيشتغل على جهازك بس وطول ما VELOX شغال. ولو البورت كان مشغول، اللي اتكتبلك (زي 8090) هو اللي تستخدمه.</div>
+
+<h3>٤) إزاي تفتح صفحة العميل أو المطعم أو المندوب؟</h3>
+<p><b>التطبيق ليه لينك واحد بس</b>، والصفحة اللي بتظهر بتعتمد على <b>الحساب اللي داخل بيه</b>. وكل متصفح بيفتكر حساب واحد، فاستخدم متصفح مختلف لكل دور:</p>
+<table>
+<tr><th>الدور</th><th>المتصفح</th><th>اللينك</th></tr>
+<tr><td>العميل</td><td>Chrome عادي</td><td><code>localhost:8080/app/</code></td></tr>
+<tr><td>المطعم</td><td>Chrome Incognito (Ctrl+Shift+N)</td><td><code>127.0.0.1:8080/app/</code></td></tr>
+<tr><td>المندوب</td><td>Edge (وخليه <b>أونلاين</b>)</td><td><code>localhost:8080/app/</code></td></tr>
+<tr><td>الأدمن</td><td>أي متصفح</td><td><code>localhost:8080/admin/</code></td></tr>
+</table>
+<p>الحسابات كمان متسجلة في <code>demo-data\local-accounts.txt</code>، وباسورد الأدمن في <code>.env</code>. <b>الملفين دول ما بيترفعوش على GitHub، ومتبعتهمش لحد.</b></p>
+
+<h3>٥) طلب كامل للتجربة</h3>
+<div class="flow"><span>العميل يطلب من ناصف</span><b>←</b><span>المطعم يسمع صوت ← قبول ← جاهز</span><b>←</b><span>المندوب: خد الطلب ← استلمت ← سلّمت</span><b>←</b><span>العميل يقيّم</span></div>
+
+<h3>٦) من الموبايل</h3>
+<ol>
+<li>اللابتوب شغال، والموبايل على <b>نفس الـ Wi-Fi</b>.</li>
+<li>من Chrome على الموبايل افتح اللينك اللي <code>START-VELOX</code> كاتبه جنب <b>Phones on the same Wi-Fi</b> (زي <code>http://192.168.1.5:8080/app/</code>).</li>
+<li>⋮ ← <b>Add to Home screen</b>، وهتلاقي أيقونة VELOX زي أي تطبيق.</li>
+</ol>
+<div class="warn">ملف الـ <b>APK</b> مش هينفع مع النسخة المحلية: التطبيق بيرفض أي اتصال من غير HTTPS (ده من تصليحات الأمان). الـ APK بيشتغل بس مع السيرفر اللي على جهاز نبيه، من خلال لينك Cloudflare.</div>
+
+<h3>٧) الإيقاف والتحديث والمسح</h3>
+<table>
+<tr><th>عايز</th><th>تعمل</th></tr>
+<tr><td>توقّفه</td><td>دبل كليك على <code>STOP-VELOX.bat</code>، والداتا بتفضل موجودة</td></tr>
+<tr><td>تاخد نسخة جديدة</td><td>وقّفه ← نزّل الـ ZIP تاني ← فكّه <b>فوق الفولدر القديم</b> ← Replace ← شغّل. حساباتك وداتاتك بتفضل زي ما هي</td></tr>
+<tr><td>تمسح كل حاجة وتبدأ من الصفر</td><td><code>docker compose --profile app down -v</code>، وبعدين امسح <code>.env</code> و<code>demo-data\local-accounts.txt</code></td></tr>
+</table>
+
+<h3>٨) مشاكل وحلولها</h3>
+<table>
+<tr><th>اللي ظاهر</th><th>الحل</th></tr>
+<tr><td><code>Docker is not running</code></td><td>افتح Docker Desktop واستنى <b>Engine running</b></td></tr>
+<tr><td>Docker Desktop فاضي أو بيقفل لوحده</td><td>اقفله ← غيّر اسم الفولدر <code>%LOCALAPPDATA%\Docker\run</code> (مثلاً لـ <code>run.old</code>)، ونفس الحاجة لـ <code>%LOCALAPPDATA%\docker-secrets-engine</code> ← افتحه تاني</td></tr>
+<tr><td><code>certificate verify failed</code> وهو بيبني</td><td>برنامج الحماية بيفتح الاتصالات المشفّرة. في Avast: Settings ← Protection ← Core Shields ← Web Shield ← اقفل <b>Enable HTTPS scanning</b></td></tr>
+<tr><td><code>VELOX did not answer</code></td><td><code>docker compose logs api</code> وابعت آخر 30 سطر</td></tr>
+<tr><td>المنيو مش ظاهر</td><td><code>docker compose logs demo-loader</code></td></tr>
+<tr><td>شكل قديم أو صفحة بيضا</td><td>Ctrl+Shift+R</td></tr>
+</table>
+
+<h3>٩) إيه اللي بيحصل جوه Docker</h3>
+<pre>START-VELOX.bat
+  ├── .env                 ← باسورد أدمن + مفتاح توكن عشوائيين (أول مرة)
+  └── docker compose --profile app up -d --build
+        ├── db           PostgreSQL 16 — الداتا في volume اسمه velox-db (بتفضل بعد الإيقاف)
+        ├── api          السيرفر Java — بيتبني من backend/Dockerfile
+        │                 وبيعرض web/ على /  و demo-data/app على /app/
+        └── demo-loader  Python بيشتغل مرة واحدة: بيقرا demo-data/catalog.json
+                         ويعمل المطاعم والأصناف والحسابات ← demo-data/local-accounts.txt</pre>
+<p>كل ده متعرّف في ملف <code>docker-compose.yml</code>. والـ <code>Dockerfile</code> بيبني السيرفر على مرحلتين: الأولى بتبني بـ Maven، والتانية بتشغّل الـ JAR بس على Java صغيرة، بيوزر مش admin، ومعاها حماية Java2Shell.</p>
+
+<h2 id="s1">١. المشروع في دقيقة</h2>
+<div class="card">
+<b>VELOX</b> منصة توصيل لمدينة <b>سمنود</b>: العميل يطلب أكل من مطعم، أو "مشوار" (يشتري له حاجة من أي مكان). المطعم يجهّز، والمندوب يوصّل، والأدمن يتابع كل حاجة.
+</div>
+<table>
+<tr><th>المستخدم</th><th>بيعمل إيه</th><th>الشاشة بتاعته</th></tr>
+<tr><td>العميل (CUSTOMER)</td><td>يتصفح المطاعم، يطلب، يدفع كاش أو أونلاين، يتابع المندوب على الخريطة، يقيّم</td><td>التطبيق + الموقع</td></tr>
+<tr><td>المطعم (RESTAURANT)</td><td>يستقبل الطلب بصوت، يقبل أو يرفض، يقول "جاهز"، يعدّل المنيو والأسعار</td><td>صفحة المطعم في التطبيق</td></tr>
+<tr><td>المندوب (DRIVER)</td><td>يبقى أونلاين، ياخد الطلب، يستلمه، يسلّمه، يشوف أرباحه</td><td>صفحة المندوب في التطبيق</td></tr>
+<tr><td>الأدمن (ADMIN)</td><td>يدير المستخدمين والمطاعم والمناطق والكوبونات والشكاوى ويشوف الإحصائيات</td><td>لوحة التحكم</td></tr>
+</table>
+<h3>رحلة طلب واحد (اتجربت فعلاً: الطلب ORD-1009)</h3>
+<div class="flow"><span>العميل يطلب</span><b>←</b><span>المطعم يسمع صوت ويقبل</span><b>←</b><span>المطعم: جاهز</span><b>←</b><span>المندوب: خد الطلب</span><b>←</b><span>استلمت</span><b>←</b><span>سلّمت</span><b>←</b><span>العميل يقيّم</span></div>
+
+<!-- ============================================================ -->
+
+<h2 id="s2">٢. الصورة الكبيرة: Client و Server</h2>
+<div class="card">
+أي نظام زي ده عبارة عن حاجتين:<br>
+• <b>Client (العميل/الواجهة):</b> اللي المستخدم بيلمسه: تطبيق الموبايل والموقع. مبيخزنش داتا مهمة، هو بيسأل السيرفر بس.<br>
+• <b>Server (السيرفر/الباك إند):</b> برنامج Java شغال على جهاز، بيستقبل الطلبات، يتأكد من الصلاحيات، يكلم قاعدة البيانات، ويرجّع الرد.
+</div>
+<div class="flow"><span>تطبيق Flutter / الموقع</span><b>⇄ HTTP + JSON ⇄</b><span>سيرفر Spring Boot (Java)</span><b>⇄ JDBC ⇄</b><span>PostgreSQL</span></div>
+<h3>يعني إيه HTTP وREST وJSON؟</h3>
+<ul>
+<li><b>HTTP</b>: اللغة اللي الواجهة والسيرفر بيتكلموا بيها. كل طلب ليه <b>Method</b> و<b>عنوان</b>: <code>GET /api/zones</code> = "هاتلي المناطق".</li>
+<li><b>REST</b>: طريقة تنظيم العناوين: <code>GET</code> قراءة، <code>POST</code> إنشاء، <code>PUT/PATCH</code> تعديل، <code>DELETE</code> مسح.</li>
+<li><b>JSON</b>: شكل الداتا اللي بتتبعت: <code>{"code":"SAMANNOUD","fee":15}</code>.</li>
+<li><b>Status codes</b>: <code>200</code> تمام، <code>201</code> اتعمل، <code>204</code> تمام من غير رد، <code>400</code> بيانات غلط، <code>401</code> مش مسجّل دخول، <code>403</code> مش مسموحلك، <code>404</code> مش موجود، <code>429</code> محاولات كتير، <code>500</code> خطأ في السيرفر.</li>
+</ul>
+<h3>السيرفر نفسه متقسّم ٣ طبقات (Layered Architecture)</h3>
+<div class="flow"><span>Controller<br><small>يستقبل الطلب</small></span><b>←</b><span>Service<br><small>القواعد والصلاحيات</small></span><b>←</b><span>Repository<br><small>SQL عن طريق JDBC</small></span><b>←</b><span>Database</span></div>
+<div class="note">ليه نقسّم؟ عشان كل طبقة ليها شغلانة واحدة. لو غيّرنا قاعدة البيانات نغيّر الـ Repository بس. ولو عايزين نختبر القواعد نختبر الـ Service من غير HTTP.</div>
+<p>والمشروع متقسّم كمان بالـ <b>Feature</b> (كل واحد في الفريق ليه جزء):</p>
+<table>
+<tr><th>الفولدر في <code>backend/src/main/java/com/velox</code></th><th>بيعمل إيه</th></tr>
+<tr><td><code>auth</code></td><td>التسجيل والدخول والحسابات والعناوين وإدارة المستخدمين</td></tr>
+<tr><td><code>security</code></td><td>تشفير الباسورد، التوكن، الصلاحيات، منع التخمين، سجل الأحداث</td></tr>
+<tr><td><code>catalog</code></td><td>المطاعم والمنيو والصور والمفضلة والبحث</td></tr>
+<tr><td><code>order</code></td><td>الطلبات والمناطق والأسعار والتحديث المباشر</td></tr>
+<tr><td><code>payment</code></td><td>الدفع (كاش، محفظة، فوري/فودافون كاش تجريبي) والكوبونات والنقاط</td></tr>
+<tr><td><code>notification</code></td><td>الإشعارات جوه التطبيق وإشعارات الموبايل (Firebase)</td></tr>
+<tr><td><code>operation</code></td><td>شغل المطعم والمندوب والأدمن والتقييمات والشكاوى</td></tr>
+<tr><td><code>config</code> و<code>common</code></td><td>الإعدادات، Swagger، رؤوس الأمان، معالجة الأخطاء</td></tr>
+</table>
+
+<!-- ============================================================ -->
+
+<h2 id="s3">٣. كل الأدوات وليه اخترناها</h2>
+<table>
+<tr><th>الأداة</th><th>بنستخدمها في إيه</th><th>ليه هي</th></tr>
+<tr><td><b>Java 17</b></td><td>لغة السيرفر</td><td>اللغة اللي اتعلمناها في الكورس، قوية وآمنة، ونسخة LTS</td></tr>
+<tr><td><b>Spring Boot 3.3</b></td><td>إطار عمل السيرفر</td><td>بيدّينا سيرفر ويب جاهز (Tomcat جواه) و Dependency Injection و Validation</td></tr>
+<tr><td><b>Apache Maven</b></td><td>بناء المشروع وتنزيل المكتبات وتشغيل الاختبارات</td><td>نفس اللي الدكتور بعته (Apache.rar). ملف واحد <code>pom.xml</code> فيه كل حاجة</td></tr>
+<tr><td><b>PostgreSQL 16</b></td><td>قاعدة البيانات</td><td>مجانية وقوية. الدكتور استخدم SQL Server، والفكرة واحدة (SQL + JDBC)</td></tr>
+<tr><td><b>Supabase</b></td><td>استضافة PostgreSQL على الإنترنت</td><td>مجاني، وقاعدة البيانات شغالة حتى لو جهازنا مقفول</td></tr>
+<tr><td><b>JDBC + JdbcTemplate</b></td><td>كلام Java مع قاعدة البيانات</td><td>SQL صريح نفهمه ونتحكم فيه (من غير ORM مخبّي)</td></tr>
+<tr><td><b>Flyway</b></td><td>إنشاء الجداول بترتيب (V1…V7)</td><td>أي جهاز جديد بيعمل نفس الجداول أوتوماتيك</td></tr>
+<tr><td><b>JUnit 5</b></td><td>اختبارات الكود (97 اختبار)</td><td>زي JUnit_Project اللي الدكتور شرحه</td></tr>
+<tr><td><b>Testcontainers</b></td><td>بيشغّل PostgreSQL حقيقي جوه Docker أثناء الاختبار</td><td>الاختبار يبقى على نفس قاعدة البيانات الحقيقية</td></tr>
+<tr><td><b>Selenium</b></td><td>اختبار الموقع كأن حد بيدوس</td><td>اختبار End-to-End</td></tr>
+<tr><td><b>Postman / Newman</b></td><td>اختبار الـ API</td><td>نجرّب كل عنوان ونشوف الرد</td></tr>
+<tr><td><b>Apache JMeter</b></td><td>اختبار الأداء (100 مستخدم في نفس الوقت)</td><td>الأداة المشهورة لاختبار الحِمل</td></tr>
+<tr><td><b>Swagger (springdoc)</b></td><td>صفحة فيها كل عناوين الـ API وتجرّبها</td><td>توثيق أوتوماتيك من الكود</td></tr>
+<tr><td><b>Flutter (Dart)</b></td><td>التطبيق (أندرويد + ويب) من كود واحد</td><td>كود واحد لكل الأجهزة، وشكل حلو بسرعة</td></tr>
+<tr><td><b>Firebase Cloud Messaging</b></td><td>إشعارات الموبايل</td><td>مجاني والطريقة الرسمية على أندرويد</td></tr>
+<tr><td><b>Docker</b></td><td>تغليف السيرفر في "كونتينر" يشتغل على أي جهاز</td><td>نفس البيئة على جهازنا وعلى السيرفر</td></tr>
+<tr><td><b>Cloudflare Tunnel</b></td><td>لينك عام للسيرفر اللي على جهاز نبيه</td><td>مجاني ومن غير ما نفتح بورتات في الراوتر</td></tr>
+<tr><td><b>Git + GitHub</b></td><td>حفظ الكود وتاريخه وشغل الفريق</td><td>كل واحد يشتغل على جزئه من غير ما يبوّظ شغل التاني</td></tr>
+<tr><td><b>Burp Suite / ZAP</b></td><td>اختبار الاختراق (Pentest track)</td><td>نهاجم السيستم بنفسنا ونقفل الثغرات</td></tr>
+</table>
+
+<!-- ============================================================ -->
+
+<h2 id="s4">٤. Java اللي استخدمناها (مفاهيم الكورس جوه مشروعنا)</h2>
+<table>
+<tr><th>المفهوم</th><th>يعني إيه</th><th>مثال من المشروع</th></tr>
+<tr><td><b>Class و Object</b></td><td>الكلاس هو القالب، والأوبجكت نسخة منه</td><td><code>PasswordHasher hasher = new PasswordHasher();</code></td></tr>
+<tr><td><b>Encapsulation</b></td><td>الداتا <code>private</code> والوصول من خلال methods</td><td><code>private final JdbcTemplate db;</code> في كل Repository</td></tr>
+<tr><td><b>Interface + Polymorphism</b></td><td>عقد واحد وأكتر من تنفيذ</td><td><code>PaymentGateway</code> ليها تنفيذين: <code>SandboxFawry</code> و<code>SandboxVodafoneCash</code></td></tr>
+<tr><td><b>enum</b></td><td>قيم ثابتة محددة</td><td><code>OrderStatus</code>: PLACED, ACCEPTED, READY, PICKED_UP, DELIVERED… و<code>Role</code>: CUSTOMER, RESTAURANT, DRIVER, ADMIN</td></tr>
+<tr><td><b>record</b> (Java 16+)</td><td>كلاس للداتا بس، من غير getters/setters يدوي</td><td><code>record DeliveryZone(String code, String nameAr, ...)</code></td></tr>
+<tr><td><b>Exceptions</b></td><td>نرمي خطأ واضح بدل ما البرنامج يقع</td><td><code>ApiException</code> + <code>GlobalExceptionHandler</code> بيحوّلها لرد JSON مفهوم</td></tr>
+<tr><td><b>Collections</b></td><td>List وMap وSet</td><td><code>Map&lt;OrderStatus, Map&lt;OrderStatus, Set&lt;Actor&gt;&gt;&gt;</code> قواعد الطلب</td></tr>
+<tr><td><b>Lambda + Streams</b></td><td>كود أقصر للتعامل مع القوائم</td><td><code>zones.active().stream().map(ZoneView::of).toList()</code></td></tr>
+<tr><td><b>Optional</b></td><td>بدل ما نرجّع null</td><td><code>Optional&lt;DeliveryZone&gt; findActive(String code)</code></td></tr>
+<tr><td><b>Annotations</b></td><td>علامات بتقول لـ Spring يعمل إيه</td><td><code>@RestController</code>, <code>@GetMapping</code>, <code>@Repository</code>, <code>@Test</code></td></tr>
+<tr><td><b>Dependency Injection</b></td><td>الكلاس مبيعملش <code>new</code> للحاجات اللي محتاجها، Spring بيديهاله في الـ Constructor</td><td><code>public ZoneRepository(JdbcTemplate db) { this.db = db; }</code></td></tr>
+<tr><td><b>Multithreading</b></td><td>شغل بيحصل في نفس الوقت</td><td><code>ConcurrentHashMap</code> في <code>EventHub</code> و<code>@Scheduled</code> في <code>StaleOrderCloser</code></td></tr>
+</table>
+
+<!-- ============================================================ -->
+
+<h2 id="s5">٥. Maven (Apache Maven) — نفس اللي الدكتور بعته</h2>
+<div class="card">
+Maven بيعمل ٣ حاجات: (١) <b>ينزّل المكتبات</b> لوحده بدل ما نضيف JAR بإيدنا (زي ما الدكتور عمل مع JDBC driver في NetBeans: Add JAR/Folder)، (٢) <b>يبني المشروع</b> لملف JAR واحد، (٣) <b>يشغّل الاختبارات</b>.
+</div>
+<h3>ملف pom.xml (الجزء المهم منه)</h3>
+<pre><span class="c">&lt;!-- بدل ما ننزّل JDBC driver بإيدنا ونضيفه في Libraries، بنكتب السطرين دول --&gt;</span>
+&lt;dependency&gt;
+    &lt;groupId&gt;org.postgresql&lt;/groupId&gt;
+    &lt;artifactId&gt;<span class="k">postgresql</span>&lt;/artifactId&gt;          <span class="c">&lt;!-- JDBC driver --&gt;</span>
+&lt;/dependency&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;<span class="k">spring-boot-starter-jdbc</span>&lt;/artifactId&gt;   <span class="c">&lt;!-- JdbcTemplate + connection pool --&gt;</span>
+&lt;/dependency&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;<span class="k">spring-boot-starter-test</span>&lt;/artifactId&gt;   <span class="c">&lt;!-- JUnit 5 + Assertions --&gt;</span>
+    &lt;scope&gt;test&lt;/scope&gt;
+&lt;/dependency&gt;</pre>
+<p>المكتبات اللي في المشروع: <code>spring-boot-starter-web</code> (السيرفر)، <code>-validation</code> (التحقق من البيانات)، <code>-jdbc</code>، <code>postgresql</code>، <code>flyway-core</code>، <code>springdoc-openapi</code> (Swagger)، و للاختبارات: <code>spring-boot-starter-test</code> و<code>testcontainers</code> و<code>junit-jupiter</code>، وأدوات فحص: <code>jacoco</code> (نسبة تغطية الاختبارات) و<code>spotbugs + findsecbugs</code> (يدوّر على ثغرات في الكود).</p>
+<h3>أوامر Maven</h3>
+<table>
+<tr><th>الأمر</th><th>بيعمل إيه</th></tr>
+<tr><td><code>mvnw compile</code></td><td>يحوّل الكود لـ bytecode</td></tr>
+<tr><td><code>mvnw test</code></td><td>يشغّل كل اختبارات JUnit (97 اختبار)</td></tr>
+<tr><td><code>mvnw package</code></td><td>يطلّع <code>target/velox-backend-2.0.0.jar</code></td></tr>
+<tr><td><code>mvnw spring-boot:run</code></td><td>يشغّل السيرفر مباشرة</td></tr>
+</table>
+<div class="note"><code>mvnw</code> = Maven Wrapper: بينزّل النسخة الصح من Maven لوحده، فمش لازم كل واحد يسطّب Maven. وفي <b>NetBeans</b> تقدر تفتح فولدر <code>backend</code> كـ Maven project على طول (File ← Open Project) وتدوس Build أو Test.</div>
+
+<!-- ============================================================ -->
+
+<div class="pb"></div>
+<h2 id="gh">ج. GitHub: كل حاجة</h2>
+<h3>١) الكلمات الأساسية</h3>
+<table>
+<tr><th>الكلمة</th><th>معناها ببساطة</th><th>مثال عندنا</th></tr>
+<tr><td><b>Repository (ريبو)</b></td><td>فولدر المشروع على النت، بكل تاريخه</td><td><code>abdelrhman19122007/VELOX</code></td></tr>
+<tr><td><b>Commit</b></td><td>"حفظ" لمجموعة تعديلات، معاه رسالة بتقول اتعمل إيه، ومين عمله، وإمتى</td><td>"Driver screen 2.1.9: fuller layout"</td></tr>
+<tr><td><b>Branch (فرع)</b></td><td>نسخة موازية من المشروع، تشتغل فيها من غير ما تبوّظ الأصلي</td><td><code>velox-v2-integration</code></td></tr>
+<tr><td><b>main</b></td><td>الفرع الأساسي، "النسخة الرسمية"</td><td><code>main</code></td></tr>
+<tr><td><b>Clone</b></td><td>تنزّل الريبو كله على جهازك ومعاه تاريخه</td><td></td></tr>
+<tr><td><b>Push</b></td><td>ترفع الـ commits بتاعتك على GitHub</td><td></td></tr>
+<tr><td><b>Pull</b></td><td>تنزّل آخر تعديلات من GitHub</td><td></td></tr>
+<tr><td><b>Pull Request (PR)</b></td><td>طلب "ادمجوا فرعي في main"، والتيم يراجعه ويوافق</td><td></td></tr>
+<tr><td><b>Merge</b></td><td>دمج فرع في فرع تاني</td><td></td></tr>
+<tr><td><b>Conflict</b></td><td>اتنين عدّلوا نفس السطر، وGit مش عارف ياخد أنهي تعديل</td><td></td></tr>
+<tr><td><b>.gitignore</b></td><td>ملف فيه الحاجات اللي <b>متترفعش أبداً</b>، زي الأسرار والملفات الكبيرة</td><td><code>.env</code>، <code>local-accounts.txt</code></td></tr>
+</table>
+
+<h3>٢) الريبوهات بتاعتنا</h3>
+<table>
+<tr><th>الريبو</th><th>لمين</th><th>فيه إيه</th></tr>
+<tr><td><b>abdelrhman19122007/VELOX</b></td><td><b>ريبو التيم الرسمي</b>، والدكتور هيبص عليه</td><td>كل شغل التيم</td></tr>
+<tr><td>nabosallem-svg/VELOX</td><td>حساب نبيه</td><td>نسخة احتياطية (فرع <code>velox-v2</code>) + المشروع القديم على <code>main</code></td></tr>
+</table>
+
+<h3>٣) الفروع في ريبو التيم</h3>
+<table>
+<tr><th>الفرع</th><th>فيه إيه</th><th>الحالة</th></tr>
+<tr><td>⭐ <b>velox-v2-integration</b></td><td><b>النسخة الكاملة الأخيرة</b>: كل الأجزاء، والتشغيل بدبل كليك، والاختبارات، والتوثيق</td><td><b>ده اللي ننزّل منه</b></td></tr>
+<tr><td>main</td><td>النسخة الرسمية القديمة (16 أكتوبر): الأساس والحسابات</td><td>متأخر عن الفرع اللي فوق بـ 40+ تعديل. <b>محتاج يتدمج</b></td></tr>
+<tr><td>feature/hoda-updates</td><td>شغل هدى: المحلات والمنيو والاختبارات والتوثيق (14 نوفمبر)</td><td>✅</td></tr>
+<tr><td>VELOX_V.2.1</td><td>ملفات هدى وفادي (نوفمبر)</td><td>✅</td></tr>
+<tr><td>feature/auth، catalog، orders، payments، operations</td><td>فرع لكل جزء من السيرفر (أكتوبر)</td><td>اتجمعوا في النسخة الكاملة</td></tr>
+<tr><td>feature/order_delivery</td><td>شغل رحيق (سبتمبر)</td><td>قديم</td></tr>
+<tr><td>gh-pages، velox-mobile، demo-githack، restructure، codex/…</td><td>تجارب وإصدارات من سبتمبر</td><td>أرشيف</td></tr>
+</table>
+<div class="warn"><b>مهم:</b> صفحة الريبو الرئيسية بتفتح على <code>main</code> القديم. عشان الدكتور يشوف آخر شغل لازم <b>ندمج <code>velox-v2-integration</code> في <code>main</code></b> بـ Pull Request، ونبيه يوافق عليه.</div>
+
+<h3>٤) الفولدرات</h3>
+<table>
+<tr><th>الفولدر</th><th>فيه إيه</th><th>مين</th></tr>
+<tr><td><code>backend/</code></td><td>السيرفر (Java Spring Boot) + اختبارات JUnit + الـ Dockerfile</td><td>الكل، كل واحد جزء</td></tr>
+<tr><td><code>database/migrations/</code></td><td>إنشاء الجداول (Flyway V1–V7)</td><td>نبيه</td></tr>
+<tr><td><code>mobile/</code></td><td>التطبيق (Flutter): أندرويد + ويب</td><td>نبيه + فادي</td></tr>
+<tr><td><code>web/</code></td><td>الموقع ولوحة الأدمن (HTML/CSS/JS)</td><td>عبد الرحمن</td></tr>
+<tr><td><code>tests/</code></td><td>Postman، وSelenium، وJMeter، والفحص الكامل، والتقارير والنتايج</td><td>رحيق</td></tr>
+<tr><td><code>security/</code></td><td>تقارير اختبار الاختراق لكل جزء</td><td>الكل</td></tr>
+<tr><td><code>docs/</code></td><td>التشغيل، والمذاكرة، والخريطة التفاعلية، ويوم المناقشة، والـ SRS</td><td>نبيه + هدى</td></tr>
+<tr><td><code>design/</code></td><td>نظام التصميم وتحليل المنافسين</td><td>هدى</td></tr>
+<tr><td><code>demo-data/</code></td><td>المنيو الحقيقي، والصور، ونسخة التطبيق الجاهزة، وسكريبت التحميل</td><td>نبيه</td></tr>
+<tr><td><code>deploy/</code></td><td>التشغيل على سيرفر</td><td>نبيه</td></tr>
+<tr><td><code>.github/workflows/</code></td><td><code>backend.yml</code> (بيشغّل الاختبارات) و<code>security.yml</code> (CodeQL وSpotBugs وTrivy وZAP) أوتوماتيك على GitHub</td><td>نبيه</td></tr>
+<tr><td><code>legacy/</code></td><td>كود الإصدار الأول</td><td>أرشيف</td></tr>
+<tr><td><code>START-VELOX.bat</code> / <code>STOP-VELOX.bat</code></td><td>التشغيل والإيقاف</td><td></td></tr>
+<tr><td><code>docker-compose.yml</code></td><td>تعريف الحاويات (db, api, demo-loader)</td><td></td></tr>
+</table>
+
+<h3>٥) على موقع GitHub: تبص فين</h3>
+<ul>
+<li><b>Branches:</b> قايمة الفروع، اختار فرع من فوق الشمال.</li>
+<li><b>Commits:</b> دوس "N commits" في أي فرع، وهتشوف كل تعديل مين عمله وإمتى.</li>
+<li><b>Insights ← Contributors:</b> كل واحد ساهم قد إيه. <b>الدكتور غالباً هيبص هنا</b>، عشان كده لازم كل واحد يرفع من حسابه.</li>
+<li><b>Actions:</b> نتايج الفحوصات الأوتوماتيك (الاختبارات والأمان).</li>
+<li><b>Pull requests:</b> طلبات الدمج والمراجعات.</li>
+<li><b>أي ملف ← History:</b> تاريخ الملف ده بالذات.</li>
+</ul>
+
+<h3>٦) ترفع شغلك إزاي (GitHub Desktop، أسهل طريقة)</h3>
+<ol>
+<li>سطّب <b>GitHub Desktop</b> وسجّل دخول بحسابك.</li>
+<li><b>File ← Clone repository</b> ← <code>abdelrhman19122007/VELOX</code>.</li>
+<li><b>Current branch ← New branch</b>، وسمّيه باسمك، زي <code>raheek/tests</code>.</li>
+<li>حط ملفاتك في الفولدر الصح.</li>
+<li>هتلاقي تعديلاتك على الشمال ← اكتب رسالة واضحة تحت ← <b>Commit</b>.</li>
+<li><b>Push origin</b>.</li>
+<li><b>Create Pull Request</b> ← نبيه يراجع ويدمج.</li>
+</ol>
+<h3>٧) بالأوامر (لو حد بيفضّل الـ Terminal)</h3>
+<pre>git clone -b velox-v2-integration https://github.com/abdelrhman19122007/VELOX.git
+cd VELOX
+git switch -c raheek/tests          # فرع جديد باسمك
+git add tests/                      # جهّز الملفات
+git commit -m "tests: manual test cases for operations"
+git push -u origin raheek/tests     # ارفع، وبعدين اعمل Pull Request من الموقع
+git pull                            # تنزّل آخر تعديلات</pre>
+<h3>٨) قواعد التيم</h3>
+<ul>
+<li><b>أي سر عمره ما يترفع:</b> لا باسوردات ولا <code>.env</code> ولا مفاتيح. الـ <code>.gitignore</code> بيمنعهم، بس خلي بالك.</li>
+<li>رسالة الـ commit تقول <b>اتعمل إيه</b>، مش "update" أو "files".</li>
+<li><b>ارفع كود، مش zip.</b> الـ zip مبيبانش في تاريخ GitHub كشغل ليك.</li>
+<li>كل واحد يرفع <b>من حسابه</b>، عشان يبان في Contributors.</li>
+</ul>
+
+<h2 id="s6">٦. قاعدة البيانات</h2>
+<p>عندنا <b>22 جدول</b>، متقسمين بالـ Feature، وبيتعملوا بـ Flyway من ملفات في <code>database/migrations</code>:</p>
+<table>
+<tr><th>الملف</th><th>الجداول</th></tr>
+<tr><td><code>V1__accounts.sql</code></td><td>users, addresses, push_devices, login_attempts, audit_log</td></tr>
+<tr><td><code>V2__catalog.sql</code></td><td>stores, products, favorites</td></tr>
+<tr><td><code>V3__orders.sql</code></td><td>delivery_zones, orders, order_items, order_attachments, order_events</td></tr>
+<tr><td><code>V4__payments.sql</code></td><td>payments, wallet_transactions, promo_codes, loyalty_points</td></tr>
+<tr><td><code>V5__operations.sql</code></td><td>driver_status, reviews, complaints, notifications</td></tr>
+<tr><td><code>V6__seed.sql</code></td><td>البيانات الأولية: المناطق والمطاعم والمنيو</td></tr>
+<tr><td><code>V7__product_description_en.sql</code></td><td>إضافة وصف إنجليزي للمنتجات (مثال على تعديل جدول موجود)</td></tr>
+</table>
+<h3>العلاقات الأساسية (ERD مختصر)</h3>
+<div class="card ltr" style="font-family:Consolas,monospace;font-size:9pt">
+users (1) ───&lt; (N) orders  ── customer_id / driver_id<br>
+stores (1) ───&lt; (N) products<br>
+stores (1) ───&lt; (N) orders<br>
+orders (1) ───&lt; (N) order_items &gt;─── (1) products<br>
+orders (1) ───&lt; (N) order_events   (timeline: PLACED → ACCEPTED → …)<br>
+orders (1) ─── (1) payments, reviews<br>
+delivery_zones (1) ───&lt; (N) orders<br>
+users (1) ───&lt; (N) addresses, notifications, wallet_transactions
+</div>
+<h3>مفاهيم لازم تعرفها</h3>
+<ul>
+<li><b>Primary Key</b>: رقم مميز لكل صف (<code>id</code>). و<b>Foreign Key</b>: عمود بيشاور على صف في جدول تاني (<code>orders.store_id → stores.id</code>).</li>
+<li><b>Normalization</b>: أصناف الطلب في جدول لوحدها (<code>order_items</code>) بدل ما نكررها في <code>orders</code>.</li>
+<li><b>Transaction</b>: كذا عملية تنجح مع بعض أو تتلغي مع بعض. مثلاً إنشاء الطلب + أصنافه + خصم المحفظة.</li>
+<li><b>Index</b>: بيسرّع البحث (زي فهرس الكتاب).</li>
+<li><b>Migration</b>: كل تعديل على الجداول في ملف جديد برقم أكبر. Flyway بيشغّل اللي لسه ماتشغلش بس، وبيسجّل ده في جدول <code>flyway_schema_history</code>.</li>
+<li>الأسعار متخزنة <code>NUMERIC</code> وفي Java <code>BigDecimal</code> (مش double) عشان الفلوس متتلخبطش في الكسور.</li>
+</ul>
+
+<!-- ============================================================ -->
+
+<h2 id="s7">٧. JDBC — طريقة الدكتور وطريقتنا</h2>
+<div class="card">
+<b>JDBC</b> (Java Database Connectivity) هي الطريقة اللي Java بتكلم بيها أي قاعدة بيانات. كل قاعدة بيانات ليها <b>Driver</b> (SQL Server ليه <code>sqljdbc</code> اللي الدكتور بعته، وPostgreSQL ليه <code>postgresql</code>).
+</div>
+<h3>١) جملة الاتصال (Connection String)</h3>
+<table>
+<tr><th></th><th>اللي الدكتور شرحه (SQL Server)</th><th>اللي عندنا (PostgreSQL)</th></tr>
+<tr><td>البروتوكول</td><td><code>jdbc:sqlserver://</code></td><td><code>jdbc:postgresql://</code></td></tr>
+<tr><td>السيرفر</td><td><code>localhost\SQLEXPRESS</code></td><td><code>aws-0-eu-north-1.pooler.supabase.com:5432</code> (أو <code>localhost:5432</code> على جهازك)</td></tr>
+<tr><td>قاعدة البيانات</td><td><code>databaseName=DEPI_Library</code></td><td><code>/postgres</code> (أو <code>/velox</code> محلياً)</td></tr>
+<tr><td>التشفير</td><td><code>encrypt=true; trustServerCertificate=true</code></td><td><code>sslmode=require</code></td></tr>
+<tr><td>اليوزر والباسورد</td><td>جوه الكود</td><td><b>برّه الكود</b> في متغيرات بيئة <code>DB_USER</code> و<code>DB_PASSWORD</code> (عشان الباسورد ميترفعش على GitHub)</td></tr>
+</table>
+<p>في <code>application.properties</code>:</p>
+<pre>spring.datasource.url=${DB_URL:jdbc:postgresql://localhost:5432/velox}
+spring.datasource.username=${DB_USER:velox}
+<span class="c"># ${DB_URL:...} = خد القيمة من متغير البيئة DB_URL، ولو مش موجود استخدم اللي بعد النقطتين</span></pre>
+
+<h3>٢) نفس الاستعلام بالطريقتين</h3>
+<p><b>الطريقة الخام (زي الكورس):</b></p>
+<pre>String url = "jdbc:postgresql://localhost:5432/velox";
+<span class="k">try</span> (Connection con = DriverManager.getConnection(url, user, password);
+     PreparedStatement ps = con.prepareStatement(
+         "SELECT * FROM delivery_zones WHERE code = ? AND active")) {
+    ps.setString(1, code);                       <span class="c">// ? بتتملي بأمان — ده بيمنع SQL Injection</span>
+    <span class="k">try</span> (ResultSet rs = ps.executeQuery()) {
+        <span class="k">while</span> (rs.next()) {
+            String name = rs.getString("name_ar");
+            BigDecimal fee = rs.getBigDecimal("fee");
+        }
+    }
+}   <span class="c">// try-with-resources بيقفل الاتصال لوحده</span></pre>
+<p><b>طريقتنا بـ JdbcTemplate (من <code>ZoneRepository.java</code> الحقيقي):</b></p>
+<pre><span class="k">@Repository</span>
+<span class="k">public class</span> ZoneRepository {
+
+    <span class="c">// RowMapper: بيحوّل كل صف من ResultSet لأوبجكت Java</span>
+    <span class="k">private static final</span> RowMapper&lt;DeliveryZone&gt; ZONE = (rs, n) -&gt; <span class="k">new</span> DeliveryZone(
+            rs.getString("code"), rs.getString("name_ar"), rs.getString("name_en"),
+            rs.getString("kind"), rs.getBigDecimal("fee"), rs.getInt("eta_min"),
+            rs.getBoolean("active"), rs.getInt("sort_order"));
+
+    <span class="k">private final</span> JdbcTemplate db;
+
+    <span class="k">public</span> ZoneRepository(JdbcTemplate db) { <span class="k">this</span>.db = db; }   <span class="c">// Dependency Injection</span>
+
+    <span class="k">public</span> Optional&lt;DeliveryZone&gt; findActive(String code) {
+        <span class="k">return</span> db.query("SELECT * FROM delivery_zones WHERE code = ? AND active", ZONE, code)
+                 .stream().findFirst();
+    }
+
+    <span class="k">public void</span> insert(DeliveryZone z) {
+        db.update("INSERT INTO delivery_zones (code, name_ar, name_en, kind, fee, eta_min, active, sort_order) "
+                + "VALUES (?,?,?,?,?,?,?,?)", z.code(), z.nameAr(), z.nameEn(), z.kind(), z.fee(),
+                z.etaMinutes(), z.active(), z.sortOrder());
+    }
+}</pre>
+<div class="note">
+<b>الفرق:</b> JdbcTemplate بيعمل نفس خطوات JDBC بالظبط (Connection ← PreparedStatement ← ResultSet ← close) بس هو اللي بيفتح ويقفل، ومعاه <b>Connection Pool</b> (HikariCP) يعني بيحتفظ باتصالات مفتوحة جاهزة بدل ما يفتح اتصال جديد مع كل طلب، فالسيرفر بيبقى أسرع.<br>
+<b>أهم حاجة أمنياً:</b> إحنا <u>مبنلزقش</u> كلام المستخدم جوه الـ SQL أبداً. دايماً <code>?</code>. لو كتبنا <code>"... WHERE code = '" + code + "'"</code> حد ممكن يكتب <code>' OR 1=1 --</code> ويقرا كل الجدول. ده اسمه <b>SQL Injection</b>، وجرّبناه في اختبار الاختراق ومنفعش.
+</div>
+
+<!-- ============================================================ -->
+
+<h2 id="s8">٨. السيرفر بـ Spring Boot</h2>
+<h3>نقطة البداية</h3>
+<pre><span class="k">@SpringBootApplication</span>
+<span class="k">public class</span> VeloxApplication {
+    <span class="k">public static void</span> main(String[] args) {
+        SpringApplication.run(VeloxApplication.class, args);   <span class="c">// بيشغّل Tomcat على بورت 8080 + Flyway + كل الكلاسات</span>
+    }
+}</pre>
+<h3>طلب واحد من أوله لآخره: <code>GET /api/zones</code></h3>
+<ol>
+<li>التطبيق يبعت <code>GET https://.../api/zones</code>.</li>
+<li><b>Filters</b> الأول: <code>SecurityHeadersFilter</code> بيحط رؤوس الأمان، و CORS بيتأكد إن الطلب جاي من موقع مسموح.</li>
+<li><b>Controller</b> (<code>ZoneController</code>) يستقبله:
+<pre><span class="k">@RestController</span>
+<span class="k">public class</span> ZoneController {
+    <span class="k">private final</span> ZoneService zones;
+    <span class="k">public</span> ZoneController(ZoneService zones) { <span class="k">this</span>.zones = zones; }
+
+    <span class="k">@GetMapping</span>("/api/zones")
+    <span class="k">public</span> List&lt;ZoneView&gt; zones() {
+        <span class="k">return</span> zones.active().stream().map(ZoneView::of).toList();
+    }
+
+    <span class="k">@PostMapping</span>("/api/admin/zones")
+    <span class="k">@ResponseStatus</span>(HttpStatus.CREATED)
+    <span class="k">public void</span> create(<span class="k">@CurrentUser</span> AuthUser me, <span class="k">@Valid @RequestBody</span> ZoneRequest req) {
+        zones.create(me, req.toZone());     <span class="c">// الـ Service بيتأكد إن me أدمن</span>
+    }
+}</pre></li>
+<li><b>Service</b> (<code>ZoneService</code>) فيه القواعد: مين مسموحله، والبيانات صح ولا لأ.</li>
+<li><b>Repository</b> (<code>ZoneRepository</code>) يعمل الـ SQL (شفناه فوق).</li>
+<li>Spring يحوّل الـ <code>List&lt;ZoneView&gt;</code> لـ JSON أوتوماتيك (مكتبة Jackson) ويرجّعه بـ <code>200</code>.</li>
+</ol>
+<h3>أهم الـ Annotations</h3>
+<table>
+<tr><th>Annotation</th><th>معناها</th></tr>
+<tr><td><code>@RestController</code></td><td>الكلاس ده بيستقبل طلبات HTTP ويرجّع JSON</td></tr>
+<tr><td><code>@GetMapping / @PostMapping / @PutMapping / @PatchMapping / @DeleteMapping</code></td><td>العنوان والـ Method</td></tr>
+<tr><td><code>@PathVariable</code></td><td>جزء من العنوان: <code>/api/orders/{code}</code></td></tr>
+<tr><td><code>@RequestBody</code> + <code>@Valid</code></td><td>الـ JSON اللي جاي يتحوّل لأوبجكت ويتراجع (مثلاً <code>@NotBlank</code>, <code>@Email</code>, <code>@Size</code>)</td></tr>
+<tr><td><code>@Service / @Repository / @Component</code></td><td>Spring يعمل منه نسخة واحدة ويديها لأي حد محتاجها (Bean)</td></tr>
+<tr><td><code>@Transactional</code></td><td>كل اللي جوه الميثود ينجح مع بعض أو يتلغي مع بعض</td></tr>
+<tr><td><code>@Scheduled</code></td><td>ميثود بتشتغل لوحدها كل فترة</td></tr>
+<tr><td><code>@CurrentUser</code></td><td>Annotation إحنا عاملينها: بتجيب المستخدم من التوكن (<code>CurrentUserResolver</code>)</td></tr>
+</table>
+<h3>الأخطاء</h3>
+<p>أي مشكلة بنرمي <code>ApiException</code> بكود ورسالة، و<code>GlobalExceptionHandler</code> (<code>@RestControllerAdvice</code>) بيحوّلها لرد JSON ثابت الشكل. ومبنرجعش أبداً تفاصيل الخطأ الداخلية (<code>server.error.include-stacktrace=never</code>) عشان المهاجم ميعرفش حاجة عن الكود.</p>
+<h3>Swagger</h3>
+<p>لو شغّلت السيرفر محلياً افتح <code>http://localhost:8080/swagger-ui.html</code>: هتلاقي كل العناوين وتقدر تجرّبها. في السيرفر الحقيقي مقفولة (<code>VELOX_API_DOCS=false</code>) عشان الأمان.</p>
+
+<!-- ============================================================ -->
+
+<h2 id="s9">٩. رحلة الطلب (State Machine)</h2>
+<p>حالة الطلب <code>enum OrderStatus</code>، وكل انتقال مسموح لنوع حساب معيّن بس:</p>
+<table>
+<tr><th>من</th><th>إلى</th><th>مين يقدر</th></tr>
+<tr><td>PENDING_PAYMENT</td><td>PLACED</td><td>السيستم (لما الدفع الأونلاين يتأكد)</td></tr>
+<tr><td>PLACED</td><td>ACCEPTED / REJECTED</td><td>المطعم</td></tr>
+<tr><td>PLACED</td><td>CANCELLED</td><td>العميل (قبل ما المطعم يقبل بس)</td></tr>
+<tr><td>ACCEPTED</td><td>READY</td><td>المطعم</td></tr>
+<tr><td>READY</td><td>PICKED_UP</td><td>المندوب</td></tr>
+<tr><td>PICKED_UP</td><td>DELIVERED</td><td>المندوب</td></tr>
+<tr><td>DELIVERED</td><td>RETURNED</td><td>العميل (مرتجع)</td></tr>
+</table>
+<pre><span class="k">public boolean</span> canMoveTo(OrderStatus next, Actor actor) {
+    <span class="k">return</span> RULES.getOrDefault(<span class="k">this</span>, Map.of()).getOrDefault(next, Set.of()).contains(actor);
+}</pre>
+<ul>
+<li>كل انتقال بيتسجّل في <code>order_events</code>، وده الـ Timeline اللي العميل بيشوفه.</li>
+<li><b>StaleOrderCloser</b> (<code>@Scheduled</code>): لو المطعم مردّش في <b>15 دقيقة</b> الطلب بيتلغي لوحده والفلوس بترجع (لو كان دفع أونلاين). ده حصل فعلاً في التجربة: "The store didn't answer".</li>
+<li>الأسعار بيحسبها السيرفر بس (<code>PricingService</code>): سعر الأصناف من قاعدة البيانات + رسوم المنطقة − الكوبون. التطبيق مبيبعتش سعر، عشان محدش يغيّره.</li>
+<li><b>المندوب يقدر ياخد الطلب</b> من أول ما المطعم يقبل (ACCEPTED أو READY)، بس مينفعش يدوس "استلمت" غير بعد READY. ولو محدش خده في <b>40 دقيقة</b> الطلب بيتلغي لوحده.</li></ul>
+
+<!-- ============================================================ -->
+
+<h2 id="s10">١٠. التحديث المباشر والإشعارات</h2>
+<table>
+<tr><th>الطريقة</th><th>بتشتغل إزاي</th><th>بنستخدمها في</th></tr>
+<tr><td><b>SSE</b> (Server-Sent Events)</td><td>التطبيق بيفتح اتصال واحد مفتوح على <code>/api/events</code> والسيرفر يبعت فيه أي تغيير فوراً (<code>EventHub</code> + <code>SseEmitter</code>)</td><td>الطلب الجديد يظهر عند المطعم بصوت، وحالة الطلب تتحدث عند العميل، ومكان المندوب</td></tr>
+<tr><td><b>Push (FCM)</b></td><td>السيرفر يبعت لـ Firebase، وFirebase يوصّل الإشعار للموبايل حتى لو التطبيق مقفول</td><td>"طلبك اتقبل" و"المندوب وصل"</td></tr>
+<tr><td><b>Inbox</b></td><td>جدول <code>notifications</code></td><td>صفحة الإشعارات جوه التطبيق</td></tr>
+</table>
+<div class="note">ليه SSE مش إن التطبيق يسأل كل ثانية (Polling)؟ عشان Polling بيضيّع نت وبطارية وبيتقل السيرفر. وSSE أبسط من WebSocket لأن الداتا رايحة في اتجاه واحد (من السيرفر للتطبيق).</div>
+
+<!-- ============================================================ -->
+
+<h2 id="s11">١١. الأمان (إحنا Pentest track — الجزء ده مهم جداً)</h2>
+<h3>١) الباسوردات</h3>
+<pre><span class="c">// PasswordHasher.java — PBKDF2-HMAC-SHA256، 210,000 لفة، و salt عشوائي 16 بايت لكل باسورد</span>
+<span class="k">static final int</span> ROUNDS = 210_000;
+<span class="k">public</span> String hash(String password) {
+    ...
+    <span class="k">return</span> "pbkdf2$" + ROUNDS + "$" + b64(salt) + "$" + b64(pbkdf2(password, salt, ROUNDS));
+}</pre>
+<ul>
+<li>الباسورد <b>مش متخزن أبداً</b>، بنخزن الـ hash بس. و Hash ده اتجاه واحد: مينفعش يرجع باسورد.</li>
+<li><b>Salt</b>: نفس الباسورد لاتنين بيطلع hash مختلف، فالـ Rainbow tables مبتنفعش.</li>
+<li><b>210,000 لفة</b>: بتخلي تخمين كل باسورد بطيء جداً على المهاجم.</li>
+</ul>
+<h3>٢) تسجيل الدخول (Token)</h3>
+<pre><span class="c">// TokenService.java — توكن موقّع بـ HMAC-SHA256</span>
+<span class="c">// شكله:  base64(publicId) . version . expiry . signature</span></pre>
+<ul>
+<li>بعد الدخول السيرفر يدّي التطبيق <b>توكن</b>، والتطبيق يبعته مع كل طلب: <code>Authorization: Bearer &lt;token&gt;</code>.</li>
+<li>التوكن <b>موقّع</b> بمفتاح سري على السيرفر (<code>VELOX_TOKEN_SECRET</code>). لو حد غيّر حرف واحد التوقيع يبوظ والطلب يترفض <code>401</code>.</li>
+<li>ليه <b>version</b>؟ لما المستخدم يغيّر الباسورد أو الأدمن يقفل حسابه، الـ version يزيد، فكل التوكنات القديمة تبطل فوراً.</li>
+<li>التوكن ليه تاريخ انتهاء (expiry).</li>
+</ul>
+<h3>٣) الصلاحيات (Authorization)</h3>
+<ul>
+<li>كل مستخدم ليه <code>Role</code>. الـ Service بيتأكد قبل أي عملية: المطعم يشوف طلباته هو بس، والمندوب ميقدرش يقبل طلب مكان المطعم.</li>
+<li>كل الأرقام اللي في العناوين <code>publicId</code> عشوائي أو كود (<code>ORD-1009</code>)، و دايماً بنتأكد إن الطلب ده بتاعك. ده بيمنع <b>IDOR</b> (إنك تغيّر رقم في اللينك وتشوف داتا حد تاني).</li>
+</ul>
+<h3>٤) حمايات تانية</h3>
+<table>
+<tr><th>الحماية</th><th>بتمنع إيه</th><th>فين</th></tr>
+<tr><td>Login throttle: محاولات كتير غلط = قفل مؤقت (نافذة 10 دقايق)</td><td>Brute force (تخمين الباسورد)</td><td><code>LoginThrottle</code> + جدول <code>login_attempts</code></td></tr>
+<tr><td>PreparedStatement (<code>?</code>)</td><td>SQL Injection</td><td>كل الـ Repositories</td></tr>
+<tr><td>Bean Validation (<code>@Valid</code>, <code>@Size</code>)</td><td>بيانات غلط أو طويلة جداً</td><td>الـ DTOs</td></tr>
+<tr><td>CORS</td><td>موقع غريب يكلم الـ API بتاعنا من متصفح الضحية</td><td><code>WebConfig</code></td></tr>
+<tr><td>Security headers (X-Frame-Options, nosniff, HSTS…)</td><td>Clickjacking ومشاكل المتصفح</td><td><code>SecurityHeadersFilter</code></td></tr>
+<tr><td>Audit log</td><td>نعرف مين عمل إيه (تغيير صلاحية، قفل حساب)</td><td><code>AuditLog</code> + <code>audit_log</code></td></tr>
+<tr><td>فحص الصور المرفوعة (النوع والحجم)</td><td>رفع ملف خبيث</td><td><code>ImageStorage</code></td></tr>
+<tr><td>Docker بيشتغل بيوزر عادي مش root</td><td>لو حد اخترق السيرفر ميبقاش admin على الجهاز</td><td><code>Dockerfile</code></td></tr>
+<tr><td>الأسرار في متغيرات بيئة مش في الكود</td><td>تسريب الباسوردات على GitHub</td><td><code>deploy/.env</code> (مش بيترفع)</td></tr>
+</table>
+<h3>٥) الثغرات اللي لقيناها بنفسنا وقفلناها (اختبار ما قبل الرفع)</h3>
+<table>
+<tr><th>الثغرة</th><th>الخطورة</th><th>الحل</th></tr>
+<tr><td>التطبيق بيقبل أي لينك سيرفر من قناة ntfy، فحد ممكن يبعت لينك بتاعه ويسرق الباسوردات</td><td>عالية جداً</td><td>التطبيق يقبل لينكات <code>https://…trycloudflare.com</code> بس، والنسخة النهائية لينكها ثابت جوه الكود (<code>API_URL</code>)</td></tr>
+<tr><td>التطبيق بيسمح بـ HTTP من غير تشفير</td><td>عالية</td><td><code>usesCleartextTraffic="false"</code> في نسخة الـ Release</td></tr>
+<tr><td>Android backup بيطلّع التوكن</td><td>متوسطة</td><td><code>allowBackup="false"</code></td></tr>
+<tr><td>حسابات مندوب تجريبية فاضلة على السيرفر</td><td>متوسطة</td><td>اتقفلت، والاختبار بقى يمسح الحساب بتاعه في الآخر</td></tr>
+</table>
+<p>وكمان اتأكدنا إن <code>/actuator</code> و<code>/swagger</code> و<code>/.env</code> بيرجعوا <code>404</code> على السيرفر الحقيقي. التقارير الكاملة لكل جزء في فولدر <code>security/</code> (catalog, orders, payments, operations).</p>
+
+<!-- ============================================================ -->
+
+<div class="pb"></div>
+<h2 id="s12">١٢. الاختبارات (Testing) — كل الأنواع وآخر النتايج</h2>
+<div class="card">الدكتور طالب <b>Manual</b> و<b>Automated</b> و<b>API</b>. إحنا عندنا الـ 3 ومعاهم Security وPerformance وUsability. <b>طريقة تشغيل كل نوع خطوة بخطوة</b> في <code>tests/HOW_TO_TEST.md</code>، والنتايج في <code>tests/TEST_REPORT.md</code> و<code>tests/results/</code>.</div>
+
+<h3>١) الأنواع وآخر نتيجة</h3>
+<table>
+<tr><th>النوع</th><th>الأداة</th><th>بيختبر إيه</th><th>آخر نتيجة</th></tr>
+<tr><td><b>Unit</b> (Automated)</td><td>JUnit 5</td><td>كلاس واحد لوحده: الباسورد، والتوكن، وحالات الطلب، والكتالوج</td><td rowspan="2"><b>97 / 97</b> (19 نوفمبر)</td></tr>
+<tr><td><b>Integration</b> (Automated)</td><td>JUnit 5 + Spring Boot Test + Testcontainers</td><td>السيرفر كله + PostgreSQL حقيقي جوه Docker، وبنبعتله طلبات HTTP</td></tr>
+<tr><td><b>End-to-End</b> على السيرفر الحقيقي</td><td>Python (<code>tests/e2e_live_check.py</code>)</td><td>45 فحص: الصفحات، ورؤوس الأمان، وCORS، والرحلة الكاملة، ومسح الحسابات في الآخر</td><td><b>45 / 45</b> بـ HTTPS (18 نوفمبر)</td></tr>
+<tr><td><b>API</b></td><td>Postman / Newman</td><td>30 طلب و42 تأكيد، ومنهم هجمات: IDOR، والتلاعب بالسعر، وXSS، وتوكن مزوّر، ورفع الصلاحيات</td><td>30 / 30 (أكتوبر). التيم هيعيده</td></tr>
+<tr><td><b>UI Automated</b></td><td>Selenium (Chrome)</td><td>الموقع ولوحة الأدمن، كأن حد بيدوس بالماوس</td><td>4 / 4 (أكتوبر). رحيق هتعيده</td></tr>
+<tr><td><b>Manual</b></td><td>Excel (<code>tests/manual/VELOX-Manual-Tests.xlsx</code>)</td><td>47 حالة بالخطوات والمتوقع، متقسمة على التيم</td><td>التيم بينفّذها</td></tr>
+<tr><td><b>Security</b> (Pentest)</td><td>Burp Suite، وZAP، وSpotBugs + FindSecBugs، وCodeQL</td><td>هجمات على كل جزء (<code>security/*.md</code>)، وفحص الكود</td><td>SpotBugs: 0 مشاكل. التقارير اليدوية التيم بيكملها</td></tr>
+<tr><td><b>Performance</b></td><td>Apache JMeter (<code>velox-browse.jmx</code>)</td><td>100 مستخدم في نفس الوقت × 10 لفّات</td><td>أكتوبر (داتابيز محلية): p95 = 116ms. نوفمبر (داتابيز بعيدة): p95 = 3 ثواني (D-10)</td></tr>
+<tr><td><b>Flutter</b></td><td><code>flutter test</code> + <code>flutter analyze</code></td><td>شاشات التطبيق وترجمة الأخطاء</td><td><b>6 / 6</b>، والفحص من غير مشاكل</td></tr>
+<tr><td><b>Usability</b></td><td>تاب في ملف الـ Excel</td><td>5 مهام على 5 أشخاص من برّه التيم</td><td>التيم بينفّذها</td></tr>
+</table>
+
+<h3>٢) حاجة حصلت فعلاً وبتتقال للدكتور</h3>
+<div class="ok">لما شغّلنا الـ 97 اختبار على جهاز نبيه فشل اختبار واحد: <code>pushConfigIsEmptyWithoutFirebase</code>. <b>السبب مكانش غلطة في التطبيق.</b> الاختبار كان بيقرا إعدادات Firebase الحقيقية اللي على الجهاز، فالاختبار <b>مكانش معزول</b> عن الجهاز اللي بيشتغل عليه. صلّحناه بإن الاختبارات تتجاهل إعدادات الجهاز، فبقت <b>97/97</b>. ده مثال على "Test isolation".</div>
+
+<h3>٣) JUnit: إزاي بيشتغل</h3>
+<pre><span class="k">@Test</span>
+<span class="k">void</span> wrongActorsAreRefused() {
+    assertFalse(OrderStatus.PLACED.canMoveTo(OrderStatus.ACCEPTED, Actor.CUSTOMER),
+                "customer can't accept own order");
+    assertFalse(OrderStatus.READY.canMoveTo(OrderStatus.PICKED_UP, Actor.RESTAURANT));
+}</pre>
+<table>
+<tr><th>الحاجة</th><th>معناها</th></tr>
+<tr><td><code>@Test</code></td><td>الميثود دي اختبار</td></tr>
+<tr><td><code>@BeforeEach / @AfterEach</code></td><td>تتنفذ قبل/بعد كل اختبار</td></tr>
+<tr><td><code>assertEquals / assertTrue / assertFalse / assertThrows</code></td><td>التأكيدات</td></tr>
+<tr><td><b>AAA</b></td><td>Arrange (جهّز) ← Act (نفّذ) ← Assert (اتأكد)</td></tr>
+<tr><td><b>Testcontainers</b></td><td>بيشغّل PostgreSQL حقيقي في Docker للاختبار، فالاختبار بيبقى على نفس قاعدة البيانات اللي في الحقيقة</td></tr>
+</table>
+<p><b>تشغيلها:</b> <code>cd backend</code> ثم <code>.\mvnw.cmd test</code>، أو من NetBeans: كليك يمين على المشروع ← Test.</p>
+
+<h3>٤) Manual Testing: إزاي بيتعمل</h3>
+<ol>
+<li>كل حالة ليها: <b>ID</b>، والجزء، والخطوات، والنتيجة المتوقعة.</li>
+<li>بتنفّذها بإيدك وبتكتب <b>النتيجة الفعلية</b> و<b>Pass / Fail / Blocked</b> ومعاها سكرينشوت.</li>
+<li>أي Fail بيتسجّل في <b>Bug Report</b>: الخطوات، والمتوقع، والفعلي، والخطورة (Critical / High / Medium / Low)، والحالة.</li>
+</ol>
+<table>
+<tr><th>مين</th><th>الحالات</th></tr>
+<tr><td>نبيه</td><td>M-ACC-01 → 10: التسجيل، والدخول، والقفل بعد 5 محاولات، وتغيير الباسورد، وSQL Injection، وواتساب الإدارة</td></tr>
+<tr><td>هدى</td><td>M-CAT-01 → 09: المطاعم، والمنيو، والبحث، والمفضلة، والمطعم يغيّر السعر ويقفل صنف</td></tr>
+<tr><td>عبد الرحمن</td><td>M-ORD-01 → 10: السلة، والرسوم، والطلب، والكوبونات، والإلغاء، والمشوار، والتتبع، ولوحة الأدمن</td></tr>
+<tr><td>فادي</td><td>M-PAY-01 → 08: المحفظة، والإشعارات، والفكّة، والتقييم، والشكوى، و"اطلب تاني"</td></tr>
+<tr><td>رحيق</td><td>M-OPS-01 → 10: الطلب بيرن، والقبول والرفض وجاهز، والمندوب أونلاين وياخد ويستلم ويسلّم، والإلغاء الأوتوماتيك</td></tr>
+</table>
+
+<h3>٥) API Testing: إزاي بيتعمل</h3>
+<p>بنبعت طلبات للـ API مباشرة من غير التطبيق، ونتأكد من <b>الكود</b> (200، 401، 403، 404) و<b>الرد</b>:</p>
+<pre>pm.test("IDOR: another customer can't read the order", () =>
+    pm.expect(pm.response.code).to.be.oneOf([403, 404]));</pre>
+<p>في Postman: Import ← <code>tests/api/velox.postman_collection.json</code> ← Run. وفي Swagger: <code>localhost:8080/swagger-ui.html</code> ← Try it out.</p>
+
+<h3>٦) Security Testing: إزاي بيتعمل</h3>
+<p>بـ <b>Burp Suite</b>: Proxy ← Open browser ← اعمل الحاجة ← HTTP history ← Send to Repeater ← غيّر وابعت:</p>
+<table>
+<tr><th>الهجمة</th><th>بتعمل إيه</th><th>المتوقع</th></tr>
+<tr><td>IDOR</td><td>تغيّر رقم الطلب لطلب حد تاني</td><td>403 / 404</td></tr>
+<tr><td>Missing auth</td><td>تشيل سطر Authorization</td><td>401</td></tr>
+<tr><td>Wrong role</td><td>طلب مطعم بتوكن عميل</td><td>403</td></tr>
+<tr><td>Price tampering</td><td>تبعت سعر من عندك</td><td>السيرفر يتجاهله</td></tr>
+<tr><td>XSS</td><td><code>&lt;script&gt;</code> في العنوان</td><td>مرفوض أو بيظهر كنص</td></tr>
+<tr><td>SQL Injection</td><td><code>' OR 1=1 --</code></td><td>مرفوض</td></tr>
+<tr><td>Brute force</td><td>6 باسوردات غلط</td><td>429</td></tr>
+</table>
+
+<h3>٧) Bugs اللي لقيناها وقفلناها (من التقرير)</h3>
+<table>
+<tr><th>#</th><th>الغلطة</th><th>الخطورة</th><th>الحل</th></tr>
+<tr><td>D-01</td><td>تخمين كود فودافون كاش من غير حد</td><td>High</td><td>العدّاد بقى بيتحفظ حتى مع الخطأ</td></tr>
+<tr><td>D-08</td><td>لينك السيرفر ممكن يتسرق من قناة عامة</td><td><b>Critical</b></td><td>لينكات Cloudflare بس، والنسخة النهائية مقفولة على لينك واحد</td></tr>
+<tr><td>D-09</td><td>صفحة المطعم والمندوب مش بتتحدث بعد زرار</td><td>Low</td><td>بتتحدث دايماً بعد أي زرار</td></tr>
+<tr><td>D-10</td><td>الأداء مع الداتابيز البعيدة</td><td>Medium</td><td><b>مفتوحة</b>: محتاجة اختبار على الداتابيز المحلية</td></tr>
+<tr><td>D-12</td><td>التطبيق كان بيسمح بـ HTTP من غير تشفير، والتوكن كان بيتنسخ مع الـ backup</td><td>High</td><td>اتقفلوا الاتنين في نسخة الـ release</td></tr>
+<tr><td>—</td><td>اختبار بيقرا إعدادات Firebase بتاعة الجهاز</td><td>Low</td><td>الاختبارات بقت معزولة (97/97)</td></tr>
+</table>
+
+<h2 id="s13">١٣. الواجهة: تطبيق Flutter والموقع</h2>
+<div class="card"><b>Flutter</b> إطار من Google بلغة <b>Dart</b>. كتبنا الكود مرة واحدة وطلع منه <b>تطبيق أندرويد</b> و<b>نسخة ويب</b> (<code>/app/</code>). كل حاجة في Flutter عبارة عن <b>Widget</b> (زرار، نص، صفحة).</div>
+<h3>شكل الكود (<code>mobile/lib</code>)</h3>
+<table>
+<tr><th>الملف</th><th>بيعمل إيه</th></tr>
+<tr><td><code>main.dart</code></td><td>نقطة البداية: بيشغّل التطبيق ويختار الشاشة حسب نوع الحساب</td></tr>
+<tr><td><code>core/api.dart</code></td><td>كل الكلام مع السيرفر (GET/POST + التوكن + اكتشاف لينك السيرفر)</td></tr>
+<tr><td><code>core/app_state.dart</code></td><td>حالة التطبيق كلها (المستخدم، السلة، اللغة، الإشعارات المباشرة) باستخدام <b>Provider</b></td></tr>
+<tr><td><code>core/models.dart</code></td><td>كلاسات الداتا (Store, Product, OrderView…) وتحويلها من JSON</td></tr>
+<tr><td><code>core/strings.dart</code></td><td>كل الكلام بالعربي والإنجليزي (التطبيق بلغتين)</td></tr>
+<tr><td><code>core/theme.dart</code></td><td>الألوان والخطوط (التصميم)</td></tr>
+<tr><td><code>core/push.dart</code></td><td>إشعارات Firebase</td></tr>
+<tr><td><code>screens/auth</code></td><td>الترحيب، التسجيل، الدخول</td></tr>
+<tr><td><code>screens/customer</code></td><td>الرئيسية، المطعم، البحث، السلة، الدفع، التتبع على الخريطة، الطلبات، المشاوير، الحساب</td></tr>
+<tr><td><code>screens/store/store_shell.dart</code></td><td>صفحة المطعم: الطلبات (جديدة/بتتجهز/جاهزة/خلصت)، المنيو، إحصائيات النهارده</td></tr>
+<tr><td><code>screens/driver/driver_shell.dart</code></td><td>صفحة المندوب: أونلاين، الطلبات المتاحة، التوصيلة الحالية، الأرباح</td></tr>
+<tr><td><code>screens/admin/admin_shell.dart</code></td><td>شاشة الأدمن</td></tr>
+<tr><td><code>widgets/common.dart</code></td><td>حاجات بنستخدمها في كل مكان (كارت الطلب، حالة الطلب، العنوان)</td></tr>
+</table>
+<h3>مفاهيم Flutter</h3>
+<ul>
+<li><b>StatelessWidget</b>: شاشة أو جزء مبيتغيرش. <b>StatefulWidget</b>: بيتغير، و<code>setState()</code> بيعيد رسمه.</li>
+<li><b>Provider</b> (State management): <code>AppState</code> بيتشاف من أي شاشة بـ <code>context.watch&lt;AppState&gt;()</code>، ولما يتغير كل الشاشات اللي بتتفرج عليه تتحدث.</li>
+<li><b>async / await</b>: الكلام مع السيرفر بياخد وقت، فالتطبيق مبيقفش وهو مستني.</li>
+<li><b>i18n</b>: <code>s.t('key')</code> بترجّع الكلام باللغة اللي المستخدم اختارها، والاتجاه (RTL/LTR) بيتظبط لوحده.</li>
+<li>الخرايط: <code>flutter_map</code> (OpenStreetMap) ومكان الموبايل: <code>geolocator</code>.</li>
+</ul>
+<h3>مثال: صفحة المطعم الجديدة</h3>
+<ul>
+<li>كارت فوق: اسم المطعم + زرار "بنستقبل طلبات" + ٣ عدّادات (مستني / بيتجهز / مع المندوب).</li>
+<li>كارت الطلب: رقم الطلب، "من كام دقيقة" (يحمرّ بعد 15 دقيقة)، اسم العميل، الأصناف وملاحظاتها، المبلغ، والمندوب اللي جاي مع زرار اتصال.</li>
+<li>الطلب الجديد بيوصل بصوت واهتزاز (SSE).</li>
+</ul>
+<h3>الموقع ولوحة التحكم</h3>
+<p><code>web/index.html</code> الموقع اللي بيعرض المطاعم الحقيقية من الـ API، و<code>web/admin/</code> لوحة التحكم، و<code>web/downloads/</code> فيه ملف الـ APK و<code>version.json</code>. السيرفر نفسه هو اللي بيعرض الصفحات دي (<code>StaticSiteConfig</code>).</p>
+<h3>التصميم</h3>
+<p>في <code>design/</code>: <code>DESIGN_SYSTEM.md</code> (الألوان والخطوط والمسافات) و<code>COMPETITOR_ANALYSIS.md</code> (تحليل طلبات وطلبات ومرسول وغيرهم). الخط Cairo، واللون الأساسي برتقالي محروق.</p>
+
+<!-- ============================================================ -->
+<h3 id="ui-new">الجديد في الواجهة (نوفمبر)</h3>
+<table>
+<tr><th>الشاشة</th><th>الجديد</th><th>الملف</th></tr>
+<tr><td>الرئيسية</td><td>تحية حسب الوقت باسم العميل، و"نفسك في [كلمة بتتغير]؟" (<code>_CravingHeadline</code> بـ <code>Timer</code> و<code>AnimatedSwitcher</code>)، ونقطة لايف بتنبض (<code>_LiveDot</code> بـ <code>AnimationController</code>)، وكارت "المندوب ابن البلد"</td><td><code>screens/customer/home_screen.dart</code></td></tr>
+<tr><td>المطعم</td><td>كارت فوق فيه "بنستقبل طلبات" و3 عدّادات، ووقت انتظار كل طلب (أحمر بعد 15 دقيقة)، والمندوب واتصال، ودليل "الطلب بيمشي إزاي"</td><td><code>screens/store/store_shell.dart</code></td></tr>
+<tr><td>المندوب</td><td>كارت ترحيب وأونلاين، و3 أرقام، وكارت الطلب الكامل، والفكّة، والخطوات والنصايح</td><td><code>screens/driver/driver_shell.dart</code></td></tr>
+<tr><td>الدخول</td><td>زرار واتساب الإدارة (<code>AdminContact</code>)</td><td><code>widgets/common.dart</code></td></tr>
+<tr><td>التحميل</td><td>شاشة باللوجو بدل الأبيض، بتختفي مع أول frame (<code>flutter-first-frame</code>)</td><td><code>mobile/web/index.html</code></td></tr>
+<tr><td>كل التطبيق</td><td>نسخة المتصفح مقفولة على السيرفر اللي اتفتحت منه (<code>serverLocked</code>)</td><td><code>core/api.dart</code></td></tr>
+</table>
+
+<div class="pb"></div>
+<h2 id="s14">١٤. طرق التشغيل التلاتة والـ APK</h2>
+<table>
+<tr><th>الطريقة</th><th>الداتابيز</th><th>مين يستخدمها</th><th>إزاي</th></tr>
+<tr><td><b>١. Docker بدبل كليك</b></td><td>PostgreSQL على نفس الجهاز</td><td><b>التيم + يوم المناقشة</b></td><td><code>START-VELOX.bat</code> (الجزء ب)</td></tr>
+<tr><td>٢. يدوي (Java)</td><td>Supabase على النت</td><td>جهاز نبيه (السيرفر الحقيقي)</td><td><code>java -XX:-UseBASE64Intrinsics -jar velox-backend-2.0.0.jar</code> ومعاه الإعدادات من <code>deploy/.env</code> (<code>docs/RUN_LOCAL.md</code>)</td></tr>
+<tr><td>٣. سيرفر حقيقي (VPS)</td><td>Supabase</td><td>لو اشترينا سيرفر بعدين</td><td>Docker أو لوحة استضافة (<code>docs/deploy-vps/</code>)</td></tr>
+</table>
+<h3>اللينك العام (Cloudflare Tunnel)</h3>
+<p>على جهاز نبيه: <code>cloudflared tunnel --url http://localhost:8080</code> بيدّي لينك <code>https://xxxx.trycloudflare.com</code> مؤقت، بيتغير كل restart. والتطبيق بيعرف اللينك الجديد لوحده من قناة <b>ntfy</b>، وبيقبل لينكات Cloudflare بس (عشان الأمان).</p>
+<h3>تطبيق الأندرويد (APK)</h3>
+<ul>
+<li>البناء: <code>flutter build apk --release --split-per-abi</code>. الملفات بتتحط في <code>web/downloads/</code>، ومعاها <code>version.json</code> فيه رقم النسخة.</li>
+<li><b>التحديث جوه التطبيق:</b> التطبيق بيقارن رقمه (<code>appBuild</code>) بـ <code>version.json</code>، ولو فيه أحدث بيظهر زرار تحديث.</li>
+<li>الـ APK بيرفض HTTP من غير تشفير (أمان)، فبيشتغل مع اللينك العام بس، مش مع النسخة المحلية.</li>
+<li><b>على النسخة المحلية:</b> من متصفح الموبايل ← Add to Home screen، وبيظهر كأيقونة VELOX.</li>
+<li><b>آخر APK:</b> 2.1.9. نسخة 2.1.10 محتاجة Avast HTTPS scanning يتقفل عشان تتبني.</li>
+</ul>
+<h3>Java2Shell (CVE-2026-114938)</h3>
+<p>ثغرة اتعلن عنها 17 نوفمبر في Java 17 على المعالجات اللي فيها AVX-512 VBMI. <b>اتأكدنا</b> إن جهاز نبيه (i7-10850H) مش متأثر، والإعداد <code>UseBASE64Intrinsics</code> مقفول أصلاً. وحطينا <code>-XX:-UseBASE64Intrinsics</code> في الـ Dockerfile وفي أوامر التشغيل <b>في نفس اليوم</b>.</p>
+
+<div class="pb"></div>
+<h2 id="s16">١٦. مين عمل إيه</h2>
+<table>
+<tr><th>العضو</th><th>السيرفر</th><th>غير كده</th><th>الاختبارات</th></tr>
+<tr><td><b>نبيه</b> (القائد)</td><td><code>auth</code>، <code>security</code>، <code>config</code>، <code>common</code></td><td>قاعدة البيانات، وDocker والتشغيل، وأساس التطبيق والرئيسية وصفحة المطعم، والتقارير</td><td>Manual M-ACC، وJUnit، وJMeter</td></tr>
+<tr><td><b>هدى</b></td><td><code>catalog</code>: المحلات والمنيو والصور</td><td>التصميم والتوثيق (SRS وERD)، ورفعت شغلها في <code>feature/hoda-updates</code></td><td>Manual M-CAT + Burp على الكتالوج</td></tr>
+<tr><td><b>عبد الرحمن</b></td><td><code>order</code>: الطلبات والمناطق والتحديث المباشر</td><td>الموقع ولوحة الأدمن</td><td>Manual M-ORD + Burp على الطلبات</td></tr>
+<tr><td><b>فادي</b></td><td><code>payment</code>، <code>notification</code></td><td>شاشات التطبيق (السلة والدفع والتتبع والحساب)</td><td>Manual M-PAY + Burp على الدفع</td></tr>
+<tr><td><b>رحيق</b></td><td><code>operation</code>: المطعم والمندوب والأدمن والتقييمات</td><td>مسؤولة الاختبارات</td><td>Manual M-OPS، وSelenium، وتجميع التقرير</td></tr>
+</table>
+
+<h2 id="s17">١٧. قاموس الكلمات</h2>
+<table>
+<tr><th>الكلمة</th><th>معناها ببساطة</th></tr>
+<tr><td>API</td><td>العناوين اللي التطبيق بيكلم بيها السيرفر</td></tr>
+<tr><td>Endpoint</td><td>عنوان واحد، زي <code>POST /api/orders</code></td></tr>
+<tr><td>DTO</td><td>كلاس شكل الداتا اللي داخلة أو خارجة من الـ API (مش نفس جدول قاعدة البيانات)</td></tr>
+<tr><td>Bean</td><td>أوبجكت Spring عامله وبيديه لأي حد محتاجه</td></tr>
+<tr><td>Dependency Injection</td><td>الكلاس بياخد اللي محتاجه في الـ Constructor بدل ما يعمل <code>new</code></td></tr>
+<tr><td>Connection Pool</td><td>اتصالات مفتوحة جاهزة بقاعدة البيانات بتتعاد في كل طلب</td></tr>
+<tr><td>Migration</td><td>ملف SQL بيعدّل شكل قاعدة البيانات بالترتيب</td></tr>
+<tr><td>Hash / Salt</td><td>تحويل الباسورد لشكل مينفعش يرجع / إضافة عشوائية عشان كل hash يبقى مختلف</td></tr>
+<tr><td>Token</td><td>"كارنيه" بيثبت إنك مسجّل دخول</td></tr>
+<tr><td>Authentication / Authorization</td><td>إنت مين؟ / مسموحلك تعمل إيه؟</td></tr>
+<tr><td>CORS</td><td>قاعدة المتصفح اللي بتحدد مين المواقع اللي تقدر تكلم الـ API</td></tr>
+<tr><td>IDOR</td><td>ثغرة إنك تغيّر رقم في الطلب وتوصل لداتا حد تاني</td></tr>
+<tr><td>SSE</td><td>اتصال مفتوح السيرفر بيبعت فيه تحديثات للتطبيق</td></tr>
+<tr><td>Container / Image</td><td>البرنامج + كل اللي محتاجه متغلفين مع بعض / القالب اللي بيطلع منه الكونتينر</td></tr>
+<tr><td>Reverse proxy</td><td>برنامج (Caddy) قاعد قدام السيرفر بيعمل HTTPS ويوصّل الطلبات</td></tr>
+<tr><td>Tunnel</td><td>طريق آمن بيدّي جهاز في البيت لينك عام</td></tr>
+<tr><td>JAR</td><td>ملف Java واحد فيه البرنامج كله وبيشتغل بـ <code>java -jar</code></td></tr>
+<tr><td>APK / AAB</td><td>ملف تطبيق الأندرويد للتسطيب المباشر / للرفع على Google Play</td></tr>
+<tr><td>p95</td><td>95% من الطلبات ردها أسرع من الرقم ده</td></tr>
+<tr><td>Testcontainers</td><td>مكتبة بتشغّل قاعدة بيانات حقيقية في Docker للاختبار</td></tr>
+</table>
+
+<!-- ============================================================ -->
+
+<h2 id="s18">١٨. أسئلة الدكتور المتوقعة بالإجابات</h2>
+<div class="card"><span class="q">س: اشرح المشروع في دقيقة.</span><br>منصة توصيل لسمنود فيها ٤ أنواع مستخدمين: عميل ومطعم ومندوب وأدمن. السيرفر Java Spring Boot وقاعدة البيانات PostgreSQL والتطبيق Flutter. الطلب بيمشي من العميل للمطعم للمندوب لحد ما يتسلّم، وكل ده بيتحدث مباشر.</div>
+<div class="card"><span class="q">س: إزاي السيرفر بيكلم قاعدة البيانات؟</span><br>بـ JDBC عن طريق JdbcTemplate من Spring. جملة الاتصال <code>jdbc:postgresql://host:5432/db</code> في <code>application.properties</code>، واليوزر والباسورد من متغيرات البيئة. وكل استعلام <code>PreparedStatement</code> بـ <code>?</code>.</div>
+<div class="card"><span class="q">س: إيه الفرق بين اللي عملتوه وبين DriverManager.getConnection اللي شرحناه؟</span><br>نفس الفكرة. JdbcTemplate جوّاه بيعمل Connection وPreparedStatement وResultSet وclose، بس بيستخدم Connection Pool بدل ما يفتح اتصال جديد كل مرة، وبيقلل الكود المكرر.</div>
+<div class="card"><span class="q">س: إيه هو SQL Injection وإزاي منعتوه؟</span><br>إن المستخدم يكتب SQL جوه خانة إدخال فيتنفذ. منعناه بإن كل القيم بتتبعت كـ parameters (<code>?</code>) مش بنلزقها في النص. وجرّبنا الهجوم في الـ Pentest ومنجحش.</div>
+<div class="card"><span class="q">س: الباسورد متخزن إزاي؟</span><br>PBKDF2-HMAC-SHA256 بـ 210,000 لفة وsalt عشوائي لكل باسورد. مش بنخزن الباسورد نفسه أبداً، وعليها اختبار JUnit (<code>PasswordHasherTest</code>).</div>
+<div class="card"><span class="q">س: الدخول بيشتغل إزاي؟</span><br>بعد ما الباسورد يتأكد، السيرفر يدّي توكن موقّع بـ HMAC-SHA256 فيه رقم المستخدم والـ version وتاريخ الانتهاء. التطبيق يبعته مع كل طلب، والسيرفر يتأكد من التوقيع. ولو الباسورد اتغير الـ version بيزيد فالتوكنات القديمة تبطل.</div>
+<div class="card"><span class="q">س: عندكم كام اختبار وأنواعهم إيه؟</span><br>97 اختبار JUnit (unit + integration بـ Testcontainers)، و45 فحص على السيرفر الحقيقي، وSelenium للموقع، وPostman للـ API، وJMeter للأداء (100 مستخدم، p95 = 116ms)، و6 اختبارات Flutter.</div>
+<div class="card"><span class="q">س: إيه الفرق بين Unit test وIntegration test؟</span><br>Unit بيختبر كلاس واحد لوحده من غير قاعدة بيانات ولا سيرفر (زي <code>OrderStatusTest</code>). Integration بيشغّل التطبيق كله مع PostgreSQL حقيقي وبيبعت طلبات HTTP (زي <code>OrderApiTest</code>).</div>
+<div class="card"><span class="q">س: اكتب اختبار JUnit دلوقتي.</span><br><code>@Test void accepted() { assertTrue(OrderStatus.PLACED.canMoveTo(OrderStatus.ACCEPTED, Actor.RESTAURANT)); }</code>: Arrange/Act/Assert.</div>
+<div class="card"><span class="q">س: إيه لازمة Maven؟</span><br>بينزّل المكتبات لوحده من <code>pom.xml</code> (بدل Add JAR/Folder)، وبيبني المشروع لـ JAR، وبيشغّل الاختبارات بـ <code>mvn test</code>.</div>
+<div class="card"><span class="q">س: لو المطعم مردّش على الطلب؟</span><br><code>StaleOrderCloser</code> بيشتغل كل شوية (<code>@Scheduled</code>)، ولو عدّى 15 دقيقة بيلغي الطلب ويرجّع الفلوس ويبلّغ العميل.</div>
+<div class="card"><span class="q">س: المطعم بيعرف بالطلب الجديد إزاي؟</span><br>SSE: التطبيق فاتح اتصال مع <code>/api/events</code>، فالسيرفر يبعت الطلب فوراً والتطبيق يعمل صوت واهتزاز. ولو التطبيق مقفول يوصل Push من Firebase.</div>
+<div class="card"><span class="q">س: إيه يمنع العميل يغيّر سعر الطلب؟</span><br>التطبيق بيبعت المنتجات والكميات بس، والسيرفر بيحسب السعر من قاعدة البيانات (<code>PricingService</code>).</div>
+<div class="card"><span class="q">س: إيه يمنع المندوب يشوف طلبات مطعم مش بتاعه أو عميل يشوف طلب حد تاني؟</span><br>كل Service بيتأكد من الـ Role ومن إن الطلب ده يخص المستخدم ده (منع IDOR). ولو مش بتاعك الرد <code>403</code> أو <code>404</code>.</div>
+<div class="card"><span class="q">س: الجداول اتعملت إزاي؟</span><br>بـ Flyway: ملفات <code>V1</code> لـ <code>V7</code>. أول ما السيرفر يشتغل بيشغّل اللي لسه ماتشغلش بالترتيب، فأي جهاز جديد بيطلع بنفس الجداول.</div>
+<div class="card"><span class="q">س: ليه Docker؟ والـ Dockerfile فيه مرحلتين ليه؟</span><br>عشان السيرفر يشتغل بنفس الشكل على أي جهاز. المرحلة الأولى بتبني بـ JDK وMaven، والتانية بتشغّل الـ JAR بس على JRE صغير بيوزر مش root، فالـ image أصغر وأأمن.</div>
+<div class="card"><span class="q">س: السيرفر مستضاف فين؟</span><br>دلوقتي على جهاز نبيه مع Cloudflare Tunnel وقاعدة البيانات على Supabase. وبننقله لسيرفر Hetzner (2 vCPU / 4GB / Ubuntu) بـ Docker وCaddy للـ HTTPS ولينك ثابت.</div>
+<div class="card"><span class="q">س: إيه أخطر ثغرة لقيتوها؟</span><br>التطبيق كان بيقبل أي لينك سيرفر من قناة عامة، فمهاجم ممكن يحوّل التطبيق لسيرفر بتاعه ويسرق الباسوردات. قفلناها بإن التطبيق يقبل لينكات Cloudflare بس، والنسخة النهائية لينكها ثابت جوه الكود.</div>
+<div class="card"><span class="q">س: ليه Flutter؟</span><br>كود واحد طلع منه أندرويد وويب. والتطبيق بلغتين عربي وإنجليزي، والاتجاه بيتظبط لوحده.</div>
+<div class="card"><span class="q">س: إيه الـ Layers في السيرفر؟</span><br>Controller (يستقبل HTTP) ← Service (القواعد والصلاحيات) ← Repository (SQL) ← Database.</div>
+<div class="card"><span class="q">س: ليه BigDecimal مش double في الفلوس؟</span><br>double بيعمل أخطاء كسور (0.1 + 0.2 ≠ 0.3). BigDecimal دقيق، والعمود في قاعدة البيانات NUMERIC.</div>
+<div class="card"><span class="q">س: لو 100 واحد طلبوا في نفس الوقت؟</span><br>جرّبناها بـ JMeter: 4000 طلب، صفر أخطاء، و95% أسرع من 116ms. والـ Connection Pool والـ ConcurrentHashMap بيخلّوا السيرفر يستحمل الطلبات اللي جاية مع بعض.</div>
+
+<!-- ============================================================ -->
+<div class="card"><span class="q">س: كل واحد في التيم بيشغّل المشروع إزاي؟</span><br>بـ Docker: دبل كليك على <code>START-VELOX.bat</code> بيشغّل قاعدة البيانات والسيرفر ويحمّل المنيو ويعمل الحسابات. كل جهاز بقاعدة بيانات وباسوردات خاصة بيه.</div>
+<div class="card"><span class="q">س: إيه الفرق بين Manual و Automated testing؟</span><br>الـ Manual حد بينفّذ الخطوات بإيده ويقارن بالمتوقع (عندنا 47 حالة). الـ Automated كود بيختبر لوحده وينفع يتكرر في ثواني (97 JUnit و30 Postman و4 Selenium).</div>
+<div class="card"><span class="q">س: إيه هو API testing وعملتوه إزاي؟</span><br>بنبعت طلبات للـ API مباشرة ونتأكد من الكود والرد. عندنا 30 طلب في Postman، منهم هجمات IDOR والتلاعب بالسعر وXSS والتوكن المزوّر.</div>
+<div class="card"><span class="q">س: اختبار فشل عندكم؟</span><br>آه، واحد: كان بيقرا إعدادات Firebase بتاعة الجهاز، فمكانش معزول. عزلناه وبقت 97/97.</div>
+<div class="card"><span class="q">س: سمعتوا عن Java2Shell؟</span><br>آه، CVE-2026-114938 في Java 17. اتأكدنا إن جهازنا مش متأثر، وقفلنا الجزء المصاب بـ <code>-XX:-UseBASE64Intrinsics</code> في نفس اليوم.</div>
+<div class="card"><span class="q">س: الشغل على GitHub متقسم إزاي؟</span><br>فرع لكل جزء، وفرع <code>velox-v2-integration</code> فيه النسخة الكاملة، وكل واحد بيرفع من حسابه ويعمل Pull Request.</div>
+
+<div class="pb"></div>
+<h2 id="demo">د. يوم المناقشة والبريزنتيشن</h2>
+<h3>تقسيم البريزنتيشن</h3>
+<table>
+<tr><th>مين</th><th>السلايدات</th></tr>
+<tr><td>هدى</td><td>الافتتاح، والمشكلة، والحل</td></tr>
+<tr><td>فادي</td><td>الأدوار الأربعة، وتجربة العميل</td></tr>
+<tr><td>رحيق</td><td>المطعم، ورحلة الطلب، والاختبارات</td></tr>
+<tr><td>عبد الرحمن</td><td>لوحة الأدمن، والمميزات (المشوار والتتبع)</td></tr>
+<tr><td>نبيه</td><td>التكنولوجيا، والـ Architecture، والأمان، والديمو، والختام والأسئلة</td></tr>
+</table>
+<h3>الديمو (5 دقايق)</h3>
+<div class="flow"><span>فادي: عميل يطلب</span><b>←</b><span>رحيق: المطعم يسمع ويقبل وجاهز</span><b>←</b><span>فادي: المندوب ياخد ويسلّم</span><b>←</b><span>عبد الرحمن: لوحة الأدمن</span><b>←</b><span>نبيه: الأمان (401 و403 وSQLi)</span></div>
+<h3>قبلها</h3>
+<ul>
+<li>كل واحد يشغّل VELOX على جهازه ويجرّب طلب كامل.</li>
+<li><b>لابتوب عرض + لابتوب احتياطي</b> + <b>فيديو متسجّل</b> لو كل حاجة وقعت.</li>
+<li>المندوب <b>أونلاين</b> قبل الطلب، والشبابيك مفتوحة ومتسجّل فيها دخول.</li>
+<li>التفاصيل كلها في <code>docs/DEMO_DAY.md</code>.</li>
+</ul>
+<h3>نصايح للشرح</h3>
+<ul>
+<li>متقروش من السلايد. السلايد كلمات قليلة، والشرح من دماغكم.</li>
+<li>الأرقام بتفرق: 97 اختبار، و45/45، و111 صنف، و15 دقيقة، و210,000 لفة، و22 جدول.</li>
+<li>كل واحد يقول "أنا عملت كذا، وده الكود بتاعه".</li>
+<li>المشاكل اللي لقيتوها بنفسكم (D-10، واختبار Firebase، وJava2Shell) <b>نقط قوة</b>.</li>
+</ul>
+
+<div class="card" style="text-align:center;margin-top:18px"><b>بالتوفيق يا فريق VELOX 🚀</b><br><span style="color:var(--m)">اتعمل من الكود الحقيقي للمشروع — فرع velox-v2-integration، 19 نوفمبر 2026</span></div>
+</main>
+</body>
+</html>

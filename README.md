@@ -4,52 +4,76 @@
 
 **مشروع مبادرة رواد مصر الرقمية (DEPI) — تراك Penetration Testing.**
 
+> **ابدأ من هنا:**
+> - ▶️ **شغّل VELOX على جهازك بدبل كليك (لكل التيم):** نزّل Docker Desktop ← دبل كليك على `START-VELOX.bat`. التفاصيل: [docs/TEAM_SETUP.md](docs/TEAM_SETUP.md)
+> - 🎤 **يوم المناقشة (العرض قدام الدكتور):** [docs/DEMO_DAY.md](docs/DEMO_DAY.md)
+> - 🛠️ **فهم كل خطوة وتشغيلها بإيدك:** [docs/RUN_LOCAL.md](docs/RUN_LOCAL.md)
+> - ✅ **نتايج الاختبارات:** [tests/TEST_REPORT.md](tests/TEST_REPORT.md) — والملفات الخام في [tests/results/](tests/results/)
+> - 📚 **ملف المذاكرة الكامل:** [docs/study/VELOX-Study-Guide.pdf](docs/study/VELOX-Study-Guide.pdf) — و**الخريطة التفاعلية:** [docs/study/velox-map.html](docs/study/velox-map.html) (نزّلها وافتحها في المتصفح)
+> - 🖥️ **تشغيله على سيرفر (VPS / aaPanel):** [docs/deploy-vps/](docs/deploy-vps/)
+
 | | |
 |---|---|
-| Backend | Java 17 · Spring Boot 3 · PostgreSQL 16 · Flyway |
-| Web | HTML / CSS / JavaScript |
-| Mobile | Flutter (Android — Google Play) |
-| Security | OWASP Top 10 · ZAP · Burp Suite · Dependency-Check · SpotBugs |
-| Testing | JUnit 5 · Mockito · Newman · Selenium · JMeter |
+| Backend | Java 17 · Spring Boot 3 · PostgreSQL 16 · Flyway · OpenAPI (Swagger) |
+| Mobile + app on the web | Flutter (Android APK / Google Play، ونفس التطبيق على `/app`) |
+| Website + dashboard | HTML / CSS / JavaScript (`/` و`/admin`) |
+| Security | OWASP Top 10 · CodeQL · SpotBugs + FindSecBugs · Trivy · OWASP ZAP · Burp Suite |
+| Testing | JUnit 5 + Testcontainers · Newman · Selenium · Flutter test · JMeter |
 
 ## هيكل الريبو
 ```
 backend/      الـ API (Java) — Clean Architecture: controller → service → repository → domain
-web/          الموقع
-mobile/       تطبيق الموبايل (Flutter)
+mobile/       تطبيق Flutter: عميل، مطعم، مندوب، أدمن (نفس الكود للأندرويد والمتصفح)
+web/          الموقع ولوحة تحكم الأدمن والمطعم
 database/     migrations — ملف لكل موديول
-docs/         SRS · ERD · التقرير · UML
-security/     تقارير اختبار الاختراق لكل موديول
-tests/        Postman · Selenium · JMeter · ZAP
-legacy/       الكود اللي اتسلم قبل كده (tag: v1.0-submitted) وتوثيقه
+design/       نظام التصميم (Nile Terracotta)، تحليل المنافسين، اختبار سهولة الاستخدام
+docs/         SRS · ERD · التقرير النهائي
+security/     خطط وتقارير اختبار الاختراق لكل موديول
+tests/        Newman · Selenium · JMeter · خطة وتقرير الاختبار
+deploy/       تشغيل المشروع على الإنترنت من جهاز (Cloudflare tunnel)
+legacy/       النسخة الأولى (tag: v1.0-submitted)
 ```
 
 ## المستندات
-- [SRS — المتطلبات](docs/SRS.md)
-- [قاعدة البيانات (ERD + القواعد)](docs/database/ERD.md)
+- [SRS — المتطلبات](docs/SRS.md) · [التقرير النهائي](docs/report/FINAL_REPORT.md)
+- [قاعدة البيانات](docs/database/ERD.md) · [نظام التصميم](design/DESIGN_SYSTEM.md) · [تحليل المنافسين](design/COMPETITOR_ANALYSIS.md)
+- [خطة الاختبار](tests/TEST_PLAN.md) · [تقرير الاختبار](tests/TEST_REPORT.md) · [اختبار الاختراق](security/)
 - [طريقة الشغل في التيم](CONTRIBUTING.md)
-- [توثيق النسخة الأولى](legacy/README.md)
 
-## الموديولات وأصحابها
-| الموديول | صاحبه | الفرع |
+## التيم
+كل واحد ماسك **موديول Java** في الباك إند + **تخصص**:
+
+| العضو | الموديول (Java) | التخصص |
 |---|---|---|
-| الحسابات والأمان + تجميع المشروع | نبيه — @nabosallem-svg (Team Lead) | `feature/auth` |
-| المحلات والمنتجات والبحث | Hoda (@hodayasser511-stack) | `feature/catalog` |
-| السلة والطلبات والتوصيل | Abdelrhman (@abdelrhman19122007) | `feature/orders` |
-| الدفع والمحفظة والإشعارات | Fady (@fadyza15-collab) | `feature/payments` |
-| لوحات المطعم والمندوب والأدمن | Raheek (@Raheek25) | `feature/operations` |
+| نبيه — @nabosallem-svg (Team Lead) | الحسابات والأمان + الأساس | المعمارية، الربط، DevOps وفحوصات الأمان، أساس تطبيق Flutter، الأداء، التقرير |
+| هدى — @hodayasser511-stack | المحلات والمنيو والبحث | UI/UX: التصميم، اختبار سهولة الاستخدام |
+| عبد الرحمن — @abdelrhman19122007 | الطلبات والتوصيل | الويب: الموقع ولوحة التحكم |
+| فادي — @fadyza15-collab | الدفع والمحفظة والإشعارات | الموبايل: شاشات Flutter، Google Play |
+| رحيق — @Raheek25 | المطعم والمندوب والأدمن | الاختبار والأمان: خطة وتقرير الاختبار، Newman، Selenium |
 
-## التشغيل
-محتاج Java 17 وDocker.
+## التشغيل على الجهاز
+محتاج Java 17 وDocker (وFlutter للتطبيق).
 
 ```bash
-docker compose up -d                      # PostgreSQL
+docker compose up -d db                   # PostgreSQL  (لو عندك PostgreSQL على 5432: VELOX_DB_PORT=5434)
 cd backend
-./mvnw spring-boot:run                    # الـ API على http://localhost:8080
-./mvnw verify                             # كل الاختبارات (بتشغّل PostgreSQL مؤقت لوحدها) + تقرير التغطية
+./mvnw spring-boot:run                    # http://localhost:8080  (API + الموقع + /admin + /app + /swagger-ui.html)
+./mvnw verify                             # كل الاختبارات + تقرير التغطية
 ```
 
 أول أدمن بيتعمل من الـ environment (مفيش باسورد جوه الكود):
 ```bash
 VELOX_ADMIN_EMAIL=admin@example.com VELOX_ADMIN_PASSWORD='at-least-12-chars' VELOX_TOKEN_SECRET='32+ random chars' ./mvnw spring-boot:run
 ```
+
+التطبيق:
+```bash
+cd mobile
+flutter run                               # على موبايل أو محاكي
+flutter build web --base-href /app/       # نسخة المتصفح اللي السيرفر بيقدّمها على /app
+flutter build apk --release
+```
+
+## على الإنترنت من جهاز واحد
+`deploy/start-public.ps1` بيشغّل قاعدة البيانات والسيرفر ويفتح رابط Cloudflare مجاني، والتطبيق بيلاقي الرابط الجديد لوحده.
+أول مرة بيسأل على إيميل وباسورد الأدمن وبيحفظهم في `deploy/.env` (مش بيترفع على GitHub).

@@ -1,0 +1,70 @@
+/* "Nile Terracotta" — the team's Stitch design system (design/DESIGN_SYSTEM.md). Same tokens as the Flutter app. */
+:root {
+  --primary: #9c3d10;
+  --on-primary: #ffffff;
+  --primary-container: #ffdbcc;
+  --on-primary-container: #380d00;
+  --secondary: #1f6f4a;
+  --on-secondary: #ffffff;
+  --secondary-container: #b3f1cc;
+  --tertiary: #b26a00;
+  --danger: #ba1a1a;
+  --danger-container: #ffdad6;
+  --bg: #fff8f5;
+  --surface: #ffffff;
+  --surface-2: #fff1eb;
+  --surface-3: #f6e4dd;
+  --text: #231914;
+  --text-2: #53433c;
+  --outline: #85736b;
+  --line: #e6d3cb;
+  --radius: 14px;
+  --radius-lg: 18px;
+  --shadow: 0 1px 2px rgba(35, 25, 20, .06), 0 4px 16px rgba(35, 25, 20, .05);
+  --font: "Cairo", system-ui, sans-serif;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --primary: #ffb693;
+    --on-primary: #5a1b00;
+    --primary-container: #7a2e06;
+    --on-primary-container: #ffdbcc;
+    --secondary: #7fd9a8;
+    --on-secondary: #003920;
+    --secondary-container: #005234;
+    --danger: #ffb4ab;
+    --danger-container: #93000a;
+    --bg: #1a110d;
+    --surface: #231915;
+    --surface-2: #271d19;
+    --surface-3: #322823;
+    --text: #f1dfd8;
+    --text-2: #d8c2ba;
+    --outline: #a08d85;
+    --line: #53433c;
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --primary: #ffb693;
+  --on-primary: #5a1b00;
+  --primary-container: #7a2e06;
+  --on-primary-container: #ffdbcc;
+  --secondary: #7fd9a8;
+  --on-secondary: #003920;
+  --secondary-container: #005234;
+  --danger: #ffb4ab;
+  --danger-container: #93000a;
+  --bg: #1a110d;
+  --surface: #231915;
+  --surface-2: #271d19;
+  --surface-3: #322823;
+  --text: #f1dfd8;
+  --text-2: #d8c2ba;
+  --outline: #a08d85;
+  --line: #53433c;
+  color-scheme: dark;
+}
