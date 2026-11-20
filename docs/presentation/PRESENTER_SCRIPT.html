@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VELOX — سكريبت العرض</title>
+<style>
+@page { size: A4; margin: 13mm 12mm; }
+body { font-family: 'Segoe UI', Tahoma, Arial, sans-serif; color: #111214; font-size: 11pt; line-height: 1.7; margin: 0; background: #fff; }
+main { max-width: 880px; margin: auto; padding: 0 6px; }
+.hero { background: #111214; color: #fff; border-radius: 14px; padding: 16px 20px; margin: 4px 0 12px; }
+.hero h1 { margin: 0; font-size: 22pt; } .hero p { margin: 4px 0 0; color: #C9CDD2; } .hero b { color: #E8A21E; }
+h2 { font-size: 15pt; margin: 20px 0 6px; padding-bottom: 3px; border-bottom: 3px solid #E8A21E; }
+table { width: 100%; border-collapse: collapse; font-size: 10pt; margin: 6px 0; }
+th, td { border-bottom: 1px solid #E1E4E8; padding: 5px 6px; text-align: start; vertical-align: top; }
+th { background: #F3F4F6; }
+.slide { border: 1px solid #E1E4E8; border-radius: 12px; padding: 9px 12px; margin: 8px 0; page-break-inside: avoid; }
+.slide .top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.slide .n { font-weight: 800; font-size: 12pt; }
+.who { background: #111214; color: #E8A21E; border-radius: 999px; padding: 1px 10px; font-weight: 700; font-size: 9.5pt; white-space: nowrap; }
+.t { color: #565C64; font-size: 9.5pt; white-space: nowrap; }
+.say { margin: 4px 0 0; }
+.en { direction: ltr; unicode-bidi: isolate; font-family: Calibri, 'Segoe UI', Arial, sans-serif; background: #FFF6E0; border-radius: 6px; padding: 0 5px; }
+.tip { background: #F3F4F6; border-radius: 10px; padding: 8px 12px; margin: 6px 0; }
+.warn { background: #FFF6E0; border: 1px solid #F2D58C; border-radius: 10px; padding: 8px 12px; margin: 6px 0; }
+.pb { page-break-before: always; }
+ol, ul { margin: 2px 0; padding-inline-start: 20px; }
+code { font-family: Consolas, monospace; direction: ltr; unicode-bidi: isolate; background: #F3F4F6; border-radius: 4px; padding: 0 4px; font-size: 9.5pt; }
+</style>
+</head>
+<body><main>
+
+<div class="hero">
+<h1>VELOX — سكريبت العرض</h1>
+<p>مين يقول إيه، وفي أنهي سلايد، وفي قد إيه. <b>العرض كله حوالي 18 دقيقة: 13 دقيقة كلام + 5 دقايق ديمو</b>، وبعدها الأسئلة.<br>
+الملف: <span class="en">docs/presentation/VELOX-Presentation.pptx</span>. ونفس الكلام ده موجود في الـ Notes تحت كل سلايد.</p>
+</div>
+
+<h2>١) التقسيم</h2>
+<table>
+<tr><th>مين</th><th>السلايدات</th><th>الوقت</th><th>الجزء بتاعه في المشروع</th></tr>
+<tr><td><b>هدى</b></td><td>1، 2، 3 (الافتتاح، المشكلة، الحل)</td><td>3 دقايق</td><td>المطاعم والمنيو + التصميم والتوثيق</td></tr>
+<tr><td><b>فادي</b></td><td>4، 5 (الأدوار، تجربة العميل) + <b>العميل والمندوب في الديمو</b></td><td>2.5 دقيقة + الديمو</td><td>الدفع والإشعارات وشاشات العميل</td></tr>
+<tr><td><b>رحيق</b></td><td>6، 7، 13 (المطعم، رحلة الطلب، الاختبارات) + <b>المطعم في الديمو</b></td><td>3.5 دقيقة + الديمو</td><td>التشغيل والاختبارات</td></tr>
+<tr><td><b>عبد الرحمن</b></td><td>8، 9 (لوحة الأدمن، المميزات) + <b>الأدمن في الديمو</b></td><td>2 دقيقة + الديمو</td><td>الطلبات والتتبع والموقع ولوحة الأدمن</td></tr>
+<tr><td><b>نبيه</b></td><td>10، 11، 12، 14، 15، 16 (التكنولوجيا، الـ Architecture، الأمان، الديمو، التيم، الختام) + <b>الأمان في الديمو</b> + إدارة الأسئلة</td><td>4 دقايق + الديمو</td><td>الحسابات والأمان وقاعدة البيانات والتشغيل</td></tr>
+</table>
+<div class="tip"><b>القاعدة:</b> كل واحد بيعرض <b>الجزء اللي هو عامله</b>، عشان لو الدكتور سأل يبقى الكلام عنده. <b>متقروش من السلايد</b>: السلايد فيه الكلمات المهمة بس، والشرح من دماغكم. وفي آخر كل جزء، قول جملة تسلّم بيها للي بعدك.</div>
+
+<div class="pb"></div>
+<h2>٢) السلايدات واحدة واحدة</h2>
+
+<div class="slide"><div class="top"><span class="n">1 — VELOX (الغلاف)</span><span class="who">هدى</span><span class="t">40 ثانية</span></div>
+<p class="say">"صباح الخير. إحنا فريق VELOX، مشروع تخرج مبادرة رواد مصر الرقمية، <b>تراك Penetration Testing</b>. VELOX منصة توصيل أكل لمدينة <b>سمنود</b>: <span class="en">Your favorite food, at your doorstep</span>. وبما إننا تراك أمن، فهتلاقوا الأمان جوه كل حاجة هنعرضها."</p></div>
+
+<div class="slide"><div class="top"><span class="n">2 — The problem</span><span class="who">هدى</span><span class="t">1 دقيقة</span></div>
+<p class="say">"في سمنود الطلب لسه بالتليفون. <b>العميل</b> مش عارف الأسعار ولا رسوم التوصيل، ومش عارف الطلب فين. و<b>المطعم</b> الطلبات بتجيله من كذا مكان، وبتحصل غلطات في الأصناف والعناوين، ومعندوش مناديب. <b>الفرصة:</b> منصة واحدة تخلي الطلب واضح وسريع ومنظّم."</p></div>
+
+<div class="slide"><div class="top"><span class="n">3 — Our solution</span><span class="who">هدى</span><span class="t">1 دقيقة</span></div>
+<p class="say">"VELOX بيربط العميل والمطعم والمندوب في سيستم واحد، وفيه لوحة تحكم للإدارة. عندنا منيو حقيقي بالصور والأسعار، وطلب واضح بالسعر الكامل قبل التأكيد، وتتبع لايف، والدفع كاش أو من المحفظة، وشاشة لكل دور، ولوحة أدمن. <b>رؤيتنا:</b> نخلي التوصيل في سمنود أذكى وأسهل." <i>وبعدين:</i> "فادي هيوريكم الأدوار."</p></div>
+
+<div class="slide"><div class="top"><span class="n">4 — Four connected roles</span><span class="who">فادي</span><span class="t">1 دقيقة</span></div>
+<p class="say">"عندنا 4 أدوار: <b>العميل</b> بيطلب ويدفع ويتابع. <b>المطعم</b> بيستقبل ويقبل ويجهّز. <b>المندوب</b> بياخد الطلب ويوصّله. و<b>الأدمن</b> بيدير كل حاجة. أول 3 أدوار <b>في نفس التطبيق</b>، والسيرفر هو اللي بيحدد كل حساب يشوف إيه ويعمل إيه. ده اسمه <span class="en">Role-based access control</span>."</p></div>
+
+<div class="slide"><div class="top"><span class="n">5 — Customer experience</span><span class="who">فادي</span><span class="t">1.5 دقيقة</span></div>
+<p class="say">"رحلة العميل 5 خطوات: <b>يستكشف</b> المطاعم الحقيقية، و<b>يطلب</b> وهو شايف السعر الكامل، و<b>يدفع</b> كاش أو من المحفظة أو بكوبون، و<b>يتابع</b> المندوب على الخريطة، و<b>يوصله إشعار</b> في كل خطوة." <b>عن الدفع قول بالظبط:</b> "الكاش شغال، والمحفظة فيها المرتجعات، وفوري وفودافون كاش <b>متركّبين في وضع تجريبي (Sandbox)</b> ومستنيين حساب تاجر." <i>وبعدين:</i> "رحيق هتوريكم المطعم."</p></div>
+
+<div class="slide"><div class="top"><span class="n">6 — Restaurant management</span><span class="who">رحيق</span><span class="t">1 دقيقة</span></div>
+<p class="say">"المطعم بيشتغل من الموبايل: الطلب الجديد <b>بيرن من غير Refresh</b>، يقبل أو يرفض بسبب، ويقول جاهز، ويشوف كل طلب مستني بقاله قد إيه، ويغيّر الأسعار ويقفل الصنف اللي خلص. وكسبان عملاء جداد، وطلبات مكتوبة واضحة، ومناديب من غير ما يعيّن حد. <b>على VELOX دلوقتي:</b> مطعم ناصف بـ 111 صنف بالصور، و3 كافيهات منيوهاتهم جاية."</p></div>
+
+<div class="slide"><div class="top"><span class="n">7 — The order journey</span><span class="who">رحيق</span><span class="t">1.5 دقيقة</span></div>
+<p class="say">"الطلب بيعدّي بـ 5 حالات: <span class="en">PLACED → ACCEPTED → READY → PICKED_UP → DELIVERED</span>. ده <span class="en">State Machine</span>: كل انتقال <b>مسموح لدور معيّن بس</b>، يعني العميل ميقدرش يقبل طلبه بنفسه، والمندوب ميقدرش يستلم قبل جاهز. المطعم عنده <b>15 دقيقة</b> يرد وإلا الطلب بيتلغي لوحده، ولو مفيش مندوب خده في <b>40 دقيقة</b> بيتلغي برضه. وكل خطوة بتوصل للكل فوراً بـ <span class="en">Server-Sent Events</span>." <i>وبعدين:</i> "عبد الرحمن هيوريكم لوحة الأدمن."</p></div>
+
+<div class="slide"><div class="top"><span class="n">8 — Administration dashboard</span><span class="who">عبد الرحمن</span><span class="t">1 دقيقة</span></div>
+<p class="say">"لوحة الأدمن صفحة ويب (HTML وCSS وJavaScript) بتكلم نفس الـ API. منها بيدير المطاعم والمنيو، والمناطق ورسومها، والمستخدمين، والطلبات، والكوبونات، والشكاوى، وأرقام اليوم. <b>حسابات المطاعم والمناديب الأدمن بس اللي بيعملها</b>، العميل بس هو اللي بيسجّل لنفسه. وكل حاجة الأدمن بيعملها بتتسجّل في <span class="en">audit log</span>."</p></div>
+
+<div class="slide"><div class="top"><span class="n">9 — What makes VELOX different</span><span class="who">عبد الرحمن</span><span class="t">1 دقيقة</span></div>
+<p class="say">"<b>هاتلي أي حاجة</b>: العميل يكتب عايز إيه ومن أنهي محل، والمندوب يشتريها ويجيبها. و<b>العلامة المميزة</b> زي 'جنب الصيدلية' جزء أساسي من العنوان، لأن الناس هنا بتوصف كده، وبتظهر للمندوب بلون مختلف. و<b>المناديب من البلد</b>، و<b>تتبع لايف</b>، و<b>عربي وإنجليزي</b>." <i>وبعدين:</i> "نبيه هيشرح التكنولوجيا."</p></div>
+
+<div class="slide"><div class="top"><span class="n">10 — Technology stack</span><span class="who">نبيه</span><span class="t">1 دقيقة</span></div>
+<p class="say">"السيرفر <b>Java 17 بـ Spring Boot</b> وMaven، وقاعدة البيانات <b>PostgreSQL</b> بـ JDBC وFlyway (22 جدول)، والتطبيق <b>Flutter</b> (كود واحد لأندرويد والمتصفح)، والإشعارات Firebase، والخرايط OpenStreetMap، والتشغيل كله بـ <b>Docker</b> بدبل كليك، والاختبارات JUnit وPostman وSelenium وJMeter." <b>متشرحش كل أداة بالتفصيل</b>، قول ليه اخترناها بس.</p></div>
+
+<div class="slide"><div class="top"><span class="n">11 — Architecture</span><span class="who">نبيه</span><span class="t">1 دقيقة</span></div>
+<p class="say">"كل الواجهات (التطبيق والموقع ولوحة الأدمن) بتكلم <b>API واحد</b> بـ HTTPS وJSON. جوه السيرفر كل طلب بيعدّي على 3 طبقات: <span class="en">Controller → Service → Repository</span>. الـ Controller بيستقبل، والـ Service فيه القواعد والصلاحيات، والـ Repository بيكلم قاعدة البيانات بـ JDBC. والسيرفر مقسّم 7 أجزاء، كل واحد في التيم مسؤول عن جزء."</p></div>
+
+<div class="slide"><div class="top"><span class="n">12 — Security</span><span class="who">نبيه</span><span class="t">1.5 دقيقة</span></div>
+<p class="say">"<b>اللي جوه السيستم:</b> الباسورد متخزن بـ <span class="en">PBKDF2</span> بـ 210 ألف لفة وsalt، والتوكن موقّع وبيبطل لو الباسورد اتغير، وفيه فحص صلاحية على كل طلب (مفيش IDOR)، وبعد 5 محاولات غلط الحساب بيتقفل، وكل الـ SQL بـ parameters فمفيش SQL Injection.<br>
+<b>وهاجمنا السيستم بنفسنا</b> بـ Burp Suite. أخطر حاجة لقيناها: التطبيق كان بيقبل أي لينك سيرفر من قناة عامة، فممكن حد يحوّل الموبايلات لسيرفر بتاعه ويسرق الباسوردات. قفلناها. ولما اتعلن عن <b>Java2Shell</b> في Java 17، اتأكدنا إذا كنا متأثرين وقفلناها <b>في نفس اليوم</b>." <i>وبعدين:</i> "رحيق هتوريكم الاختبارات."</p></div>
+
+<div class="slide"><div class="top"><span class="n">13 — Testing &amp; quality</span><span class="who">رحيق</span><span class="t">1 دقيقة</span></div>
+<p class="say">"عملنا <b>Manual وAutomated وAPI وLoad</b>: <b>97 اختبار JUnit</b> كلهم ناجحين، منهم اختبارات بتشغّل PostgreSQL حقيقي في Docker. و<b>45 فحص</b> للرحلة كاملة على السيرفر الحقيقي. و<b>30 طلب في Postman</b> فيهم هجمات. و<b>47 حالة اختبار يدوي</b> اتقسمت علينا. و<b>JMeter بـ 100 مستخدم</b> في نفس الوقت. <b>واختباراتنا لقت مشاكل:</b> البطء مع قاعدة البيانات البعيدة، واختبار مكانش معزول، وسجّلنا الاتنين." <i>وبعدين:</i> "يلا نوريكم السيستم شغال."</p></div>
+
+<div class="slide"><div class="top"><span class="n">14 — Live demo</span><span class="who">الكل</span><span class="t">5 دقايق</span></div>
+<p class="say">الخطوات تحت في الجزء ٣.</p></div>
+
+<div class="slide"><div class="top"><span class="n">15 — Meet the team</span><span class="who">نبيه</span><span class="t">30 ثانية</span></div>
+<p class="say">"دول التيم: كل واحد عمل جزء من السيرفر واختباراته وتقرير الأمان بتاعه، والشغل كله على GitHub، وكل واحد رافع من حسابه."</p></div>
+
+<div class="slide"><div class="top"><span class="n">16 — Thank you</span><span class="who">نبيه</span><span class="t">—</span></div>
+<p class="say">"شكراً لحضراتكم، وده رابط المشروع على GitHub. اتفضلوا بالأسئلة." وفي الأسئلة: <b>كل سؤال يرد عليه صاحب الجزء</b> (جدول ٤).</p></div>
+
+<div class="pb"></div>
+<h2>٣) الديمو: 5 دقايق بالظبط</h2>
+<div class="warn"><b>قبل ما الدكتور يدخل</b> (على لابتوب نبيه، والـ VELOX شغال بـ <code>START-VELOX.bat</code>):<br>
+• <b>Chrome</b> ← <code>localhost:8080/app</code> ← داخل كـ <b>عميل</b><br>
+• <b>Chrome Incognito</b> ← <code>127.0.0.1:8080/app</code> ← داخل كـ <b>مطعم ناصف</b><br>
+• <b>Edge</b> ← <code>localhost:8080/app</code> ← داخل كـ <b>مندوب، وعامل أونلاين ✅</b><br>
+• تاب ← <code>localhost:8080/admin</code> ← داخل كـ <b>أدمن</b>، وتاب ← <code>localhost:8080/swagger-ui.html</code><br>
+• <b>الفيديو المتسجّل</b> مفتوح وجاهز لو حاجة وقعت.</div>
+<table>
+<tr><th>#</th><th>مين</th><th>بيعمل إيه</th><th>بيقول إيه</th></tr>
+<tr><td>1</td><td>فادي</td><td>Chrome (العميل): مطعم ناصف ← صنفين ← ملاحظة "من غير بصل" ← العنوان والعلامة المميزة ← كاش ← تأكيد</td><td>"شايفين السعر كامل ورسوم التوصيل قبل ما أأكّد"</td></tr>
+<tr><td>2</td><td>رحيق</td><td>Incognito (المطعم): الطلب يظهر <b>بصوت لوحده</b> ← قبول ← جاهز</td><td>"من غير Refresh، والعدّاد بيتغير"</td></tr>
+<tr><td>3</td><td>فادي</td><td>Edge (المندوب): الكارت فيه الأصناف والعنوان والكاش ← خد الطلب ← استلمت ← سلّمت. والعميل شايف التتبع</td><td>"المندوب شايف كل اللي محتاجه، وأرباحه زادت"</td></tr>
+<tr><td>4</td><td>عبد الرحمن</td><td>لوحة الأدمن: الطلب بحالته وأرقام اليوم</td><td>"الأدمن شايف كل حاجة"</td></tr>
+<tr><td>5</td><td>نبيه</td><td>في Swagger: ١) <code>GET /api/admin/users</code> ← Try it out ← Execute من غير توكن ← <b>401</b>. ٢) <code>POST /api/auth/login</code> بإيميل وباسورد العميل ← انسخ الـ <code>token</code> من الرد ← زرار <b>Authorize</b> فوق ← الصقه ← نفذ <code>/api/admin/users</code> تاني ← <b>403</b>. ٣) <code>POST /api/auth/login</code> والإيميل <code>' OR 1=1 --</code> ← <b>مرفوض (401)</b>. <i>جهّز الخطوات دي قبلها وجرّبها مرة.</i></td><td>"ده الأمان اللي اتكلمنا عنه، شغال قدامكم"</td></tr>
+</table>
+<div class="tip"><b>لو حاجة وقعت:</b> الطلب مش ظاهر ← 🔄 في الصفحة. صفحة بيضا ← Ctrl+Shift+R. VELOX مبيردش ← <code>docker compose --profile app restart api</code>. لو كل حاجة وقعت ← <b>الفيديو</b>. وكمّلوا بهدوء، الدكتور عارف إن الديمو ممكن يقف.</div>
+
+<h2>٤) الأسئلة: مين يرد على إيه</h2>
+<table>
+<tr><th>لو السؤال عن</th><th>يرد</th></tr>
+<tr><td>الحسابات، الباسورد، التوكن، الصلاحيات، قاعدة البيانات، Docker، الأمان بشكل عام، Java2Shell</td><td>نبيه</td></tr>
+<tr><td>المطاعم، المنيو، البحث، الصور، التصميم، الـ ERD والـ SRS</td><td>هدى</td></tr>
+<tr><td>الطلبات، الأسعار، المناطق، التتبع، SSE، الموقع ولوحة الأدمن</td><td>عبد الرحمن</td></tr>
+<tr><td>الدفع، المحفظة، الكوبونات، الإشعارات وFirebase، شاشات العميل</td><td>فادي</td></tr>
+<tr><td>المطعم والمندوب، حالات الطلب، الاختبارات كلها (JUnit وManual وAPI وJMeter)</td><td>رحيق</td></tr>
+</table>
+<p><b>الإجابات</b> موجودة في الدليل الشامل (<code>docs/guide/</code>، الجزء ١٨: 28 سؤال). <b>لو محدش عارف الإجابة:</b> "سؤال حلو، اللي عملناه هو كذا، وده هيبقى في التطوير الجاي". متخترعوش إجابة أبداً.</p>
+
+<h2>٥) نصايح</h2>
+<ul>
+<li>كل واحد <b>يتمرن على جزءه بصوت عالي مرتين</b> ويوقّت نفسه.</li>
+<li><b>الأرقام:</b> 97/97، و45/45، و111 صنف، و15 و40 دقيقة، و210 ألف لفة، و22 جدول، و5 محاولات.</li>
+<li>بص للدكتور مش للشاشة، واتكلم بالعربي، والكلمات التقنية بالإنجليزي عادي.</li>
+<li>المشاكل اللي لقيناها بنفسنا (البطء، والاختبار اللي مكانش معزول، وJava2Shell) <b>نقط قوة، قولوها بثقة</b>.</li>
+</ul>
+</main></body></html>
