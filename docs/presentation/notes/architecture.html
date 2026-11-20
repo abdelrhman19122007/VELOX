@@ -1,0 +1,24 @@
+<section id="architecture">
+<div class="head">
+<p class="eyebrow">Architecture</p>
+<h2>How the parts talk to each other</h2>
+</div>
+<div class="arch fadein" style="--i:1; position:relative; width:1664px; height:560px;">
+<div class="node" style="position:absolute; left:0; top:0; width:440px; height:160px;"><h3>Flutter app</h3><p>Customer · Restaurant · Courier</p></div>
+<div class="node" style="position:absolute; left:0; top:200px; width:440px; height:160px;"><h3>Website</h3><p>Real menus, app download</p></div>
+<div class="node" style="position:absolute; left:0; top:400px; width:440px; height:160px;"><h3>Admin dashboard</h3><p>HTML · CSS · JavaScript</p></div>
+<div class="node core" style="position:absolute; left:620px; top:0; width:520px; height:560px;"><p class="k">SPRING BOOT REST API</p><h3>Controller → Service → Repository</h3><p>auth · security · catalog · order · payment · notification · operation</p><p class="tag">Role checks on every request</p></div>
+<div class="node db" style="position:absolute; left:1320px; top:0; width:344px; height:220px;"><h3>PostgreSQL</h3><p>22 tables · Flyway V1–V7</p></div>
+<div class="node" style="position:absolute; left:1320px; top:250px; width:344px; height:145px;"><h3>Firebase</h3><p>Push notifications</p></div>
+<div class="node" style="position:absolute; left:1320px; top:415px; width:344px; height:145px;"><h3>OpenStreetMap</h3><p>Maps</p></div>
+<x-connector x1="440" y1="80" x2="620" y2="200" head="end" route="straight" style="color:#9C3D10; border-width:4px;"></x-connector>
+<x-connector x1="440" y1="280" x2="620" y2="280" head="end" route="straight" style="color:#9C3D10; border-width:4px;"></x-connector>
+<x-connector x1="440" y1="480" x2="620" y2="360" head="end" route="straight" style="color:#9C3D10; border-width:4px;"></x-connector>
+<x-connector x1="1140" y1="110" x2="1320" y2="110" head="both" route="straight" style="color:#1F6F4A; border-width:4px;"></x-connector>
+<x-connector x1="1140" y1="322" x2="1320" y2="322" head="end" route="straight" style="color:#1F6F4A; border-width:4px;"></x-connector>
+<p class="lbl" style="position:absolute; left:452px; top:300px; width:160px;">HTTPS + JSON, live events</p>
+<p class="lbl" style="position:absolute; left:1150px; top:70px; width:160px;">JDBC</p>
+</div>
+<div class="foot"><p>VELOX</p><p class="pg"></p></div>
+<aside>Presenter: Nabeeh. Every client talks to one REST API over HTTPS and JSON; the restaurant and customer screens also keep one live connection (Server-Sent Events). Inside the API each request goes Controller → Service (rules and role checks) → Repository (SQL through JDBC with parameters). The server, database and website run together in Docker with one double-click.</aside>
+</section>
