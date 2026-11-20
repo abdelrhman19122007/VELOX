@@ -58,6 +58,47 @@ class AdminUserApiTest extends IntegrationTest {
     }
 
     @Test
+    void adminCreatesStaffWithATemporaryPassword() {
+        String admin = login(ADMIN_EMAIL, ADMIN_PASSWORD);
+        String email = uniqueEmail();
+        ResponseEntity<JsonNode> made = post("/api/admin/users",
+                Map.of("name", "New Admin", "email", email, "phone", "01012345678", "role", "ADMIN"), admin);
+        assertEquals(HttpStatus.CREATED, made.getStatusCode());
+        String temp = made.getBody().get("password").asText();
+        ResponseEntity<JsonNode> in = post("/api/auth/login", Map.of("email", email, "password", temp), null);
+        assertEquals("ADMIN", in.getBody().get("user").get("role").asText());
+
+        assertEquals(HttpStatus.BAD_REQUEST, post("/api/admin/users",
+                Map.of("name", "Shop", "email", uniqueEmail(), "phone", "01012345678", "role", "RESTAURANT"), admin).getStatusCode(),
+                "store accounts come with their store");
+        assertEquals(HttpStatus.CONFLICT, post("/api/admin/users",
+                Map.of("name", "Again", "email", email, "phone", "01012345678", "role", "DRIVER"), admin).getStatusCode());
+        String customer = newCustomer(uniqueEmail(), "secret-123");
+        assertEquals(HttpStatus.FORBIDDEN, post("/api/admin/users",
+                Map.of("name", "Me", "email", uniqueEmail(), "phone", "01012345678", "role", "ADMIN"), customer).getStatusCode());
+    }
+
+    @Test
+    void customerDeletesTheirAccount() {
+        String email = uniqueEmail();
+        String token = newCustomer(email, "secret-123");
+        assertEquals(HttpStatus.BAD_REQUEST, post("/api/me/delete", Map.of("password", "wrong-one"), token).getStatusCode());
+        assertEquals(HttpStatus.NO_CONTENT, post("/api/me/delete", Map.of("password", "secret-123"), token).getStatusCode());
+        assertEquals(HttpStatus.UNAUTHORIZED, get("/api/auth/me", token).getStatusCode(), "session ends");
+        assertEquals(HttpStatus.UNAUTHORIZED, post("/api/auth/login", Map.of("email", email, "password", "secret-123"), null).getStatusCode(),
+                "the email is gone");
+        String admin = login(ADMIN_EMAIL, ADMIN_PASSWORD);
+        assertEquals(HttpStatus.FORBIDDEN, post("/api/me/delete", Map.of("password", ADMIN_PASSWORD), admin).getStatusCode(),
+                "admins are closed by another admin");
+    }
+
+    @Test
+    void nobodyCanSignUpAsADriver() {
+        assertEquals("INVALID_ROLE", post("/api/auth/register", Map.of("name", "Fake Driver", "email", uniqueEmail(),
+                "phone", "01112345678", "password", "driver-pass-1", "role", "DRIVER"), null).getBody().get("code").asText());
+    }
+
+    @Test
     void adminCannotBlockThemselves() {
         String admin = login(ADMIN_EMAIL, ADMIN_PASSWORD);
         assertEquals(HttpStatus.BAD_REQUEST,

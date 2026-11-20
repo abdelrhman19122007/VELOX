@@ -24,3 +24,20 @@ Velox.jar
 
 # Local DB credentials template override (use *.example as template)
 velox-backend/src/main/resources/application.properties
+
+# Firebase keys and uploaded files (never commit)
+.firebase/
+backend/uploads/
+
+# Built files served by the server (not source)
+web/downloads/
+
+# Deployment secrets and logs (never commit)
+deploy/.env
+deploy/logs/
+
+# demo script state (holds a throwaway test login)
+tests/demo/demo_state.json
+
+# local demo (START-VELOX.bat)
+demo-data/local-accounts.txt

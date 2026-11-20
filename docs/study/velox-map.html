@@ -1,0 +1,473 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>خريطة VELOX</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800;900&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: three lanes read right-to-left like a request (screens → server → data), a detail drawer beside them; journey and team are alternate views. */
+:root {
+  --bg: #fbf7f4;
+  --panel: #ffffff;
+  --ink: #241a15;
+  --muted: #76675e;
+  --line: #eadfd7;
+  --accent: #b4410f;
+  --accent-soft: #fbe6da;
+  --lane-client: #1f6f8b;
+  --lane-server: #b4410f;
+  --lane-data: #4d7a3a;
+  --dim: 0.28;
+  --font-ui: 'Cairo', 'Segoe UI', Tahoma, sans-serif;
+  --font-code: 'IBM Plex Mono', Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #17120f; --panel: #211a16; --ink: #f3e9e2; --muted: #b3a296; --line: #3a2e27;
+    --accent: #f08a54; --accent-soft: #3d2518; --lane-client: #6cc0dc; --lane-server: #f08a54; --lane-data: #9ccc7f;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #17120f; --panel: #211a16; --ink: #f3e9e2; --muted: #b3a296; --line: #3a2e27;
+  --accent: #f08a54; --accent-soft: #3d2518; --lane-client: #6cc0dc; --lane-server: #f08a54; --lane-data: #9ccc7f;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-ui); font-size: 15px; line-height: 1.6; }
+.wrap { max-width: 1240px; margin: 0 auto; padding-block: 20px 40px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+header h1 { font-size: clamp(24px, 4vw, 34px); font-weight: 900; margin: 0; text-wrap: balance; letter-spacing: -0.01em; }
+header h1 span { color: var(--accent); }
+header p { margin: 4px 0 0; color: var(--muted); max-width: 70ch; }
+code, .code { font-family: var(--font-code); font-size: 0.84em; direction: ltr; unicode-bidi: isolate; }
+
+.tabs { display: flex; flex-wrap: wrap; gap: 6px; margin: 16px 0 12px; }
+.tab { font: inherit; font-weight: 800; border: 1.5px solid var(--line); background: var(--panel); color: var(--ink); border-radius: 999px; padding: 6px 16px; cursor: pointer; }
+.tab[aria-selected="true"] { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+.tab:focus-visible, .node:focus-visible, .chip:focus-visible, .step:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+.people { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 12px; }
+.people .lbl { color: var(--muted); font-size: 13px; font-weight: 700; margin-inline-end: 4px; }
+.chip { font: inherit; font-size: 13px; font-weight: 700; border: 1.5px solid var(--line); background: var(--panel); color: var(--ink); border-radius: 999px; padding: 2px 12px; cursor: pointer; }
+.chip[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
+
+.board { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 16px; align-items: start; }
+.lanes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.lane { border: 1px solid var(--line); border-radius: 14px; padding: 10px; background: color-mix(in srgb, var(--panel) 70%, var(--bg)); min-width: 0; }
+.lane h2 { margin: 0 0 2px; font-size: 15px; font-weight: 900; display: flex; align-items: center; gap: 8px; }
+.lane h2::before { content: ""; width: 10px; height: 10px; border-radius: 3px; background: var(--c); }
+.lane .sub { color: var(--muted); font-size: 12px; margin: 0 0 8px; }
+.lane[data-lane="client"] { --c: var(--lane-client); }
+.lane[data-lane="server"] { --c: var(--lane-server); }
+.lane[data-lane="data"] { --c: var(--lane-data); }
+.nodes { display: grid; gap: 8px; }
+.node { text-align: start; font: inherit; width: 100%; background: var(--panel); color: var(--ink); border: 1.5px solid var(--line); border-inline-start: 4px solid var(--c); border-radius: 10px; padding: 7px 10px; cursor: pointer; transition: opacity .18s, border-color .18s, transform .18s; }
+.node b { display: block; font-size: 14px; font-weight: 800; }
+.node small { display: block; color: var(--muted); font-size: 12px; line-height: 1.4; }
+.node:hover { border-color: var(--c); }
+.node.sel { border-color: var(--c); box-shadow: 0 0 0 2px color-mix(in srgb, var(--c) 35%, transparent); }
+.node.dim { opacity: var(--dim); }
+.node.linked { border-color: var(--c); }
+.flowhint { display: flex; justify-content: space-between; color: var(--muted); font-size: 12px; margin: 6px 4px 0; }
+
+.drawer { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px); background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 14px; min-width: 0; max-height: calc(100vh - 32px); overflow: auto; }
+.drawer h3 { margin: 0; font-size: 19px; font-weight: 900; }
+.drawer .kind { font-size: 12px; font-weight: 800; letter-spacing: .04em; color: var(--c, var(--accent)); }
+.drawer p { margin: 6px 0; }
+.drawer h4 { margin: 12px 0 4px; font-size: 13px; color: var(--muted); font-weight: 800; letter-spacing: .03em; }
+.drawer ul { margin: 0; padding-inline-start: 18px; }
+.drawer li { margin: 2px 0; }
+.ep { list-style: none; padding: 0 !important; display: grid; gap: 3px; }
+.ep li { display: flex; gap: 6px; align-items: baseline; direction: ltr; justify-content: flex-end; font-family: var(--font-code); font-size: 12px; flex-wrap: wrap; }
+.m { font-weight: 600; font-size: 10.5px; border-radius: 4px; padding: 0 5px; color: var(--bg); background: var(--muted); }
+.m.GET { background: var(--lane-client); } .m.POST { background: var(--lane-data); } .m.PATCH, .m.PUT { background: #a07b12; } .m.DELETE { background: #b42318; }
+.owner { display: inline-block; background: var(--accent-soft); color: var(--accent); font-weight: 800; border-radius: 999px; padding: 0 10px; font-size: 13px; margin-inline-end: 4px; }
+.tip { background: var(--accent-soft); border-radius: 10px; padding: 8px 10px; margin-top: 10px; font-size: 14px; }
+.tip b { color: var(--accent); }
+.links { display: flex; flex-wrap: wrap; gap: 4px; }
+.links button { font: inherit; font-size: 12px; border: 1px solid var(--line); background: transparent; color: var(--ink); border-radius: 6px; padding: 0 8px; cursor: pointer; }
+
+/* journey */
+.journey { display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 16px; align-items: start; }
+.steps { display: grid; gap: 6px; counter-reset: s; }
+.step { font: inherit; text-align: start; display: flex; gap: 10px; align-items: center; border: 1.5px solid var(--line); background: var(--panel); color: var(--ink); border-radius: 10px; padding: 7px 10px; cursor: pointer; }
+.step .n { flex: none; width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; background: var(--line); font-weight: 900; font-size: 13px; }
+.step[aria-current="step"] { border-color: var(--accent); }
+.step[aria-current="step"] .n { background: var(--accent); color: var(--bg); }
+.step.done .n { background: var(--accent-soft); color: var(--accent); }
+.scene { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 16px; min-width: 0; }
+.scene h3 { margin: 0 0 4px; font-size: 21px; font-weight: 900; }
+.trail { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 10px 0 14px; }
+.trail span { border-radius: 8px; padding: 3px 10px; font-weight: 800; font-size: 13px; border: 1.5px solid; }
+.trail .cl { color: var(--lane-client); border-color: var(--lane-client); }
+.trail .sv { color: var(--lane-server); border-color: var(--lane-server); }
+.trail .dt { color: var(--lane-data); border-color: var(--lane-data); }
+.trail i { font-style: normal; color: var(--muted); }
+.facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.fact { border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; min-width: 0; }
+.fact h4 { margin: 0 0 2px; font-size: 12px; color: var(--muted); font-weight: 800; }
+.status { display: inline-flex; gap: 6px; align-items: center; direction: ltr; font-family: var(--font-code); font-size: 13px; }
+.status s { color: var(--muted); }
+.status b { color: var(--accent); }
+.nav { display: flex; gap: 8px; margin-top: 14px; }
+.btn { font: inherit; font-weight: 800; border-radius: 10px; padding: 6px 14px; border: 1.5px solid var(--accent); background: var(--accent); color: var(--bg); cursor: pointer; }
+.btn.ghost { background: transparent; color: var(--accent); }
+.btn:disabled { opacity: .4; cursor: default; }
+
+/* team */
+.team { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; }
+.member { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 12px; }
+.member h3 { margin: 0; font-size: 18px; font-weight: 900; }
+.member .role { color: var(--muted); font-size: 13px; margin-bottom: 6px; }
+.member ul { margin: 0; padding-inline-start: 18px; font-size: 14px; }
+.member .links { margin-top: 8px; }
+
+footer { margin-top: 22px; color: var(--muted); font-size: 12px; }
+
+@media (max-width: 980px) {
+  .board { grid-template-columns: minmax(0, 1fr); }
+  .drawer { position: static; max-height: none; }
+}
+@media (max-width: 720px) {
+  .lanes { grid-template-columns: minmax(0, 1fr); }
+  .journey { grid-template-columns: minmax(0, 1fr); }
+  .facts { grid-template-columns: minmax(0, 1fr); }
+  .flowhint { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { .node { transition: none; } }
+</style>
+
+<div class="wrap" dir="rtl" lang="ar">
+  <header>
+    <h1>خريطة <span>VELOX</span></h1>
+    <p>المشروع كله في صفحة واحدة. دوس على أي مربع تشوف بيعمل إيه، وملفاته، وعناوين الـ API بتاعته، والجداول اللي بيستخدمها، ومين في التيم مسؤول عنه، وسؤال متوقع من الدكتور.</p>
+  </header>
+
+  <div class="tabs" role="tablist" aria-label="طريقة العرض">
+    <button class="tab" role="tab" id="tab-map" aria-selected="true" aria-controls="view-map">الخريطة</button>
+    <button class="tab" role="tab" id="tab-journey" aria-selected="false" aria-controls="view-journey">رحلة الطلب</button>
+    <button class="tab" role="tab" id="tab-team" aria-selected="false" aria-controls="view-team">مين عمل إيه</button>
+  </div>
+
+  <section id="view-map" role="tabpanel" aria-labelledby="tab-map">
+    <div class="people" id="people"><span class="lbl">ورّيني شغل:</span></div>
+    <div class="board">
+      <div>
+        <div class="lanes">
+          <div class="lane" data-lane="client"><h2>الواجهات</h2><p class="sub">اللي المستخدم بيلمسه (Flutter + الويب)</p><div class="nodes" id="lane-client"></div></div>
+          <div class="lane" data-lane="server"><h2>السيرفر</h2><p class="sub">Java Spring Boot — <code>com.velox.*</code></p><div class="nodes" id="lane-server"></div></div>
+          <div class="lane" data-lane="data"><h2>البيانات والخدمات</h2><p class="sub">قاعدة البيانات والاستضافة والإشعارات</p><div class="nodes" id="lane-data"></div></div>
+        </div>
+        <div class="flowhint"><span>الطلب بيبدأ من هنا ←</span><span>HTTP + JSON</span><span>JDBC</span><span>← وبيوصل هنا</span></div>
+      </div>
+      <aside class="drawer" id="drawer" aria-live="polite"></aside>
+    </div>
+  </section>
+
+  <section id="view-journey" role="tabpanel" aria-labelledby="tab-journey" hidden>
+    <div class="journey">
+      <div class="steps" id="steps"></div>
+      <div class="scene" id="scene"></div>
+    </div>
+  </section>
+
+  <section id="view-team" role="tabpanel" aria-labelledby="tab-team" hidden>
+    <div class="team" id="team"></div>
+  </section>
+
+  <footer>اتعملت من الكود الحقيقي لفرع <code>velox-v2-integration</code> — 22 جدول، 97 اختبار JUnit، و8 أجزاء في السيرفر.</footer>
+</div>
+
+<script>
+const PEOPLE = {
+  nabeeh: { name: 'نبيه', role: 'قائد الفريق — الحسابات والأمان والتشغيل' },
+  hoda: { name: 'هدى', role: 'المحلات والمنيو + التصميم والتوثيق' },
+  abdelrhman: { name: 'عبد الرحمن', role: 'الطلبات + الموقع ولوحة التحكم' },
+  fady: { name: 'فادي', role: 'الدفع والإشعارات + شاشات التطبيق' },
+  raheek: { name: 'رحيق', role: 'التشغيل (مطعم/مندوب/أدمن) + الاختبارات' },
+};
+
+const NODES = [
+  // ---------- clients ----------
+  { id: 'app-core', lane: 'client', title: 'أساس التطبيق', short: 'الاتصال بالسيرفر والحالة واللغتين',
+    what: 'الجزء اللي كل شاشات Flutter بتعتمد عليه: بيكلم السيرفر ويحفظ التوكن، وبيمسك حالة التطبيق كلها (المستخدم، السلة، اللغة) بـ Provider، وبيسمع التحديثات المباشرة.',
+    files: ['mobile/lib/main.dart', 'core/api.dart', 'core/app_state.dart', 'core/models.dart', 'core/strings.dart', 'core/theme.dart'],
+    eps: [['GET', '/api/auth/me'], ['GET', '/api/events']],
+    owners: ['nabeeh'], links: ['auth', 'order', 'cloudflare'],
+    q: ['التطبيق بيعرف لينك السيرفر إزاي؟', 'من قناة ntfy، وبيقبل لينكات https://…trycloudflare.com بس. والنسخة النهائية لينكها ثابت جوه الكود (API_URL).'] },
+  { id: 'app-customer', lane: 'client', title: 'تطبيق العميل', short: 'الرئيسية، المطعم، السلة، الدفع، التتبع',
+    what: 'العميل بيتصفح المطاعم والمنيو ويضيف للسلة، ويدفع كاش أو أونلاين، ويتابع المندوب على الخريطة، ويقيّم أو يشتكي. وفيه "مشوار" يشتري له حاجة من أي مكان.',
+    files: ['screens/customer/home_screen.dart', 'store_screen.dart', 'cart_screen.dart', 'checkout_screen.dart', 'payment_screen.dart', 'track_screen.dart', 'orders_screen.dart', 'errand_screen.dart', 'account_screen.dart'],
+    eps: [['GET', '/api/stores'], ['GET', '/api/stores/{id}'], ['POST', '/api/orders/quote'], ['POST', '/api/orders'], ['GET', '/api/orders/{code}'], ['POST', '/api/orders/{code}/review']],
+    owners: ['nabeeh', 'fady'], links: ['app-core', 'catalog', 'order', 'payment', 'operation', 'notification'],
+    q: ['العميل يقدر يغيّر سعر الطلب من التطبيق؟', 'لأ. التطبيق بيبعت المنتجات والكميات بس، والسيرفر بيحسب السعر من قاعدة البيانات (PricingService).'] },
+  { id: 'app-store', lane: 'client', title: 'صفحة المطعم', short: 'طلبات جديدة بصوت، قبول، جاهز، المنيو',
+    what: 'المطعم بيشوف الطلب الجديد بصوت واهتزاز، يقبل أو يرفض بسبب، ويدوس "جاهز". فيه كارت فوق بعدّادات (مستني / بيتجهز / مع المندوب) وزرار "بنستقبل طلبات"، وتاب للمنيو (السعر والمتاح) وتاب لإحصائيات النهارده.',
+    files: ['screens/store/store_shell.dart'],
+    eps: [['GET', '/api/restaurant/orders'], ['POST', '/api/restaurant/orders/{code}/accept'], ['POST', '/api/restaurant/orders/{code}/reject'], ['POST', '/api/restaurant/orders/{code}/ready'], ['PATCH', '/api/restaurant/store'], ['PATCH', '/api/restaurant/products/{id}'], ['GET', '/api/restaurant/stats']],
+    owners: ['nabeeh', 'fady'], links: ['app-core', 'operation', 'catalog', 'order'],
+    q: ['المطعم بيعرف بالطلب الجديد إزاي من غير ما يعمل تحديث؟', 'SSE: التطبيق فاتح اتصال واحد مع /api/events، والسيرفر بيبعت فيه الطلب أول ما يتعمل.'] },
+  { id: 'app-driver', lane: 'client', title: 'صفحة المندوب', short: 'أونلاين، خد الطلب، استلمت، سلّمت',
+    what: 'المندوب بيبقى أونلاين ويختار وسيلته، ويشوف الطلبات اللي المطاعم قبلتها وفيها الأصناف واسم العميل وعنوانه والعلامة المميزة والكاش. ياخد الطلب، ويستلمه، ويسلّمه، ويشوف أرباحه. وموقعه بيتبعت للعميل والمطعم.',
+    files: ['screens/driver/driver_shell.dart'],
+    eps: [['POST', '/api/driver/status'], ['POST', '/api/driver/location'], ['GET', '/api/driver/offers'], ['POST', '/api/driver/orders/{code}/take'], ['POST', '/api/driver/orders/{code}/pickup'], ['POST', '/api/driver/orders/{code}/deliver'], ['GET', '/api/driver/earnings']],
+    owners: ['fady'], links: ['app-core', 'operation', 'order'],
+    q: ['مندوبين اتنين داسوا "خد الطلب" في نفس اللحظة؟', 'السيرفر بيحدّث الطلب بشرط إنه لسه من غير مندوب، فواحد بس اللي بينجح والتاني ياخد رسالة إن الطلب اتاخد.'] },
+  { id: 'app-admin', lane: 'client', title: 'لوحة التحكم', short: 'المستخدمين، المطاعم، المناطق، الكوبونات',
+    what: 'الأدمن بيعمل حسابات المطاعم والمناديب، ويقفل أي حساب، ويعدّل المطاعم والمنتجات ورسوم المناطق، ويعمل كوبونات، ويقفل الشكاوى، ويشوف إحصائيات اليوم.',
+    files: ['web/admin/index.html', 'screens/admin/admin_shell.dart'],
+    eps: [['GET', '/api/admin/users'], ['PATCH', '/api/admin/users/{id}'], ['POST', '/api/admin/stores'], ['PUT', '/api/admin/zones/{code}'], ['POST', '/api/admin/promos'], ['POST', '/api/admin/complaints/{code}/close']],
+    owners: ['abdelrhman'], links: ['auth', 'catalog', 'order', 'payment', 'operation'],
+    q: ['مين يقدر يعمل حساب أدمن؟', 'أول أدمن بيتعمل لما السيرفر يشتغل من متغيرات البيئة (AdminBootstrap). وأي تغيير صلاحية بيتسجّل في audit_log.'] },
+  { id: 'website', lane: 'client', title: 'الموقع', short: 'المطاعم الحقيقية + تحميل التطبيق',
+    what: 'صفحة ويب بتعرض المطاعم والمنيو من الـ API، وفيها لينك تحميل الـ APK. والسيرفر نفسه هو اللي بيعرضها، ومعاها نسخة الويب من التطبيق على /app/.',
+    files: ['web/index.html', 'web/downloads/version.json', 'config/StaticSiteConfig.java'],
+    eps: [['GET', '/api/stores'], ['GET', '/api/search']],
+    owners: ['abdelrhman'], links: ['catalog', 'config'],
+    q: ['التطبيق بيعرف إن فيه نسخة جديدة إزاي؟', 'بيقارن رقمه (appBuild) بالرقم اللي في downloads/version.json، ولو أقل بيظهر زرار التحديث.'] },
+
+  // ---------- server ----------
+  { id: 'auth', lane: 'server', title: 'auth — الحسابات', short: 'تسجيل، دخول، باسورد، عناوين',
+    what: 'التسجيل والدخول وتغيير الباسورد ومسح الحساب والعناوين المحفوظة، وإدارة المستخدمين للأدمن. العملاء بس هما اللي بيسجّلوا لنفسهم، والمطاعم والمناديب الأدمن هو اللي بيعملهم.',
+    files: ['auth/controller/AuthController.java', 'AccountController.java', 'AdminUserController.java', 'auth/service/AuthService.java', 'AccountService.java', 'auth/repository/UserRepository.java'],
+    eps: [['POST', '/api/auth/register'], ['POST', '/api/auth/login'], ['GET', '/api/auth/me'], ['POST', '/api/me/password'], ['POST', '/api/me/delete'], ['GET', '/api/me/addresses']],
+    tables: ['users', 'addresses', 'login_attempts', 'audit_log'],
+    owners: ['nabeeh'], links: ['security', 'postgres'],
+    q: ['لو حد غيّر الباسورد، الأجهزة التانية اللي داخلة بيحصلها إيه؟', 'رقم الـ version بتاع المستخدم بيزيد، فكل التوكنات القديمة بتبطل فوراً.'] },
+  { id: 'security', lane: 'server', title: 'security — الأمان', short: 'Hash، توكن، صلاحيات، منع التخمين',
+    what: 'تشفير الباسورد بـ PBKDF2 (210,000 لفة + salt)، وتوكن موقّع بـ HMAC-SHA256، و@CurrentUser اللي بيجيب المستخدم من التوكن، والأدوار، ومنع التخمين، وسجل الأحداث.',
+    files: ['security/PasswordHasher.java', 'TokenService.java', 'CurrentUserResolver.java', 'LoginThrottle.java', 'Role.java', 'AuditLog.java'],
+    eps: [],
+    tables: ['login_attempts', 'audit_log'],
+    owners: ['nabeeh'], links: ['auth', 'catalog', 'order', 'payment', 'operation', 'notification'],
+    q: ['ليه 210,000 لفة في الـ hash؟', 'عشان كل محاولة تخمين تبقى بطيئة على المهاجم، والـ salt بيخلي نفس الباسورد يطلع hash مختلف فالـ rainbow tables متنفعش.'] },
+  { id: 'catalog', lane: 'server', title: 'catalog — المحلات', short: 'المطاعم، المنيو، الصور، البحث',
+    what: 'المطاعم وأقسام المنيو والمنتجات بلغتين، والمقاسات، ومواعيد الفتح، والصور (Cloudinary أو على السيرفر)، والبحث، والمفضلة. والمطعم يقدر يعدّل السعر ويقفل صنف خلص.',
+    files: ['catalog/controller/CatalogController.java', 'RestaurantCatalogController.java', 'AdminCatalogController.java', 'catalog/service/CatalogService.java', 'ImageStorage.java', 'catalog/repository/StoreRepository.java'],
+    eps: [['GET', '/api/stores'], ['GET', '/api/stores/{id}'], ['GET', '/api/search'], ['POST', '/api/me/favorites/{key}'], ['PATCH', '/api/restaurant/products/{id}'], ['POST', '/api/admin/stores']],
+    tables: ['stores', 'products', 'favorites'],
+    owners: ['hoda'], links: ['security', 'postgres'],
+    q: ['الصورة المرفوعة بتتأمّن إزاي؟', 'ImageStorage بيتأكد من نوعها وحجمها (أقصى حاجة 2 ميجا) قبل ما يحفظها.'] },
+  { id: 'order', lane: 'server', title: 'order — الطلبات', short: 'إنشاء، أسعار، حالات، تحديث مباشر',
+    what: 'إنشاء الطلب وحساب سعره (الأصناف + رسوم المنطقة − الكوبون)، وحالات الطلب (State Machine)، والمناطق، والتحديث المباشر بـ SSE. وفيه StaleOrderCloser اللي بيلغي الطلب لو المطعم مردّش في 15 دقيقة.',
+    files: ['order/controller/OrderController.java', 'ZoneController.java', 'LiveController.java', 'order/service/OrderService.java', 'PricingService.java', 'StaleOrderCloser.java', 'order/domain/OrderStatus.java', 'order/live/EventHub.java'],
+    eps: [['POST', '/api/orders/quote'], ['POST', '/api/orders'], ['GET', '/api/orders/mine'], ['GET', '/api/orders/{code}'], ['POST', '/api/orders/{code}/cancel'], ['GET', '/api/zones'], ['GET', '/api/events']],
+    tables: ['orders', 'order_items', 'order_events', 'order_attachments', 'delivery_zones'],
+    owners: ['abdelrhman'], links: ['security', 'payment', 'operation', 'postgres'],
+    q: ['العميل يقدر يلغي الطلب إمتى؟', 'وهو PLACED بس، قبل ما المطعم يقبل. canMoveTo بيتأكد من الحالة ومن نوع الحساب.'] },
+  { id: 'payment', lane: 'server', title: 'payment — الدفع', short: 'كاش، محفظة، كوبونات، نقاط',
+    what: 'طرق الدفع: كاش، ومحفظة، وفوري وفودافون كاش (تجريبي Sandbox)، والكوبونات، ونقاط الولاء، والمرتجعات اللي بترجع للمحفظة لو الطلب اتلغى بعد الدفع.',
+    files: ['payment/controller/PaymentController.java', 'payment/service/PaymentService.java', 'WalletService.java', 'RefundListener.java', 'PromoDiscountPolicy.java', 'payment/gateway/PaymentGateway.java'],
+    eps: [['GET', '/api/orders/{code}/payment'], ['POST', '/api/orders/{code}/payment/confirm'], ['GET', '/api/me/wallet'], ['GET', '/api/admin/promos'], ['POST', '/api/admin/promos']],
+    tables: ['payments', 'wallet_transactions', 'promo_codes', 'loyalty_points'],
+    owners: ['fady'], links: ['security', 'order', 'postgres'],
+    q: ['ليه PaymentGateway عامل interface؟', 'Polymorphism: SandboxFawry وSandboxVodafoneCash تنفيذين لنفس العقد، ونقدر نزوّد بوابة حقيقية من غير ما نغيّر باقي الكود.'] },
+  { id: 'notification', lane: 'server', title: 'notification — الإشعارات', short: 'Inbox + Push على الموبايل',
+    what: 'الإشعارات جوه التطبيق (صندوق الوارد)، وإشعارات الموبايل عن طريق Firebase Cloud Messaging حتى لو التطبيق مقفول.',
+    files: ['notification/NotificationController.java', 'NotificationService.java', 'PushService.java'],
+    eps: [['GET', '/api/me/notifications'], ['POST', '/api/me/notifications/read'], ['POST', '/api/me/devices'], ['GET', '/api/push-config']],
+    tables: ['notifications', 'push_devices'],
+    owners: ['fady'], links: ['security', 'firebase', 'postgres'],
+    q: ['إيه الفرق بين SSE والـ Push؟', 'SSE شغال والتطبيق مفتوح وبيحدّث الشاشة فوراً. والـ Push بيوصل عن طريق Firebase حتى لو التطبيق مقفول.'] },
+  { id: 'operation', lane: 'server', title: 'operation — التشغيل', short: 'المطعم، المندوب، الأدمن، التقييمات',
+    what: 'شغل المطعم على الطلبات (قبول، رفض، جاهز)، وشغل المندوب (أونلاين، العروض، خد، استلم، سلّم، الأرباح)، وإحصائيات الأدمن، والتقييمات، والشكاوى.',
+    files: ['operation/controller/RestaurantOrderController.java', 'DriverController.java', 'AdminOperationsController.java', 'FeedbackController.java', 'operation/service/DriverService.java', 'RestaurantOrderService.java'],
+    eps: [['POST', '/api/restaurant/orders/{code}/accept'], ['POST', '/api/restaurant/orders/{code}/ready'], ['GET', '/api/driver/offers'], ['POST', '/api/driver/orders/{code}/take'], ['POST', '/api/orders/{code}/review'], ['GET', '/api/admin/stats']],
+    tables: ['driver_status', 'reviews', 'complaints'],
+    owners: ['raheek'], links: ['security', 'order', 'postgres'],
+    q: ['المطعم يقدر يشوف طلبات مطعم تاني؟', 'لأ. RestaurantOrderService بيجيب طلبات المطعم المربوط بحساب المستخدم ده بس، وأي كود تاني الرد بيبقى 404.'] },
+  { id: 'config', lane: 'server', title: 'config + common', short: 'الإعدادات، Swagger، الأخطاء، رؤوس الأمان',
+    what: 'إعدادات السيرفر: CORS، ورؤوس الأمان، وSwagger، وعرض الموقع، وأول حساب أدمن. وGlobalExceptionHandler اللي بيحوّل أي خطأ لرد JSON ثابت من غير تفاصيل داخلية.',
+    files: ['config/WebConfig.java', 'SecurityHeadersFilter.java', 'OpenApiConfig.java', 'StaticSiteConfig.java', 'AdminBootstrap.java', 'common/error/GlobalExceptionHandler.java', 'resources/application.properties'],
+    eps: [['GET', '/swagger-ui.html']],
+    owners: ['nabeeh'], links: ['security', 'website'],
+    q: ['ليه Swagger مقفول على السيرفر الحقيقي؟', 'عشان المهاجم ميشوفش خريطة كل العناوين. بنقفله بـ VELOX_API_DOCS=false، وبيرجع 404.'] },
+  { id: 'tests', lane: 'server', title: 'الاختبارات', short: 'JUnit، Selenium، Postman، JMeter',
+    what: '97 اختبار JUnit (Unit + Integration بـ Testcontainers)، و45 فحص على السيرفر الحقيقي، وSelenium للموقع، وPostman للـ API، وJMeter لـ 100 مستخدم (p95 = 116ms).',
+    files: ['backend/src/test/java/com/velox/**', 'tests/e2e_live_check.py', 'tests/e2e (Selenium)', 'tests/api/velox.postman_collection.json', 'tests/performance/velox-browse.jmx', 'tests/TEST_PLAN.md'],
+    eps: [],
+    owners: ['raheek'], links: ['auth', 'catalog', 'order', 'payment', 'operation', 'postgres'],
+    q: ['إيه الفرق بين Unit وIntegration test؟', 'Unit بيختبر كلاس لوحده (OrderStatusTest). Integration بيشغّل السيرفر كله مع PostgreSQL حقيقي في Docker وبيبعت HTTP (OrderApiTest).'] },
+
+  // ---------- data ----------
+  { id: 'postgres', lane: 'data', title: 'PostgreSQL', short: '22 جدول — Flyway V1…V7',
+    what: 'قاعدة البيانات. الجداول بتتعمل بالترتيب من ملفات Flyway، والسيرفر بيكلمها بـ JDBC (JdbcTemplate + Connection Pool)، وكل استعلام بـ ? عشان يمنع SQL Injection.',
+    files: ['database/migrations/V1__accounts.sql', 'V2__catalog.sql', 'V3__orders.sql', 'V4__payments.sql', 'V5__operations.sql', 'V6__seed.sql', 'V7__product_description_en.sql'],
+    eps: [],
+    tables: ['users', 'addresses', 'push_devices', 'login_attempts', 'audit_log', 'stores', 'products', 'favorites', 'delivery_zones', 'orders', 'order_items', 'order_attachments', 'order_events', 'payments', 'wallet_transactions', 'promo_codes', 'loyalty_points', 'driver_status', 'reviews', 'complaints', 'notifications'],
+    owners: ['nabeeh'], links: ['supabase', 'auth', 'catalog', 'order', 'payment', 'notification', 'operation'],
+    q: ['ليه BigDecimal مش double في الفلوس؟', 'double بيعمل أخطاء كسور (0.1 + 0.2 ≠ 0.3)، وBigDecimal دقيق. والعمود في قاعدة البيانات NUMERIC.'] },
+  { id: 'supabase', lane: 'data', title: 'Supabase', short: 'استضافة قاعدة البيانات',
+    what: 'PostgreSQL على الإنترنت (Stockholm). السيرفر بيتصل بيه بـ jdbc:postgresql://…pooler.supabase.com:5432 مع sslmode=require، واليوزر والباسورد من متغيرات البيئة مش من الكود.',
+    files: ['deploy/.env (مش بيترفع)'],
+    eps: [],
+    owners: ['nabeeh'], links: ['postgres'],
+    q: ['الباسورد بتاع قاعدة البيانات فين؟', 'في متغيرات بيئة (DB_PASSWORD) من ملف .env مش بيترفع على GitHub، فمش موجود في الكود.'] },
+  { id: 'firebase', lane: 'data', title: 'Firebase', short: 'إشعارات الموبايل (FCM)',
+    what: 'السيرفر بيبعت الإشعار لـ Firebase Cloud Messaging، وهو بيوصّله للموبايل. التطبيق بيسجّل الجهاز بـ /api/me/devices.',
+    files: ['mobile/lib/core/push.dart', 'notification/PushService.java'],
+    eps: [],
+    owners: ['fady'], links: ['notification', 'app-core'],
+    q: ['ليه مش بنستضيف السيرفر كله على Firebase؟', 'Firebase مبيشغّلش Spring Boot. كنا هنحتاج نكتب السيرفر كله من الأول ونسيب JDBC وJUnit.'] },
+  { id: 'cloudflare', lane: 'data', title: 'الاستضافة', short: 'دلوقتي Cloudflare Tunnel — قريب سيرفر VPS',
+    what: 'دلوقتي: السيرفر java -jar على جهاز نبيه، وCloudflare Tunnel بيدّيه لينك https مؤقت، والتطبيق بيلاقيه من ntfy. والخطة: سيرفر VPS (Hetzner أو Contabo) بـ Docker وCaddy للـ HTTPS ولينك ثابت 24 ساعة.',
+    files: ['backend/Dockerfile', 'docker-compose.yml', 'deploy/'],
+    eps: [],
+    owners: ['nabeeh'], links: ['app-core', 'config'],
+    q: ['ليه الـ Dockerfile مرحلتين؟', 'الأولى بتبني بـ JDK وMaven، والتانية بتشغّل الـ JAR بس على JRE صغير بيوزر مش root. الـ image أصغر وأأمن.'] },
+];
+
+const STEPS = [
+  { t: 'العميل يطلب', who: 'تطبيق العميل', trail: [['cl', 'تطبيق العميل'], ['sv', 'order + payment'], ['dt', 'PostgreSQL']],
+    ep: 'POST /api/orders', st: [null, 'PLACED'], tables: 'orders، order_items، order_events (+ payments)',
+    live: 'SSE للمطعم: طلب جديد', note: 'التطبيق بيبعت المنتجات والكميات والمنطقة والعنوان بس. السيرفر بيحسب السعر بنفسه (PricingService)، وبيعمل الطلب وأصنافه في Transaction واحدة.' },
+  { t: 'المطعم يسمع صوت', who: 'صفحة المطعم', trail: [['sv', 'EventHub'], ['cl', 'صفحة المطعم']],
+    ep: 'GET /api/events (مفتوح)', st: ['PLACED', 'PLACED'], tables: '—',
+    live: 'صوت + اهتزاز + "جديدة (1)"', note: 'مفيش polling. الاتصال مفتوح أصلاً، والسيرفر بيبعت فيه الطلب فوراً. ولو المطعم مردّش في 15 دقيقة، StaleOrderCloser بيلغي الطلب.' },
+  { t: 'المطعم يقبل', who: 'صفحة المطعم', trail: [['cl', 'صفحة المطعم'], ['sv', 'operation'], ['dt', 'PostgreSQL']],
+    ep: 'POST /api/restaurant/orders/{code}/accept', st: ['PLACED', 'ACCEPTED'], tables: 'orders.status، order_events',
+    live: 'إشعار للعميل + الطلب يظهر للمناديب', note: 'canMoveTo(ACCEPTED, RESTAURANT) لازم يبقى true، يعني العميل أو المندوب ميقدروش يعملوا الخطوة دي. ومن هنا الطلب بيظهر للمناديب الأونلاين، عشان المندوب يلحق يروح للمطعم والطلب بيتجهز.' },
+  { t: 'المطعم: جاهز', who: 'صفحة المطعم', trail: [['cl', 'صفحة المطعم'], ['sv', 'operation'], ['dt', 'PostgreSQL']],
+    ep: 'POST /api/restaurant/orders/{code}/ready', st: ['ACCEPTED', 'READY'], tables: 'orders.status، order_events',
+    live: 'المندوب يعرف إن الطلب جاهز يستلمه', note: 'المندوب ممكن يكون خد الطلب من وقت ما اتقبل، بس مينفعش يدوس "استلمت" غير بعد READY، لأن canMoveTo(PICKED_UP) بيرفض لو الحالة ACCEPTED.' },
+  { t: 'المندوب: خد الطلب', who: 'صفحة المندوب', trail: [['cl', 'صفحة المندوب'], ['sv', 'operation'], ['dt', 'PostgreSQL']],
+    ep: 'POST /api/driver/orders/{code}/take', st: ['ACCEPTED / READY', 'نفس الحالة + مندوب'], tables: 'orders.driver_id',
+    live: 'المطعم يشوف اسم المندوب وزرار اتصال', note: 'المندوب يقدر ياخد الطلب وهو ACCEPTED أو READY. التحديث بيحصل بشرط driver_id IS NULL، فمندوب واحد بس اللي بياخده حتى لو اتنين داسوا مع بعض، والتاني بياخد ALREADY_TAKEN.' },
+  { t: 'المندوب: استلمت', who: 'صفحة المندوب', trail: [['cl', 'صفحة المندوب'], ['sv', 'operation'], ['dt', 'PostgreSQL']],
+    ep: 'POST /api/driver/orders/{code}/pickup', st: ['READY', 'PICKED_UP'], tables: 'orders.status، driver_status (الموقع)',
+    live: 'العميل يشوف المندوب على الخريطة', note: 'المندوب بيبعت موقعه بـ POST /api/driver/location، والعميل بيشوفه بيتحرك في شاشة التتبع.' },
+  { t: 'المندوب: سلّمت', who: 'صفحة المندوب', trail: [['cl', 'صفحة المندوب'], ['sv', 'operation + payment'], ['dt', 'PostgreSQL']],
+    ep: 'POST /api/driver/orders/{code}/deliver', st: ['PICKED_UP', 'DELIVERED'], tables: 'orders.status، payments، loyalty_points',
+    live: 'أرباح المندوب تزيد', note: 'الكاش اتحصّل، والطلب اتقفل. واتجربت فعلاً بالطلب ORD-1009: أرباح المندوب بقت 15 جنيه.' },
+  { t: 'العميل يقيّم', who: 'تطبيق العميل', trail: [['cl', 'تطبيق العميل'], ['sv', 'operation'], ['dt', 'PostgreSQL']],
+    ep: 'POST /api/orders/{code}/review', st: ['DELIVERED', 'DELIVERED'], tables: 'reviews',
+    live: 'التقييم يظهر في صفحة المطعم', note: 'التقييم مسموح بعد DELIVERED بس، ومرة واحدة للطلب. ولو فيه مشكلة العميل يقدر يشتكي (complaints).' },
+];
+
+const $ = (s, el = document) => el.querySelector(s);
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+const byId = Object.fromEntries(NODES.map((n) => [n.id, n]));
+const laneName = { client: 'واجهة', server: 'جزء في السيرفر', data: 'بيانات / خدمة' };
+const laneColor = { client: 'var(--lane-client)', server: 'var(--lane-server)', data: 'var(--lane-data)' };
+
+let selected = 'order';
+let person = null;
+
+function related(id) {
+  const set = new Set([id, ...(byId[id].links || [])]);
+  NODES.forEach((n) => { if ((n.links || []).includes(id)) set.add(n.id); });
+  return set;
+}
+
+function renderNodes() {
+  for (const lane of ['client', 'server', 'data']) {
+    $('#lane-' + lane).innerHTML = NODES.filter((n) => n.lane === lane).map((n) =>
+      `<button class="node" data-id="${n.id}"><b>${esc(n.title)}</b><small>${esc(n.short)}</small></button>`).join('');
+  }
+  document.querySelectorAll('.node').forEach((b) => b.addEventListener('click', () => { selected = b.dataset.id; person = null; paint(); }));
+}
+
+function paint() {
+  const rel = person ? null : related(selected);
+  document.querySelectorAll('.node').forEach((b) => {
+    const n = byId[b.dataset.id];
+    const on = person ? n.owners.includes(person) : rel.has(n.id);
+    b.classList.toggle('dim', !on);
+    b.classList.toggle('sel', !person && n.id === selected);
+    b.classList.toggle('linked', !person && on && n.id !== selected);
+    b.setAttribute('aria-pressed', String(!person && n.id === selected));
+  });
+  document.querySelectorAll('#people .chip').forEach((c) => c.setAttribute('aria-pressed', String(c.dataset.p === person)));
+  person ? drawPerson(person) : drawNode(byId[selected]);
+}
+
+function drawNode(n) {
+  const d = $('#drawer');
+  d.style.setProperty('--c', laneColor[n.lane]);
+  d.innerHTML = `
+    <div class="kind">${laneName[n.lane]}</div>
+    <h3>${esc(n.title)}</h3>
+    <div>${n.owners.map((o) => `<span class="owner">${PEOPLE[o].name}</span>`).join('')}</div>
+    <p>${esc(n.what)}</p>
+    ${n.eps.length ? `<h4>عناوين الـ API</h4><ul class="ep">${n.eps.map(([m, p]) => `<li><span class="m ${m}">${m}</span><span>${esc(p)}</span></li>`).join('')}</ul>` : ''}
+    ${n.tables ? `<h4>الجداول</h4><div class="code" style="direction:ltr;text-align:left">${n.tables.map(esc).join(' · ')}</div>` : ''}
+    <h4>الملفات</h4><ul>${n.files.map((f) => `<li><code>${esc(f)}</code></li>`).join('')}</ul>
+    <h4>مربوط بـ</h4><div class="links">${(n.links || []).map((l) => `<button data-go="${l}">${esc(byId[l].title)}</button>`).join('')}</div>
+    <div class="tip"><b>سؤال متوقع:</b> ${esc(n.q[0])}<br>${esc(n.q[1])}</div>`;
+  d.querySelectorAll('[data-go]').forEach((b) => b.addEventListener('click', () => { selected = b.dataset.go; paint(); }));
+}
+
+function drawPerson(p) {
+  const d = $('#drawer');
+  d.style.removeProperty('--c');
+  const mine = NODES.filter((n) => n.owners.includes(p));
+  d.innerHTML = `<div class="kind">عضو في الفريق</div><h3>${PEOPLE[p].name}</h3><p>${esc(PEOPLE[p].role)}</p>
+    <h4>الأجزاء بتاعته (${mine.length})</h4>
+    <div class="links">${mine.map((n) => `<button data-go="${n.id}">${esc(n.title)}</button>`).join('')}</div>
+    <div class="tip"><b>ذاكر:</b> افتح كل جزء من دول، واقرا الملفات، وجرّب العناوين بتاعته من Swagger، وحضّر إجابة السؤال المتوقع.</div>`;
+  d.querySelectorAll('[data-go]').forEach((b) => b.addEventListener('click', () => { person = null; selected = b.dataset.go; paint(); }));
+}
+
+function renderPeople() {
+  const box = $('#people');
+  box.insertAdjacentHTML('beforeend', `<button class="chip" data-p="">الكل</button>` +
+    Object.entries(PEOPLE).map(([k, v]) => `<button class="chip" data-p="${k}">${v.name}</button>`).join(''));
+  box.querySelectorAll('.chip').forEach((c) => c.addEventListener('click', () => { person = c.dataset.p || null; paint(); }));
+}
+
+let step = 0;
+function renderSteps() {
+  $('#steps').innerHTML = STEPS.map((s, i) => `<button class="step" data-i="${i}"><span class="n">${i + 1}</span><span>${esc(s.t)}</span></button>`).join('');
+  document.querySelectorAll('.step').forEach((b) => b.addEventListener('click', () => { step = +b.dataset.i; drawStep(); }));
+  drawStep();
+}
+function drawStep() {
+  const s = STEPS[step];
+  document.querySelectorAll('.step').forEach((b, i) => {
+    b.toggleAttribute('aria-current', i === step);
+    if (i === step) b.setAttribute('aria-current', 'step');
+    b.classList.toggle('done', i < step);
+  });
+  const from = s.st[0] ? `<s>${s.st[0]}</s> → ` : '';
+  $('#scene').innerHTML = `
+    <div class="kind" style="color:var(--muted);font-size:12px;font-weight:800">الخطوة ${step + 1} من ${STEPS.length} · ${esc(s.who)}</div>
+    <h3>${esc(s.t)}</h3>
+    <div class="trail">${s.trail.map(([c, x], i) => (i ? '<i>←</i>' : '') + `<span class="${c}">${esc(x)}</span>`).join('')}</div>
+    <div class="facts">
+      <div class="fact"><h4>الطلب للسيرفر</h4><code>${esc(s.ep)}</code></div>
+      <div class="fact"><h4>حالة الطلب</h4><span class="status">${from}<b>${s.st[1]}</b></span></div>
+      <div class="fact"><h4>اللي بيتكتب في قاعدة البيانات</h4><span class="code" style="direction:ltr">${esc(s.tables)}</span></div>
+      <div class="fact"><h4>مين بيعرف فوراً</h4>${esc(s.live)}</div>
+    </div>
+    <p style="margin-top:12px">${esc(s.note)}</p>
+    <div class="nav"><button class="btn ghost" id="prev" ${step === 0 ? 'disabled' : ''}>السابق</button><button class="btn" id="next" ${step === STEPS.length - 1 ? 'disabled' : ''}>الخطوة الجاية</button></div>`;
+  $('#prev').addEventListener('click', () => { step--; drawStep(); });
+  $('#next').addEventListener('click', () => { step++; drawStep(); });
+}
+
+function renderTeam() {
+  $('#team').innerHTML = Object.entries(PEOPLE).map(([k, v]) => {
+    const mine = NODES.filter((n) => n.owners.includes(k));
+    return `<div class="member"><h3>${v.name}</h3><div class="role">${esc(v.role)}</div>
+      <ul>${mine.map((n) => `<li>${esc(n.title)} — <span style="color:var(--muted)">${esc(n.short)}</span></li>`).join('')}</ul>
+      <div class="links">${mine.map((n) => `<button data-go="${n.id}">افتح ${esc(n.title)}</button>`).join('')}</div></div>`;
+  }).join('');
+  document.querySelectorAll('#team [data-go]').forEach((b) => b.addEventListener('click', () => { person = null; selected = b.dataset.go; show('map'); paint(); }));
+}
+
+function show(view) {
+  for (const v of ['map', 'journey', 'team']) {
+    $('#view-' + v).hidden = v !== view;
+    $('#tab-' + v).setAttribute('aria-selected', String(v === view));
+  }
+  if (location.hash !== '#' + view) history.replaceState(null, '', '#' + view);
+}
+['map', 'journey', 'team'].forEach((v) => $('#tab-' + v).addEventListener('click', () => show(v)));
+window.addEventListener('hashchange', () => { const h = location.hash.slice(1); if (['map', 'journey', 'team'].includes(h)) show(h); });
+
+renderNodes(); renderPeople(); renderSteps(); renderTeam(); paint();
+const h0 = location.hash.slice(1); if (['journey', 'team'].includes(h0)) show(h0);
+</script>
+
+</html>

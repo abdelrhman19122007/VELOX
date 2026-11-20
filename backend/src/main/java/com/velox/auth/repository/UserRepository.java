@@ -58,6 +58,10 @@ public class UserRepository {
         return findByPublicId(publicId).orElseThrow();
     }
 
+    public void updateProfile(long userId, String name, String phone) {
+        db.update("UPDATE users SET name = ?, phone = ? WHERE id = ?", name, phone, userId);
+    }
+
     public void updatePassword(long userId, String passwordHash) {
         db.update("UPDATE users SET password_hash = ?, token_version = token_version + 1 WHERE id = ?", passwordHash, userId);
     }
@@ -65,6 +69,19 @@ public class UserRepository {
     /** Ends every session of the account (tokens carry the old version). */
     public void bumpTokenVersion(long userId) {
         db.update("UPDATE users SET token_version = token_version + 1 WHERE id = ?", userId);
+    }
+
+    /**
+     * "Delete my account": the personal data goes (name, email, phone, picture, password, addresses, devices,
+     * favorites, notifications). The row stays, anonymous and blocked, because past orders must still add up.
+     */
+    public void anonymize(long userId) {
+        db.update("UPDATE users SET email = 'deleted-' || public_id || '@deleted.velox', name = 'Deleted user', phone = NULL, "
+                + "picture = NULL, password_hash = NULL, blocked = TRUE, token_version = token_version + 1 WHERE id = ?", userId);
+        db.update("DELETE FROM addresses WHERE user_id = ?", userId);
+        db.update("DELETE FROM push_devices WHERE user_id = ?", userId);
+        db.update("DELETE FROM favorites WHERE user_id = ?", userId);
+        db.update("DELETE FROM notifications WHERE user_id = ?", userId);
     }
 
     public boolean setBlocked(String publicId, boolean blocked) {

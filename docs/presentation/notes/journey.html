@@ -1,0 +1,16 @@
+<section id="journey">
+<div class="head">
+<p class="eyebrow">The order journey</p>
+<h2>From the kitchen to the doorstep</h2>
+</div>
+<div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr 1fr; gap:24px;">
+<div class="card rise" style="--i:1"><p class="k">01</p><h3>Order</h3><p>Customer confirms after seeing the full cost</p><p class="tag">PLACED</p></div>
+<div class="card rise" style="--i:2"><p class="k">02</p><h3>Accept</h3><p>Restaurant has 15 minutes, or it auto-cancels</p><p class="tag">ACCEPTED</p></div>
+<div class="card rise" style="--i:3"><p class="k">03</p><h3>Prepare</h3><p>Kitchen cooks, then marks the order ready</p><p class="tag">READY</p></div>
+<div class="card rise" style="--i:4"><p class="k">04</p><h3>Pick up</h3><p>A courier takes it, collects it from the shop</p><p class="tag">PICKED_UP</p></div>
+<div class="card go rise" style="--i:5"><p class="k">05</p><h3>Deliver</h3><p>Customer tracks it live until it arrives</p><p class="tag ok">DELIVERED</p></div>
+</div>
+<div class="banner fadein" style="--i:7"><p>Every step reaches everyone <b>instantly</b>. Each move is allowed only to the right role, and an order no courier takes in 40 minutes is cancelled.</p></div>
+<div class="foot"><p>VELOX</p><p class="pg"></p></div>
+<aside>Presenter: Raheek. This is a state machine: OrderStatus.canMoveTo checks the next status and who is asking, so a customer can’t accept their own order and a courier can’t pick up before READY. Updates travel over Server-Sent Events, with Firebase push when the app is closed. StaleOrderCloser runs every minute for the 15 and 40 minute rules.</aside>
+</section>

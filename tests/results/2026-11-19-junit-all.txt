@@ -1,0 +1,20 @@
+Tests run: 3, Failures: 0, Errors: 0, Skipped: 0 | com.velox.auth.AccountApiTest
+Tests run: 7, Failures: 0, Errors: 0, Skipped: 0 | com.velox.auth.AdminUserApiTest
+Tests run: 9, Failures: 0, Errors: 0, Skipped: 0 | com.velox.auth.AuthApiTest
+Tests run: 5, Failures: 0, Errors: 0, Skipped: 0 | com.velox.catalog.CatalogUnitTest
+Tests run: 3, Failures: 0, Errors: 0, Skipped: 0 | com.velox.catalog.SearchAndFavoritesApiTest
+Tests run: 7, Failures: 0, Errors: 0, Skipped: 0 | com.velox.catalog.StoreApiTest
+Tests run: 4, Failures: 0, Errors: 0, Skipped: 0 | com.velox.catalog.UploadApiTest
+Tests run: 2, Failures: 0, Errors: 0, Skipped: 0 | com.velox.config.ApiDocsTest
+Tests run: 4, Failures: 0, Errors: 0, Skipped: 0 | com.velox.operation.AdminAndFeedbackApiTest
+Tests run: 7, Failures: 0, Errors: 0, Skipped: 0 | com.velox.operation.DriverApiTest
+Tests run: 5, Failures: 0, Errors: 0, Skipped: 0 | com.velox.operation.RestaurantOrderApiTest
+Tests run: 8, Failures: 0, Errors: 0, Skipped: 0 | com.velox.order.OrderApiTest
+Tests run: 5, Failures: 0, Errors: 0, Skipped: 0 | com.velox.order.OrderLifecycleTest
+Tests run: 3, Failures: 0, Errors: 0, Skipped: 0 | com.velox.order.OrderStatusTest
+Tests run: 3, Failures: 0, Errors: 0, Skipped: 0 | com.velox.payment.NotificationApiTest
+Tests run: 8, Failures: 0, Errors: 0, Skipped: 0 | com.velox.payment.OnlinePaymentApiTest
+Tests run: 7, Failures: 0, Errors: 0, Skipped: 0 | com.velox.payment.WalletAndPromoApiTest
+Tests run: 3, Failures: 0, Errors: 0, Skipped: 0 | com.velox.security.PasswordHasherTest
+Tests run: 4, Failures: 0, Errors: 0, Skipped: 0 | com.velox.security.TokenServiceTest
+TOTAL: 97 run, 0 failures, 0 errors (Docker + Testcontainers, PostgreSQL 16)
