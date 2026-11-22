@@ -1,3 +1,7 @@
 mvnw text eol=lf
 *.sh text eol=lf
 *.bat text eol=crlf
+
+# Prebuilt web app and bundled scripts: keep them out of the language stats
+demo-data/app/** linguist-generated
+web/downloads/** linguist-generated
