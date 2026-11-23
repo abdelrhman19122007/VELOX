@@ -38,6 +38,7 @@ legacy/       النسخة الأولى (tag: v1.0-submitted)
 - [SRS — المتطلبات](docs/SRS.md) · [التقرير النهائي](docs/report/FINAL_REPORT.md)
 - [قاعدة البيانات](docs/database/ERD.md) · [نظام التصميم](design/DESIGN_SYSTEM.md) · [تحليل المنافسين](design/COMPETITOR_ANALYSIS.md)
 - [خطة الاختبار](tests/TEST_PLAN.md) · [تقرير الاختبار](tests/TEST_REPORT.md) · [اختبار الاختراق](security/)
+- [البريزنتيشن](docs/presentation/VELOX-Presentation.pptx) · [سكريبت العرض](docs/presentation/PRESENTER_SCRIPT.pdf) · [الدليل الكامل](docs/guide/VELOX-Complete-Guide.pdf)
 - [طريقة الشغل في التيم](CONTRIBUTING.md)
 
 ## التيم
